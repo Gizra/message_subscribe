@@ -12,9 +12,9 @@
 
 class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
   function setUp() {
-    //parent::setUp('message_subscribe_email', 'message_subscribe', 'flag');
+    parent::setUp('message_subscribe_email', 'message_subscribe', 'flag');
 
-    parent::setUp('message_subscribe', 'flag', 'taxonomy');
+    // parent::setUp('message_subscribe', 'flag', 'taxonomy');
 
     // Create node-type.
     $node_type = 'article';
