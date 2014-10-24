@@ -15,15 +15,12 @@ class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
     parent::setUp('message_subscribe_email', 'message_subscribe', 'flag');
 
     // Create node-type.
-    $node_type = $this->drupalCreateContentType();
-    $node_type = $node_type->type;
+    $node_type = 'article';
 
     // Enable flags.
     $flags = flag_get_default_flags(TRUE);
-    debug($flags);
 
     $flag = $flags['subscribe_node'];
-    debug($flag);
     $flag->types[] = $node_type;
     $flag->save();
     $flag->enable();
