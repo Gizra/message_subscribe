@@ -72,7 +72,7 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestHelp
     return array(
       'name' => 'Get email subscribers',
       'description' => 'Get email subscribers from content.',
-      'group' => 'Message subscribe email',
+      'group' => 'Message subscribe',
     );
   }
 
