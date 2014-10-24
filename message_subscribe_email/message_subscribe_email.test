@@ -20,7 +20,10 @@ class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
     // Enable flags.
     $flags = flag_get_default_flags(TRUE);
 
+    debug($flags);
+
     $flag = $flags['subscribe_node'];
+    debug($flag);
     $flag->types[] = $node_type;
     $flag->save();
     $flag->enable();
