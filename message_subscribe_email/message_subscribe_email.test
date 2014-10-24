@@ -12,65 +12,7 @@
 
 class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
   function setUp() {
-    parent::setUp('message_subscribe_email', 'message_subscribe', 'flag');
-
-    // parent::setUp('message_subscribe', 'flag', 'taxonomy');
-
-    // Create node-type.
-    $node_type = 'article';
-
-    // Enable flags.
-    $flags = flag_get_default_flags(TRUE);
-
-    $flag = $flags['subscribe_node'];
-    $flag->types[] = $node_type;
-    $flag->save();
-    $flag->enable();
-
-    $flag = $flags['subscribe_user'];
-    $flag->save();
-    $flag->enable();
-
-    // Reset our cache so our permissions show up.
-    drupal_static_reset('flag_get_flags');
-
-    // Reset permissions so that permissions for this flag are available.
-    $this->checkPermissions(array(), TRUE);
-
-    $user1 = $this->drupalCreateUser(array(
-        'flag subscribe_node',
-        'unflag subscribe_node',
-        'flag subscribe_user',
-        'unflag subscribe_user'
-      ));
-    $user2 = $this->drupalCreateUser(array(
-        'flag subscribe_node',
-        'unflag subscribe_node',
-        'flag subscribe_user',
-        'unflag subscribe_user'
-      ));
-
-    // Create node.
-    $settings = array();
-    $settings['type'] = $node_type;
-    $settings['uid'] = $user1->uid;
-    $node = $this->drupalCreateNode($settings);
-
-    // User1 and User2 flags node1.
-    flag('flag', 'subscribe_node', $node->nid, $user1);
-    flag('flag', 'subscribe_node', $node->nid, $user2);
-    // User2 flags User1.
-    flag('flag', 'subscribe_user', $user1->uid, $user2);
-
-    // Create a dummy message-type.
-    $message_type = message_type_create('foo', array('message_text' => array(LANGUAGE_NONE => array(array('value' => 'Example text.')))));
-    $message_type->save();
-
-    $this->node = $node;
-    $this->user1 = $user1;
-    $this->user2 = $user2;
-
-    return;
+    parent::setUp('message_subscribe', 'flag', 'message_subscribe_email');
 
     // Create node-type.
     $node_type = 'article';
