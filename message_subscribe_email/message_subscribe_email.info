@@ -3,6 +3,7 @@ core = 7.x
 php = 5.2.4
 version = 7.x-1.0
 project = message_subscribe_email
+dependencies[] = message_subscribe
 dependencies[] = flag
 dependencies[] = list
 dependencies[] = views
