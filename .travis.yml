@@ -23,7 +23,7 @@ before_script:
 
   # create new site, stubbing sendmail path with true to prevent delivery errors and manually resolving drush path
   - mysql -e 'create database drupal'
-  - php -d sendmail_path=`which true` `pear config-get php_dir`/drush/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest message_subscribe
+  - php -d sendmail_path=`which true` `pear config-get php_dir`/drush/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest message_subscribe message_subscribe_email
 
   # reference and enable module in build site
   - ln -s $(readlink -e $(cd -)) message_subscribe/drupal/sites/all/modules/message_subscribe
@@ -35,4 +35,4 @@ before_script:
   - drush runserver 127.0.0.1:8080 &
   - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
-script: drush test-run "Message subscribe" --uri=http://127.0.0.1:8080 --verbose
+script: drush test-run "Message subscribe" --uri=http://127.0.0.1:8080
