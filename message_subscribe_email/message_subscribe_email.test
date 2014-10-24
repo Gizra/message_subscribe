@@ -149,7 +149,7 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHe
     return array(
       'name' => 'Check email notifications',
       'description' => 'Check automatic email notifications for content.',
-      'group' => 'Message subscribe email',
+      'group' => 'Message subscribe',
     );
   }
 
