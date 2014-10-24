@@ -65,7 +65,7 @@ class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
 /**
  * Test getting email subscribes from context.
  */
-class MessageSubscribeEmailSubscribersTest extends DrupalWebTestCase {
+class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestHelper {
 
   public static function getInfo() {
     return array(
@@ -76,53 +76,7 @@ class MessageSubscribeEmailSubscribersTest extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('message_subscribe_email', 'message_subscribe', 'flag');
-
-    // Create node-type.
-    $node_type = 'article';
-
-    // Enable flags.
-    $flags = flag_get_default_flags(TRUE);
-
-    $flag = $flags['subscribe_node'];
-    $flag->types[] = $node_type;
-    $flag->save();
-    $flag->enable();
-
-    $flag = $flags['email_node'];
-    $flag->types[] = $node_type;
-    $flag->save();
-    $flag->enable();
-
-    // Reset our cache so our permissions show up.
-    drupal_static_reset('flag_get_flags');
-
-    // Reset permissions so that permissions for this flag are available.
-    $this->checkPermissions(array(), TRUE);
-
-    $permissions = array(
-      'flag subscribe_node',
-      'unflag subscribe_node',
-      'flag email_node',
-      'unflag email_node',
-    );
-
-    $user1 = $this->drupalCreateUser($permissions);
-    $user2 = $this->drupalCreateUser($permissions);
-
-    // Create node.
-    $settings = array();
-    $settings['type'] = $node_type;
-    $settings['uid'] = $user1->uid;
-    $node = $this->drupalCreateNode($settings);
-
-    // Create a dummy message-type.
-    $message_type = message_type_create('foo');
-    $message_type->save();
-
-    $this->node = $node;
-    $this->user1 = $user1;
-    $this->user2 = $user2;
+    parent::setUp();
 
     // Opt out of default email notifications.
     $wrapper = entity_metadata_wrapper('user', $this->user1);
@@ -188,7 +142,7 @@ class MessageSubscribeEmailSubscribersTest extends DrupalWebTestCase {
 /**
  * Test automatic email notification flagging.
  */
-class MessageSubscribeEmailNotificationsTest extends DrupalWebTestCase {
+class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHelper {
 
   public static function getInfo() {
     return array(
@@ -199,53 +153,7 @@ class MessageSubscribeEmailNotificationsTest extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('message_subscribe_email', 'message_subscribe', 'flag');
-
-    // Create node-type.
-    $node_type = 'article';
-
-    // Enable flags.
-    $flags = flag_get_default_flags(TRUE);
-
-    $flag = $flags['subscribe_node'];
-    $flag->types[] = $node_type;
-    $flag->save();
-    $flag->enable();
-
-    $flag = $flags['email_node'];
-    $flag->types[] = $node_type;
-    $flag->save();
-    $flag->enable();
-
-    // Reset our cache so our permissions show up.
-    drupal_static_reset('flag_get_flags');
-
-    // Reset permissions so that permissions for this flag are available.
-    $this->checkPermissions(array(), TRUE);
-
-    $permissions = array(
-      'flag subscribe_node',
-      'unflag subscribe_node',
-      'flag email_node',
-      'unflag email_node',
-    );
-
-    $user1 = $this->drupalCreateUser($permissions);
-    $user2 = $this->drupalCreateUser($permissions);
-
-    // Create node.
-    $settings = array();
-    $settings['type'] = $node_type;
-    $settings['uid'] = $user1->uid;
-    $node = $this->drupalCreateNode($settings);
-
-    // Create a dummy message-type.
-    $message_type = message_type_create('foo');
-    $message_type->save();
-
-    $this->node = $node;
-    $this->user1 = $user1;
-    $this->user2 = $user2;
+    parent::setUp();
 
     flag('flag', 'subscribe_node', $this->node->nid, $this->user1);
 
