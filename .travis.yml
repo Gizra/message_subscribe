@@ -26,9 +26,8 @@ before_script:
   - php -d sendmail_path=`which true` `pear config-get php_dir`/drush/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest message_subscribe
 
   # reference and enable module in build site
-  - ln -s $(readlink -e $(cd -)) message_subscribe/drupal/sites/all/modules/message_subscribe
+  - ln -s $(readlink -e $(cd -)) message_subscribe/drupal/sites/all/modules/message_subscribe message_subscribe_email
   - cd message_subscribe/drupal
-  - drush --yes pm-enable message_subscribe
   - drush dl og -y
 
   # start a web server on port 8080, run in the background; wait for initialization
