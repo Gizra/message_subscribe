@@ -211,11 +211,14 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     $settings['type'] = $node_type;
     $settings['uid'] = $user1->uid;
     $node = $this->drupalCreateNode($settings);
+    $settings['uid'] = $user2->uid;
+    $node1 = $this->drupalCreateNode($settings);
 
     // User1, User2 and user_blocked flag node1.
     flag('flag', 'subscribe_node', $node->nid, $user1);
     flag('flag', 'subscribe_node', $node->nid, $user2);
     flag('flag', 'subscribe_node', $node->nid, $user_blocked);
+    flag('flag', 'subscribe_node', $node1->nid, $user_blocked);
     // User2 flags User1.
     flag('flag', 'subscribe_user', $user1->uid, $user2);
 
@@ -224,6 +227,7 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     $message_type->save();
 
     $this->node = $node;
+    $this->node1 = $node1;
     $this->user1 = $user1;
     $this->user2 = $user2;
 
@@ -258,6 +262,18 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
         ),
       ),
     );
+
+    $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched.');
+
+    // Test none of users will get message if only blocked user is subscribed.
+    $message = message_create('foo', array('uid' => $this->user1->uid));
+
+    $node1 = $this->node1;
+
+    $uids = message_subscribe_get_subscribers('node', $node1, $message);
+
+    // Assert subscribers data.
+    $expected_uids = array();
 
     $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched.');
 

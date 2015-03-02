@@ -243,6 +243,9 @@ function message_subscribe_get_subscribers($entity_type, $entity, Message $messa
     if (!empty($results['user'])) {
       $uids = array_intersect_key($uids, $results['user']);
     }
+    else {
+      $uids = array();
+    }
   }
 
   foreach ($uids as $uid => $values) {
