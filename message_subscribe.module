@@ -244,6 +244,7 @@ function message_subscribe_get_subscribers($entity_type, $entity, Message $messa
       $uids = array_intersect_key($uids, $results['user']);
     }
     else {
+      // There are no not blocked users to notify.
       $uids = array();
     }
   }
