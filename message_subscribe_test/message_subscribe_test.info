@@ -1,0 +1,9 @@
+name = Message subscribe test
+description = Functionality for message subscribe test suites.
+core = 7.x
+package = Message
+hidden = true
+dependencies[] = flag
+dependencies[] = message_subscribe_email
+dependencies[] = message_subscribe
+dependencies[] = og

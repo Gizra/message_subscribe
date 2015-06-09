@@ -10,9 +10,11 @@
  * Test integration for the message_subscribe_email module.
  */
 
-class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
+abstract class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
+  protected static $modules = array('message_subscribe', 'flag', 'message_subscribe_email');
+
   function setUp() {
-    parent::setUp('message_subscribe', 'flag', 'message_subscribe_email');
+    parent::setUp(self::$modules);
 
     // Create node-type.
     $node_type = $this->drupalCreateContentType();
@@ -212,4 +214,11 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHe
 
     $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched.');
   }
+}
+
+/**
+ * Check the toggle button for sending email for subscribe groups.
+ */
+class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper {
+  protected static $modules = array('message_subscribe', 'flag', 'message_subscribe_email',);
 }
