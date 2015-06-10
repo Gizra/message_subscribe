@@ -1,6 +1,12 @@
 <?php
 /**
  * @file
+ * Code for the Message subscribe test feature.
+ */
+
+include_once 'message_subscribe_test.features.inc';
+/**
+ * @file
  *
  * message_subscribe_test.module
  */
@@ -15,7 +21,7 @@ function message_subscribe_test_node_insert($node) {
 
   $node_wrapper = entity_metadata_wrapper('node', $node);
 
-  $message = message_create('message_subscribe_example_post_in_group', array('uid' => $node->uid));
+  $message = message_create('message_subscribe_example_og_post_in_group', array('uid' => $node->uid));
   $wrapper = entity_metadata_wrapper('message', $message);
   $wrapper->field_node_ref->set($node);
   $wrapper->field_node_groups_ref->set($node_wrapper->{OG_AUDIENCE_FIELD}->value(array('identifier' => TRUE)));

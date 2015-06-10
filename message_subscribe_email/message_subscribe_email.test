@@ -11,10 +11,13 @@
  */
 
 abstract class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
-  protected static $modules = array('message_subscribe', 'flag', 'message_subscribe_email');
+
+  protected $user1;
+  protected $user2;
+  protected $node;
 
   function setUp() {
-    parent::setUp(self::$modules);
+    parent::setUp('message_subscribe_test');
 
     // Create node-type.
     $node_type = $this->drupalCreateContentType();
@@ -220,5 +223,33 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHe
  * Check the toggle button for sending email for subscribe groups.
  */
 class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper {
-  protected static $modules = array('message_subscribe', 'flag', 'message_subscribe_email',);
+  protected $group;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Check email notifications send toggle',
+      'description' => 'Check email notifications when the user disable the notification.',
+      'group' => 'Message subscribe',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp();
+
+    // Set up group.
+    $group_type = $this->drupalCreateContentType(array('type' => 'group'));
+    og_create_field(OG_GROUP_FIELD, 'node', 'group');
+    $group_node = $this->drupalCreateNode(array('type' => $group_type->type));
+
+    // Set up groups content type.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $this->node->type);
+    $wrapper = entity_metadata_wrapper('node', $this->node);
+    $wrapper->{OG_AUDIENCE_FIELD}->set($group_node);
+    $wrapper->save();
+  }
+
+  public function testDontSendMailButton() {
+    debug($this->node);
+  }
+
 }
