@@ -17,6 +17,7 @@ include_once 'message_subscribe_test.features.inc';
 function message_subscribe_test_node_insert($node) {
   if (!og_is_group_content_type('node', $node->type)) {
     // This is not a group content. Return early.
+    return;
   }
 
   $node_wrapper = entity_metadata_wrapper('node', $node);

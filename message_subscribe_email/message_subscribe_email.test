@@ -244,12 +244,19 @@ class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper
     // Set up groups content type.
     og_create_field(OG_AUDIENCE_FIELD, 'node', $this->node->type);
     $wrapper = entity_metadata_wrapper('node', $this->node);
-    $wrapper->{OG_AUDIENCE_FIELD}->set($group_node);
+    $wrapper->{OG_AUDIENCE_FIELD}->set(array($group_node->nid));
     $wrapper->save();
   }
 
   public function testDontSendMailButton() {
-    debug($this->node);
+    debug(node_load($this->node->nid, NULL, TRUE));
+
+    // todo Flag a group for both users.
+    // todo Post a group content by user1 and verify user2 received the mail.
+    // todo Post a group content by user2 and verify user1 received the mail.
+    // todo user2 disable mails from group1.
+    // todo Post a group content by user1 and verify user2 did not received the
+    // mail.
   }
 
 }
