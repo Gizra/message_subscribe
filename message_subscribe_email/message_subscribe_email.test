@@ -239,13 +239,23 @@ class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper
     // Set up group.
     $group_type = $this->drupalCreateContentType(array('type' => 'group'));
     og_create_field(OG_GROUP_FIELD, 'node', 'group');
-    $group_node = $this->drupalCreateNode(array('type' => $group_type->type));
+    $this->group = $this->drupalCreateNode(array('type' => $group_type->type));
 
     // Set up groups content type.
     og_create_field(OG_AUDIENCE_FIELD, 'node', $this->node->type);
     $wrapper = entity_metadata_wrapper('node', $this->node);
-    $wrapper->{OG_AUDIENCE_FIELD}->set(array($group_node->nid));
+    $wrapper->{OG_AUDIENCE_FIELD}->set(array($this->group->nid));
     $wrapper->save();
+
+    og_group('node', $this->group, array('entity_type' => 'user', 'entity' => $this->user1));
+    og_group('node', $this->group, array('entity_type' => 'user', 'entity' => $this->user2));
+
+    // Grant groups permission to users.
+    $rid = og_get_user_roles('node', $this->group->nid, $this->user1->uid);
+
+    og_role_grant_permissions(key($rid), array(
+      "create {$this->node->type} content"
+    ));
   }
 
   public function testDontSendMailButton() {
