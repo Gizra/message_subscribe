@@ -243,9 +243,6 @@ class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper
 
     // Set up groups content type.
     og_create_field(OG_AUDIENCE_FIELD, 'node', $this->node->type);
-    $wrapper = entity_metadata_wrapper('node', $this->node);
-    $wrapper->{OG_AUDIENCE_FIELD}->set(array($this->group->nid));
-    $wrapper->save();
 
     og_group('node', $this->group, array('entity_type' => 'user', 'entity' => $this->user1));
     og_group('node', $this->group, array('entity_type' => 'user', 'entity' => $this->user2));
@@ -256,13 +253,29 @@ class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper
     og_role_grant_permissions(key($rid), array(
       "create {$this->node->type} content"
     ));
+
+    $flags = flag_get_default_flags(TRUE);
+    $flag = $flags['subscribe_og'];
+    $flag->types[] = $this->group->type;
+    $flag->save();
+    $flag->enable();
+    drupal_static_reset('flag_get_flags');
   }
 
   public function testDontSendMailButton() {
-    debug(node_load($this->node->nid, NULL, TRUE));
+    // Flag a group for both users.
+    $flag = flag_get_flag('subscribe_og');
+    $flag->flag('flag', $this->group->nid, $this->user1);
+    $flag->flag('flag', $this->group->nid, $this->user2);
 
-    // todo Flag a group for both users.
-    // todo Post a group content by user1 and verify user2 received the mail.
+    // Post a group content by user1 and verify user2 received the mail.
+    $this->drupalCreateNode(array(
+      'type' => $this->node->type,
+      OG_AUDIENCE_FIELD => array(
+        LANGUAGE_NONE => array('target_id' => $this->group->nid),
+      ),
+    ));
+
     // todo Post a group content by user2 and verify user1 received the mail.
     // todo user2 disable mails from group1.
     // todo Post a group content by user1 and verify user2 did not received the
