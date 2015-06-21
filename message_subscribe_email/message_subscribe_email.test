@@ -273,14 +273,13 @@ class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper
       'type' => $this->node->type,
     ));
 
+    // Post a group content by user2 and verify user1 received the mail.
     og_group('node', $this->group, array('entity_type' => 'node', 'entity' => $node));
 
     $message = message_create('foo');
-
     $uids = message_subscribe_get_subscribers('node', $this->group, $message);
-    debug($uids);
+    $this->assertTrue(array_keys($uids), array($this->user1->uid, $this->user2->uid), 'User 1 and user 2 receiving the messages.');
 
-    // todo Post a group content by user2 and verify user1 received the mail.
     // todo user2 disable mails from group1.
     // todo Post a group content by user1 and verify user2 did not received the
     // mail.
