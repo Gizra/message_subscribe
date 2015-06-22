@@ -278,11 +278,14 @@ class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper
 
     $message = message_create('foo');
     $uids = message_subscribe_get_subscribers('node', $this->group, $message);
-    $this->assertTrue(array_keys($uids), array($this->user1->uid, $this->user2->uid), 'User 1 and user 2 receiving the messages.');
+    $this->assertEqual(array_keys($uids), array($this->user1->uid, $this->user2->uid), 'User 1 and user 2 receiving the messages.');
 
-    // todo user2 disable mails from group1.
-    // todo Post a group content by user1 and verify user2 did not received the
-    // mail.
+    // user2 disable mails from group1.
+    $flag->flag('unflag', $this->group->nid, $this->user2, TRUE);
+
+    // Post a group content by user1 and verify user2 did not received the mail.
+    $uids = message_subscribe_get_subscribers('node', $this->group, $message);
+    $this->assertEqual(array_keys($uids), array($this->user1->uid), 'Only user 1 will receive mails about relate to the group.');
   }
 
 }
