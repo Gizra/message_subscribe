@@ -12,12 +12,30 @@
 
 abstract class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
 
+  /**
+   * @var
+   *
+   * User1 object.
+   */
   protected $user1;
+
+  /**
+   * @var
+   *
+   * User2 object.
+   */
   protected $user2;
+
+  /**
+   * @var
+   *
+   * The node object for the tests.
+   */
   protected $node;
 
+
   function setUp() {
-    parent::setUp('message_subscribe_test');
+    parent::setUp('message_subscribe', 'flag', 'message_subscribe_email', 'og');
 
     // Create node-type.
     $node_type = $this->drupalCreateContentType();
@@ -223,6 +241,12 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHe
  * Check the toggle button for sending email for subscribe groups.
  */
 class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper {
+
+  /**
+   * @var
+   *
+   * The group object.
+   */
   protected $group;
 
   public static function getInfo() {
@@ -262,6 +286,9 @@ class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper
     drupal_static_reset('flag_get_flags');
   }
 
+  /**
+   * Testing the email sending workflow when flagging and un flagging OG flag.
+   */
   public function testDontSendMailButton() {
     // Flag a group for both users.
     $flag = flag_get_flag('subscribe_og');
