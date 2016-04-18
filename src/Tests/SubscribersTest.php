@@ -2,6 +2,8 @@
 
 namespace Drupal\message_subscribe\Tests;
 
+use Drupal\message\Entity\Message;
+use Drupal\message\Entity\MessageType;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -10,6 +12,27 @@ use Drupal\simpletest\WebTestBase;
  * @group message_subscribe
  */
 class SubscribersTest extends WebTestBase {
+
+  /**
+   * Flag service.
+   *
+   * @var \Drupal\flag\FlagServiceInterface
+   */
+  protected $flagService;
+
+  /**
+   * Nodes to test with.
+   *
+   * @var \Drupal\node\NodeInterface[]
+   */
+  protected $nodes;
+
+  /**
+   * Users to test with.
+   *
+   * @var \Drupal\user\UserInterface[]
+   */
+  protected $users;
 
   /**
    * {@inheritdoc}
@@ -22,76 +45,68 @@ class SubscribersTest extends WebTestBase {
   function setUp() {
     parent::setUp();
 
+    $this->flagService = $this->container->get('flag');
+
     // Create node-type.
     $node_type = 'article';
 
-    // Enable flags.
-    $flags = flag_get_default_flags(TRUE);
+    /** @var \Drupal\flag\FlagInterface[] $flags */
+    $flags = \Drupal::service('flag')->getFlags();
 
     $flag = $flags['subscribe_node'];
-    $flag->types[] = $node_type;
-    $flag->save();
+    $flag->set('bundles', [$node_type]);
     $flag->enable();
+    $flag->save();
 
     $flag = $flags['subscribe_user'];
-    $flag->save();
     $flag->enable();
+    $flag->save();
 
-    // Reset our cache so our permissions show up.
-    drupal_static_reset('flag_get_flags');
-
-    // Reset permissions so that permissions for this flag are available.
-    $this->checkPermissions([], TRUE);
-
-    $user1 = $this->drupalCreateUser([
+    $this->users[1] = $this->drupalCreateUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
     ]);
-    $user2 = $this->drupalCreateUser([
+    $this->users[2] = $this->drupalCreateUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
     ]);
-    $user_blocked = $this->drupalCreateUser([
+    // User 3 is blocked.
+    $this->users[3] = $this->drupalCreateUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
     ]);
+    $this->users[3]->block();
+    $this->users[3]->save();
 
     // Create node.
     $settings = [];
     $settings['type'] = $node_type;
-    $settings['uid'] = $user1->uid;
-    $node = $this->drupalCreateNode($settings);
-    $settings['uid'] = $user2->uid;
-    $node1 = $this->drupalCreateNode($settings);
+    $settings['uid'] = $this->users[1];
+    $this->nodes[0] = $this->drupalCreateNode($settings);
+    $settings['uid'] = $this->users[2];
+    $this->nodes[1] = $this->drupalCreateNode($settings);
 
     // User1, User2 and user_blocked flag node1.
-    flag('flag', 'subscribe_node', $node->nid, $user1);
-    flag('flag', 'subscribe_node', $node->nid, $user2);
-    flag('flag', 'subscribe_node', $node->nid, $user_blocked);
-    flag('flag', 'subscribe_node', $node1->nid, $user_blocked);
+    $this->flagService->flag($flags['subscribe_node'], $this->nodes[0], $this->users[1]);
+    $this->flagService->flag($flags['subscribe_node'], $this->nodes[0], $this->users[2]);
+    $this->flagService->flag($flags['subscribe_node'], $this->nodes[0], $this->users[3]);
+    $this->flagService->flag($flags['subscribe_node'], $this->nodes[1], $this->users[3]);
     // User2 flags User1.
-    flag('flag', 'subscribe_user', $user1->uid, $user2);
+    $this->flagService->flag($flags['subscribe_user'], $this->users[1], $this->users[2]);
 
     // Create a dummy message-type.
-    $message_type = message_type_create('foo', ['message_text' => [\Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED => [['value' => 'Example text.']]]]);
+    $message_type = MessageType::create([
+      'type' => 'foo',
+      'message_text' => ['value' => 'Example text.']
+    ]);
     $message_type->save();
 
-    $this->node = $node;
-    $this->node1 = $node1;
-    $this->user1 = $user1;
-    $this->user2 = $user2;
-
-    // $user_blocked is blocked in order to test
-    // $subscribe_options['notify blocked users'].
-    $user_blocked->status = 0;
-    $user_blocked->save();
-    $this->user_blocked = $user_blocked;
     // Override default notifiers.
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', [])->save();
   }
@@ -100,12 +115,15 @@ class SubscribersTest extends WebTestBase {
    * Test getting the subscribers list.
    */
   function testGetSubscribers() {
-    $message = message_create('foo', ['uid' => $this->user1->uid]);
+    $message = Message::create([
+      'type' => 'foo',
+      'uid' => $this->users[1],
+    ]);
 
-    $node = $this->node;
-    $user2 = $this->user2;
+    $node = $this->nodes[0];
+    $user2 = $this->users[2];
 
-    $user_blocked = $this->user_blocked;
+    $user_blocked = $this->users[3];
     $uids = message_subscribe_get_subscribers('node', $node, $message);
 
     // Assert subscribers data.
@@ -186,17 +204,20 @@ class SubscribersTest extends WebTestBase {
   function testGetSubscribersExcludeSelf() {
     // Test the affect of the variable when set to FALSE (do not notify self).
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', FALSE)->save();
-    $message = message_create('foo', ['uid' => $this->user1->uid]);
+    $message = Message::create([
+      'type' => 'foo',
+      'uid' => $this->users[1],
+    ]);
 
-    $node = $this->node;
-    $user1 = $this->user1;
-    $user2 = $this->user2;
+    $node = $this->nodes[0];
+    $user1 = $this->users[1];
+    $user2 = $this->users[2];
 
     $uids = message_subscribe_get_subscribers('node', $node, $message);
 
     // Assert subscribers data.
     $expected_uids = [
-      $user2->uid => [
+      $this->users[2]->id() => [
         'notifiers' => [],
         'flags' => [
           'subscribe_node',

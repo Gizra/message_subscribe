@@ -5,6 +5,9 @@
  * Subscribe API for the Message and Message notify modules.
  */
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\message\MessageInterface;
+
 /**
  * Process a message, and send to subscribed users.
  *
@@ -189,11 +192,11 @@ function message_subscribe_send_message($entity_type, $entity, Message $message,
 }
 
 /**
- * Get a list of user IDs that need to recieve the message.
+ * Get a list of user IDs that need to receive the message.
  *
- * @param $entity_type
- *   The entity type.
- * @param $entity
+ * @param string $entity_type
+ *   The entity type ID.
+ * @param \Drupal\Core\Entity\EntityInterface $entity
  *   The entity object.
  * @param $message
  *   The Message object.
@@ -216,8 +219,8 @@ function message_subscribe_send_message($entity_type, $entity, Message $message,
  *   );
  * @endcode
  */
-function message_subscribe_get_subscribers($entity_type, $entity, Message $message, $subscribe_options = array(), &$context = array()) {
-  $context = $context ? $context : message_subscribe_get_basic_context($entity_type, $entity, $subscribe_options, $context);
+function message_subscribe_get_subscribers($entity_type, EntityInterface $entity, MessageInterface $message, array $subscribe_options = [], array &$context = []) {
+  $context = !empty($context) ? $context : message_subscribe_get_basic_context($entity_type, $entity, $subscribe_options, $context);
   $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('notify_own_actions');
 
   $uids = array();
@@ -288,21 +291,21 @@ function message_subscribe_get_subscribers($entity_type, $entity, Message $messa
  *
  * @param $entity_type
  *   The entity type.
- * @param $entity
+ * @param \Drupal\Core\Entity\EntityInterface $entity
  *   The entity object.
- * @param $subscribe_options
+ * @param array $subscribe_options
  *   Optional; The options array to pass to
  *   message_subscribe_get_basic_context().
- * @param $context
+ * @param array $context
  *   Optional; The context array.
  *
- * @return
+ * @return array
  *   Array keyed with the entity type and array of entity IDs as the
  *   value.
  */
-function message_subscribe_get_basic_context($entity_type, $entity, $subscribe_options = array(), $context = array()) {
-  if (!$context) {
-    list($id) = entity_extract_ids($entity_type, $entity);
+function message_subscribe_get_basic_context($entity_type, EntityInterface $entity, array $subscribe_options = [], array $context = []) {
+  if (empty($context)) {
+    $id = $entity->id();
     $context[$entity_type][$id] = $id;
   }
 
@@ -326,7 +329,8 @@ function message_subscribe_get_basic_context($entity_type, $entity, $subscribe_o
     return $context;
   }
 
-  $nodes = \Drupal::entityManager()->getStorage('node')->loadMultiple($context['node']);
+  /** @var \Drupal\node\NodeInterface[] $nodes */
+  $nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($context['node']);
 
   if (\Drupal::moduleHandler()->moduleExists('og')) {
     // Iterate over existing nodes to extract the related groups.
@@ -339,12 +343,11 @@ function message_subscribe_get_basic_context($entity_type, $entity, $subscribe_o
     }
   }
 
-  $nodes = \Drupal::entityManager()->getStorage('node')->loadMultiple($context['node']);
-
   foreach ($nodes as $node) {
-    $context['user'][$node->uid] = $node->uid;
+    $context['user'][$node->getRevisionAuthor()->id()] = $node->getRevisionAuthor()->id();
 
-    if (\Drupal::moduleHandler()->moduleExists('taxonomy')) {
+    // @todo Fix this
+    if (FALSE && \Drupal::moduleHandler()->moduleExists('taxonomy')) {
       $context['taxonomy_term'] = !empty($context['taxonomy_term']) ? $context['taxonomy_term'] : array();
 
       // Iterate over all taxonomy term reference fields, or entity-reference
@@ -386,7 +389,7 @@ function message_subscribe_get_basic_context($entity_type, $entity, $subscribe_o
  *
  * @see flag_get_content_flags()
  */
-function message_subscribe_message_subscribe_get_subscribers(Message $message, $subscribe_options = array(), $context = array()) {
+function message_subscribe_message_subscribe_get_subscribers(MessageInterface $message, $subscribe_options = array(), $context = array()) {
   $uids = array();
 
   $subscribe_options += array(
@@ -410,7 +413,7 @@ function message_subscribe_message_subscribe_get_subscribers(Message $message, $
 
     $fids = array();
     foreach ($flags as $flag) {
-      $fids[$flag->fid] = $flag->name;
+      $fids[$flag->id()] = $flag->label();
     }
 
     // Query all the entity IDs inside the given flags. We don't use
@@ -480,13 +483,13 @@ function message_subscribe_message_subscribe_get_subscribers(Message $message, $
  * @param $reset
  *   Optional. Reset the internal query cache.
  *
- * @return $flags
+ * @return \Drupal\flag\FlagInterface[] $flags
  *   An array of the structure [fid] = flag_object.
  *
  * @see flag_get_flags()
  */
 function message_subscribe_flag_get_flags($content_type = NULL, $content_subtype = NULL, $account = NULL, $reset = FALSE) {
-  $flags = flag_get_flags($content_type, $content_subtype, $account, $reset);
+  $flags = \Drupal::service('flag')->getFlags($content_type, $content_subtype, $account);
   $ms_flags = array();
   $prefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
   foreach ($flags as $flag_name => $flag) {
