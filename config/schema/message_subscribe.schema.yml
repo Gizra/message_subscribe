@@ -1,0 +1,12 @@
+message_subscribe.settings:
+  type: mapping
+  label: Settings
+  mapping:
+    message_subscribe_use_queue:
+      type: boolean
+    message_subscribe_notify_own_actions:
+      type: boolean
+    message_subscribe_flag_prefix:
+      type: string
+    message_subscribe_default_notifiers:
+      type: string

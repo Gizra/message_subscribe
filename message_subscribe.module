@@ -69,8 +69,8 @@
  *  The message object.
  */
 function message_subscribe_send_message($entity_type, $entity, Message $message, $notify_options = array(), $subscribe_options = array(), $context = array()) {
-  $use_queue = isset($subscribe_options['use queue']) ? $subscribe_options['use queue'] : variable_get('message_subscribe_use_queue', FALSE);
-  $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : variable_get('message_subscribe_notify_own_actions', FALSE);
+  $use_queue = isset($subscribe_options['use queue']) ? $subscribe_options['use queue'] : \Drupal::config('message_subscribe.settings')->get('message_subscribe_use_queue');
+  $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('message_subscribe_notify_own_actions');
 
   // Save message by default.
   $subscribe_options += array(
@@ -218,13 +218,13 @@ function message_subscribe_send_message($entity_type, $entity, Message $message,
  */
 function message_subscribe_get_subscribers($entity_type, $entity, Message $message, $subscribe_options = array(), &$context = array()) {
   $context = $context ? $context : message_subscribe_get_basic_context($entity_type, $entity, $subscribe_options, $context);
-  $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : variable_get('message_subscribe_notify_own_actions', FALSE);
+  $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('message_subscribe_notify_own_actions');
 
   $uids = array();
 
   // We don't use module_invoke_all() is we want to retain the array keys,
   // which are the user IDs.
-  foreach (module_implements('message_subscribe_get_subscribers') as $module) {
+  foreach (\Drupal::moduleHandler()->getImplementations('message_subscribe_get_subscribers') as $module) {
     $function = $module . '_message_subscribe_get_subscribers';
     $result = $function($message, $subscribe_options, $context);
     $uids += $result;
@@ -256,7 +256,7 @@ function message_subscribe_get_subscribers($entity_type, $entity, Message $messa
     }
 
     if (!empty($subscribe_options['entity access'])) {
-      $account = user_load($uid);
+      $account = \Drupal::entityManager()->getStorage('user')->load($uid);
       if (!entity_access('view', $entity_type, $entity, $account)) {
         // User doesn't have access to view the entity.
         unset($uids[$uid]);
@@ -274,7 +274,7 @@ function message_subscribe_get_subscribers($entity_type, $entity, Message $messa
 
   _message_subscribe_add_default_notifiers($uids);
 
-  drupal_alter('message_subscribe_get_subscribers', $uids, $values);
+  \Drupal::moduleHandler()->alter('message_subscribe_get_subscribers', $uids, $values);
 
   return $uids;
 }
@@ -326,9 +326,9 @@ function message_subscribe_get_basic_context($entity_type, $entity, $subscribe_o
     return $context;
   }
 
-  $nodes = node_load_multiple($context['node']);
+  $nodes = \Drupal::entityManager()->getStorage('node')->loadMultiple($context['node']);
 
-  if (module_exists('og')) {
+  if (\Drupal::moduleHandler()->moduleExists('og')) {
     // Iterate over existing nodes to extract the related groups.
     foreach ($nodes as $node) {
       foreach (og_get_entity_groups('node', $node) as $group_type => $gids) {
@@ -339,12 +339,12 @@ function message_subscribe_get_basic_context($entity_type, $entity, $subscribe_o
     }
   }
 
-  $nodes = node_load_multiple($context['node']);
+  $nodes = \Drupal::entityManager()->getStorage('node')->loadMultiple($context['node']);
 
   foreach ($nodes as $node) {
     $context['user'][$node->uid] = $node->uid;
 
-    if (module_exists('taxonomy')) {
+    if (\Drupal::moduleHandler()->moduleExists('taxonomy')) {
       $context['taxonomy_term'] = !empty($context['taxonomy_term']) ? $context['taxonomy_term'] : array();
 
       // Iterate over all taxonomy term reference fields, or entity-reference
@@ -488,7 +488,7 @@ function message_subscribe_message_subscribe_get_subscribers(Message $message, $
 function message_subscribe_flag_get_flags($content_type = NULL, $content_subtype = NULL, $account = NULL, $reset = FALSE) {
   $flags = flag_get_flags($content_type, $content_subtype, $account, $reset);
   $ms_flags = array();
-  $prefix = variable_get('message_subscribe_flag_prefix', 'subscribe') . '_';
+  $prefix = \Drupal::config('message_subscribe.settings')->get('message_subscribe_flag_prefix') . '_';
   foreach ($flags as $flag_name => $flag) {
     // Check that the flag is using name convention.
     if (strpos($flag_name, $prefix) === 0) {
@@ -609,7 +609,7 @@ function message_subscribe_flag_default_flags() {
     'status' => FALSE,
   );
 
-  if (module_exists('og')) {
+  if (\Drupal::moduleHandler()->moduleExists('og')) {
     // Exported flag: "Groups".
     $flags['subscribe_og'] = array(
       'entity_type' => 'node',
@@ -662,7 +662,7 @@ function message_subscribe_flag_default_flags() {
     unset($flags['subscribe_node']['import_roles'], $flags['subscribe_term']['import_roles'], $flags['subscribe_user']['import_roles']);
     unset($flags['subscribe_node']['entity_type'], $flags['subscribe_term']['entity_type'], $flags['subscribe_user']['entity_type']);
 
-    if (module_exists('og')) {
+    if (\Drupal::moduleHandler()->moduleExists('og')) {
       $flags['subscribe_og']['api_version'] = 2;
       $flags['subscribe_og']['content_type'] = 'node';
       $flags['subscribe_og']['roles'] = $flags['subscribe_og']['import_roles'];
@@ -683,7 +683,11 @@ function message_subscribe_flag_default_flags() {
  * @see message_subscribe_get_subscribers().
  */
 function _message_subscribe_add_default_notifiers(&$uids) {
-  $notifiers = variable_get('message_subscribe_default_notifiers', array('email' => 'email'));
+  // @FIXME
+// Could not extract the default value because it is either indeterminate, or
+// not scalar. You'll need to provide a default value in
+// config/install/message_subscribe.settings.yml and config/schema/message_subscribe.schema.yml.
+$notifiers = \Drupal::config('message_subscribe.settings')->get('message_subscribe_default_notifiers');
   if (empty($notifiers)) {
     return;
   }

@@ -1,0 +1,13 @@
+name: 'Message subscribe'
+description: 'Subscribe API for the Message and Message notify modules.'
+core: 8.x
+package: Message
+php: 5.2.4
+project: message_subscribe
+dependencies:
+  - flag
+  - message
+  - message_notify
+test_dependencies:
+  - og
+type: module

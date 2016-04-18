@@ -1,0 +1,4 @@
+message_subscribe_use_queue: false
+message_subscribe_notify_own_actions: false
+message_subscribe_flag_prefix: subscribe
+message_subscribe_default_notifiers: email
