@@ -1,21 +1,26 @@
 <?php
-namespace Drupal\message_subscribe;
+
+namespace Drupal\message_subscribe\Tests;
+
+use Drupal\simpletest\WebTestBase;
 
 /**
  * Test getting subscribes from context.
+ *
+ * @group message_subscribe
  */
-class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
+class SubscribersTest extends WebTestBase {
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Get subscribers',
-      'description' => 'Get subscribers from content.',
-      'group' => 'Message subscribe',
-    );
-  }
+  /**
+   * {@inheritdoc}
+   */
+  public static $modules = ['message_subscribe', 'flag', 'taxonomy'];
 
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
-    parent::setUp('message_subscribe', 'flag', 'taxonomy');
+    parent::setUp();
 
     // Create node-type.
     $node_type = 'article';
@@ -36,29 +41,29 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     drupal_static_reset('flag_get_flags');
 
     // Reset permissions so that permissions for this flag are available.
-    $this->checkPermissions(array(), TRUE);
+    $this->checkPermissions([], TRUE);
 
-    $user1 = $this->drupalCreateUser(array(
+    $user1 = $this->drupalCreateUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
-    ));
-    $user2 = $this->drupalCreateUser(array(
+    ]);
+    $user2 = $this->drupalCreateUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
-    ));
-    $user_blocked = $this->drupalCreateUser(array(
+    ]);
+    $user_blocked = $this->drupalCreateUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
-    ));
+    ]);
 
     // Create node.
-    $settings = array();
+    $settings = [];
     $settings['type'] = $node_type;
     $settings['uid'] = $user1->uid;
     $node = $this->drupalCreateNode($settings);
@@ -74,7 +79,7 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     flag('flag', 'subscribe_user', $user1->uid, $user2);
 
     // Create a dummy message-type.
-    $message_type = message_type_create('foo', array('message_text' => array(\Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED => array(array('value' => 'Example text.')))));
+    $message_type = message_type_create('foo', ['message_text' => [\Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED => [['value' => 'Example text.']]]]);
     $message_type->save();
 
     $this->node = $node;
@@ -88,14 +93,14 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     $user_blocked->save();
     $this->user_blocked = $user_blocked;
     // Override default notifiers.
-    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', array())->save();
+    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', [])->save();
   }
 
   /**
    * Test getting the subscribers list.
    */
   function testGetSubscribers() {
-    $message = message_create('foo', array('uid' => $this->user1->uid));
+    $message = message_create('foo', ['uid' => $this->user1->uid]);
 
     $node = $this->node;
     $user2 = $this->user2;
@@ -104,27 +109,27 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     $uids = message_subscribe_get_subscribers('node', $node, $message);
 
     // Assert subscribers data.
-    $expected_uids = array(
-      $user2->uid => array(
-        'notifiers' => array(),
-        'flags' => array(
+    $expected_uids = [
+      $user2->uid => [
+        'notifiers' => [],
+        'flags' => [
           'subscribe_node',
           'subscribe_user',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
 
     $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched.');
 
     // Test none of users will get message if only blocked user is subscribed.
-    $message = message_create('foo', array('uid' => $this->user1->uid));
+    $message = message_create('foo', ['uid' => $this->user1->uid]);
 
     $node1 = $this->node1;
 
     $uids = message_subscribe_get_subscribers('node', $node1, $message);
 
     // Assert subscribers data.
-    $expected_uids = array();
+    $expected_uids = [];
 
     $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched.');
 
@@ -132,47 +137,47 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     $subscribe_options['notify blocked users'] = TRUE;
     $uids = message_subscribe_get_subscribers('node', $node, $message, $subscribe_options);
 
-    $expected_uids = array(
-      $user2->uid => array(
-        'notifiers' => array(),
-        'flags' => array(
+    $expected_uids = [
+      $user2->uid => [
+        'notifiers' => [],
+        'flags' => [
           'subscribe_node',
           'subscribe_user',
-          ),
-        ),
-      $user_blocked->uid => array(
-        'notifiers' => array(),
-        'flags' => array(
+        ],
+      ],
+      $user_blocked->uid => [
+        'notifiers' => [],
+        'flags' => [
           'subscribe_node',
-          ),
-        ),
-      );
+        ],
+      ],
+    ];
     $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched, including blocked users.');
 
-    $user3 = $this->drupalCreateUser(array(
+    $user3 = $this->drupalCreateUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
-    ));
-    $user4 = $this->drupalCreateUser(array(
+    ]);
+    $user4 = $this->drupalCreateUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
-    ));
+    ]);
     flag('flag', 'subscribe_node', $node->nid, $user3);
     flag('flag', 'subscribe_node', $node->nid, $user4);
 
     // Get subscribers from a given "last uid".
-    $subscribe_options = array('last uid' => $user2->uid);
+    $subscribe_options = ['last uid' => $user2->uid];
     $uids = message_subscribe_get_subscribers('node', $node, $message, $subscribe_options);
-    $this->assertEqual(array_keys($uids), array($user3->uid, $user4->uid), 'All subscribers from "last uid" were fetched.');
+    $this->assertEqual(array_keys($uids), [$user3->uid, $user4->uid], 'All subscribers from "last uid" were fetched.');
 
     // Get a range of subscribers.
     $subscribe_options['range'] = 1;
     $uids = message_subscribe_get_subscribers('node', $node, $message, $subscribe_options);
-    $this->assertEqual(array_keys($uids), array($user3->uid), 'All subscribers from "last uid" and "range" were fetched.');
+    $this->assertEqual(array_keys($uids), [$user3->uid], 'All subscribers from "last uid" and "range" were fetched.');
   }
 
   /**
@@ -181,7 +186,7 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
   function testGetSubscribersExcludeSelf() {
     // Test the affect of the variable when set to FALSE (do not notify self).
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', FALSE)->save();
-    $message = message_create('foo', array('uid' => $this->user1->uid));
+    $message = message_create('foo', ['uid' => $this->user1->uid]);
 
     $node = $this->node;
     $user1 = $this->user1;
@@ -190,15 +195,15 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     $uids = message_subscribe_get_subscribers('node', $node, $message);
 
     // Assert subscribers data.
-    $expected_uids = array(
-      $user2->uid => array(
-        'notifiers' => array(),
-        'flags' => array(
+    $expected_uids = [
+      $user2->uid => [
+        'notifiers' => [],
+        'flags' => [
           'subscribe_node',
           'subscribe_user',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
     $this->assertEqual($uids, $expected_uids, 'All subscribers except for the triggering user were fetched.');
 
     // Test the affect of the variable when set to TRUE (Notify self).
@@ -207,21 +212,21 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     $uids = message_subscribe_get_subscribers('node', $node, $message);
 
     // Assert subscribers data.
-    $expected_uids = array(
-      $user1->uid => array(
-        'notifiers' => array(),
-        'flags' => array(
+    $expected_uids = [
+      $user1->uid => [
+        'notifiers' => [],
+        'flags' => [
           'subscribe_node',
-        ),
-      ),
-      $user2->uid => array(
-        'notifiers' => array(),
-        'flags' => array(
+        ],
+      ],
+      $user2->uid => [
+        'notifiers' => [],
+        'flags' => [
           'subscribe_node',
           'subscribe_user',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
     $this->assertEqual($uids, $expected_uids, 'All subscribers including the triggering user were fetched.');
   }
 
@@ -232,14 +237,14 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     // Make sure we are notifying ourselves for this test.
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', TRUE)->save();
 
-    $message = message_create('foo', array());
+    $message = message_create('foo', []);
 
     $node = $this->node;
     $node->status = NODE_NOT_PUBLISHED;
     $node->save();
 
     // Add permission to view own unpublished content.
-    user_role_change_permissions(\Drupal\Core\Session\AccountInterface::AUTHENTICATED_RID, array('view own unpublished content' => TRUE));
+    user_role_change_permissions(\Drupal\Core\Session\AccountInterface::AUTHENTICATED_RID, ['view own unpublished content' => TRUE]);
 
     // Set the node to be unpublished.
     $user1 = $this->user1;
@@ -247,10 +252,10 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
 
     $subscribe_options['entity access'] = TRUE;
     $uids = message_subscribe_get_subscribers('node', $node, $message, $subscribe_options);
-    $this->assertEqual(array_keys($uids), array($user1->uid), 'Only user with access to node returned for subscribers list.');
+    $this->assertEqual(array_keys($uids), [$user1->uid], 'Only user with access to node returned for subscribers list.');
 
     $subscribe_options['entity access'] = FALSE;
     $uids = message_subscribe_get_subscribers('node', $node, $message, $subscribe_options);
-    $this->assertEqual(array_keys($uids), array($user1->uid, $user2->uid), 'All users (even without access) returned for subscribers list.');
+    $this->assertEqual(array_keys($uids), [$user1->uid, $user2->uid], 'All users (even without access) returned for subscribers list.');
   }
 }
