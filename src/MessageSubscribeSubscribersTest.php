@@ -88,7 +88,7 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     $user_blocked->save();
     $this->user_blocked = $user_blocked;
     // Override default notifiers.
-    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('message_subscribe_default_notifiers', array())->save();
+    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', array())->save();
   }
 
   /**
@@ -180,7 +180,7 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
    */
   function testGetSubscribersExcludeSelf() {
     // Test the affect of the variable when set to FALSE (do not notify self).
-    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('message_subscribe_notify_own_actions', FALSE)->save();
+    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', FALSE)->save();
     $message = message_create('foo', array('uid' => $this->user1->uid));
 
     $node = $this->node;
@@ -202,7 +202,7 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
     $this->assertEqual($uids, $expected_uids, 'All subscribers except for the triggering user were fetched.');
 
     // Test the affect of the variable when set to TRUE (Notify self).
-    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('message_subscribe_notify_own_actions', TRUE)->save();
+    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', TRUE)->save();
 
     $uids = message_subscribe_get_subscribers('node', $node, $message);
 
@@ -230,7 +230,7 @@ class MessageSubscribeSubscribersTest extends DrupalWebTestCase {
    */
   function testEntityAccess() {
     // Make sure we are notifying ourselves for this test.
-    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('message_subscribe_notify_own_actions', TRUE)->save();
+    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', TRUE)->save();
 
     $message = message_create('foo', array());
 

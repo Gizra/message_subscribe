@@ -69,8 +69,8 @@
  *  The message object.
  */
 function message_subscribe_send_message($entity_type, $entity, Message $message, $notify_options = array(), $subscribe_options = array(), $context = array()) {
-  $use_queue = isset($subscribe_options['use queue']) ? $subscribe_options['use queue'] : \Drupal::config('message_subscribe.settings')->get('message_subscribe_use_queue');
-  $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('message_subscribe_notify_own_actions');
+  $use_queue = isset($subscribe_options['use queue']) ? $subscribe_options['use queue'] : \Drupal::config('message_subscribe.settings')->get('use_queue');
+  $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('notify_own_actions');
 
   // Save message by default.
   $subscribe_options += array(
@@ -218,7 +218,7 @@ function message_subscribe_send_message($entity_type, $entity, Message $message,
  */
 function message_subscribe_get_subscribers($entity_type, $entity, Message $message, $subscribe_options = array(), &$context = array()) {
   $context = $context ? $context : message_subscribe_get_basic_context($entity_type, $entity, $subscribe_options, $context);
-  $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('message_subscribe_notify_own_actions');
+  $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('notify_own_actions');
 
   $uids = array();
 
@@ -488,7 +488,7 @@ function message_subscribe_message_subscribe_get_subscribers(Message $message, $
 function message_subscribe_flag_get_flags($content_type = NULL, $content_subtype = NULL, $account = NULL, $reset = FALSE) {
   $flags = flag_get_flags($content_type, $content_subtype, $account, $reset);
   $ms_flags = array();
-  $prefix = \Drupal::config('message_subscribe.settings')->get('message_subscribe_flag_prefix') . '_';
+  $prefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
   foreach ($flags as $flag_name => $flag) {
     // Check that the flag is using name convention.
     if (strpos($flag_name, $prefix) === 0) {
@@ -687,7 +687,7 @@ function _message_subscribe_add_default_notifiers(&$uids) {
 // Could not extract the default value because it is either indeterminate, or
 // not scalar. You'll need to provide a default value in
 // config/install/message_subscribe.settings.yml and config/schema/message_subscribe.schema.yml.
-$notifiers = \Drupal::config('message_subscribe.settings')->get('message_subscribe_default_notifiers');
+$notifiers = \Drupal::config('message_subscribe.settings')->get('default_notifiers');
   if (empty($notifiers)) {
     return;
   }

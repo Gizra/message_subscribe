@@ -18,10 +18,10 @@ class MessageSubscribeQueueTest extends DrupalWebTestCase {
     parent::setUp('message_subscribe');
 
     // Override default notifiers.
-    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('message_subscribe_default_notifiers', array())->save();
+    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', array())->save();
 
     // Enable using queue.
-    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('message_subscribe_use_queue', TRUE)->save();
+    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('use_queue', TRUE)->save();
 
     // Create a dummy message-type.
     $message_type = message_type_create('foo', array('message_text' => array(\Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED => array(array('value' => 'Example text.')))));

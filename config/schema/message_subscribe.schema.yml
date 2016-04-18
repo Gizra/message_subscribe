@@ -1,12 +1,19 @@
 message_subscribe.settings:
   type: mapping
-  label: Settings
+  label: 'Message Subscribe settings'
   mapping:
-    message_subscribe_use_queue:
+    use_queue:
       type: boolean
-    message_subscribe_notify_own_actions:
+      label: 'Use the queue to process messages'
+    notify_own_actions:
       type: boolean
-    message_subscribe_flag_prefix:
+      label: 'Notify author of their own submissions'
+    flag_prefix:
       type: string
-    message_subscribe_default_notifiers:
-      type: string
+      label: 'The prefix that will be used to identify subscription flags'
+    default_notifiers:
+      type: sequence
+      label: 'Message notifiers that will be added to every subscription'
+      sequence:
+        type: string
+        label: 'Message notifier'

@@ -9,24 +9,24 @@
  * Menu callback; Admin settings form.
  */
 function message_subscribe_admin_settings() {
-  $form['message_subscribe_default_notifiers'] = array(
+  $form['default_notifiers'] = array(
     '#type' => 'select',
     '#title' => t('Default message notifiers'),
     '#description' => t('Which message notifiers will be added to every subscription.'),
-    '#default_value' => \Drupal::config('message_subscribe.settings')->get('message_subscribe_default_notifiers'),
+    '#default_value' => \Drupal::config('message_subscribe.settings')->get('default_notifiers'),
     '#multiple' => TRUE,
     '#options' => message_notify_get_notifiers_as_options(),
     '#required' => FALSE,
   );
 
-  $form['message_subscribe_notify_own_actions'] = array(
+  $form['notify_own_actions'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify author of their own submissions'),
     '#description' => t('Determines if the user that caused the message notification receive a message about their actions. e.g. If I add a comment to a node, should I get an email saying I added a comment to a node?'),
-    '#default_value' => \Drupal::config('message_subscribe.settings')->get('message_subscribe_notify_own_actions'),
+    '#default_value' => \Drupal::config('message_subscribe.settings')->get('notify_own_actions'),
   );
 
-  $prefix = \Drupal::config('message_subscribe.settings')->get('message_subscribe_flag_prefix') . '_';
+  $prefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
 
   // For every subscription flag, show a view selection.
   foreach (message_subscribe_flag_get_flags() as $flag) {
@@ -50,19 +50,19 @@ function message_subscribe_admin_settings() {
 
   }
 
-  $form['message_subscribe_flag_prefix'] = array(
+  $form['flag_prefix'] = array(
     '#type' => 'textfield',
     '#title' => t('Flag prefix'),
     '#description' => t('The prefix that will be used to identify subscription flags. This can be used if you already have flags defined with another prefix e.g. "follow".'),
-    '#default_value' => \Drupal::config('message_subscribe.settings')->get('message_subscribe_flag_prefix'),
+    '#default_value' => \Drupal::config('message_subscribe.settings')->get('flag_prefix'),
     '#required' => FALSE,
   );
 
-  $form['message_subscribe_use_queue'] = array(
+  $form['use_queue'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use queue'),
     '#description' => t('Use the queue to process the Messages.'),
-    '#default_value' => \Drupal::config('message_subscribe.settings')->get('message_subscribe_use_queue'),
+    '#default_value' => \Drupal::config('message_subscribe.settings')->get('use_queue'),
   );
 
   return system_settings_form($form);
