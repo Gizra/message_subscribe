@@ -1,5 +1,5 @@
 message_subscribe.settings:
-  type: mapping
+  type: config_object
   label: 'Message Subscribe settings'
   mapping:
     use_queue:
