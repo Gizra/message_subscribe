@@ -1,0 +1,29 @@
+id: subscribe_term
+entity_type: taxonomy_term
+label: Terms
+bundles:
+  - tags
+flag_short: Subscribe
+flag_long: ''
+flag_message: 'You are now subscribed to this item.'
+unflag_short: Unsubscribe
+unflag_long: ''
+unflag_message: 'You are no longer subscribed to this item.'
+unflag_denied_text: ''
+weight: 0
+status: false
+langcode: en
+dependencies:
+  module:
+    - taxonomy
+roles: null
+flag_type: entity:taxonomy_term
+link_type: reload
+flagTypeConfig:
+  show_in_links:
+    - full
+    - teaser
+  show_as_field: 1
+  show_on_form: 0
+  show_contextual_link: 0
+linkTypeConfig: {  }

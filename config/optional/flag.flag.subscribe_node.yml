@@ -1,0 +1,32 @@
+id: subscribe_node
+entity_type: node
+label: Content
+bundles:
+  - article
+  - page
+flag_short: Subscribe
+flag_long: ''
+flag_message: 'You are now subscribed to this item.'
+unflag_short: Unsubscribe
+unflag_long: ''
+unflag_message: 'You are no longer subscribed to this item.'
+unflag_denied_text: ''
+weight: 0
+status: false
+langcode: en
+dependencies:
+  module:
+    - node
+roles: null
+flag_type: entity:node
+link_type: reload
+flagTypeConfig:
+  show_in_links:
+    full: full
+    teaser: teaser
+  show_as_field: 1
+  show_on_form: 0
+  show_contextual_link: 0
+  i18n: null
+  access_author: ''
+linkTypeConfig: {  }
