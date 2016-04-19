@@ -6,6 +6,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\flag\FlagServiceInterface;
 use Drupal\message\MessageInterface;
 use Drupal\message_notify\MessageNotifier;
@@ -145,6 +146,23 @@ class Subscribers implements SubscribersInterface {
 
     return $uids;
 
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFlags($entity_type = NULL, $bundle = NULL, AccountInterface $account = NULL) {
+    $flags = $this->flagService->getFlags($entity_type, $bundle, $account);
+    $ms_flags = [];
+    $prefix = $this->config->get('flag_prefix') . '_';
+    foreach ($flags as $flag_name => $flag) {
+      // Check that the flag is using name convention.
+      if (strpos($flag_name, $prefix) === 0) {
+        $ms_flags[$flag_name] = $flag;
+      }
+    }
+
+    return $ms_flags;
   }
 
   /**

@@ -181,7 +181,7 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
     }
 
     // Get all flags on given entity type.
-    if (!$flags = message_subscribe_flag_get_flags($entity_type)) {
+    if (!$flags = \Drupal::service('message_subscribe.subscribers')->getFlags($entity_type)) {
       continue;
     }
 
@@ -239,41 +239,6 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
   }
 
   return $uids;
-}
-
-/**
- * Get Message subscribe related flags.
- *
- * Return Flags related to message subscribe using a name convention --
- * the flag name should start with "subscribe_".
- *
- * @param $content_type
- *   Optional. The type of content for which to load the flags. Usually 'node'.
- * @param $content_subtype
- *   Optional. The node type for which to load the flags.
- * @param $account
- *   Optional. The user account to filter available flags. If not set, all
- *   flags for will this node will be returned.
- * @param $reset
- *   Optional. Reset the internal query cache.
- *
- * @return \Drupal\flag\FlagInterface[] $flags
- *   An array of the structure [fid] = flag_object.
- *
- * @see flag_get_flags()
- */
-function message_subscribe_flag_get_flags($content_type = NULL, $content_subtype = NULL, $account = NULL, $reset = FALSE) {
-  $flags = \Drupal::service('flag')->getFlags($content_type, $content_subtype, $account);
-  $ms_flags = array();
-  $prefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
-  foreach ($flags as $flag_name => $flag) {
-    // Check that the flag is using name convention.
-    if (strpos($flag_name, $prefix) === 0) {
-      $ms_flags[$flag_name] = $flag;
-    }
-  }
-
-  return $ms_flags;
 }
 
 /**

@@ -2,6 +2,7 @@
 
 namespace Drupal\message_subscribe;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\message\MessageInterface;
 
 /**
@@ -124,5 +125,25 @@ interface SubscribersInterface {
    *   Array keyed with the entity type and array of entity IDs as the value.
    */
   public function getBasicContext(EntityInterface $entity, $skip_detailed_context = FALSE, array $context = []);
+
+  /**
+   * Get Message subscribe related flags.
+   *
+   * Return Flags related to message subscribe using a name convention --
+   * the flag name should start with "subscribe_".
+   *
+   * @param string $entity_type
+   *   (optional) The entity type for which to load the flags.
+   * @param string $bundle
+   *   (optional) The bundle for which to load the flags.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   (optional) The user account to filter available flags. If not set, all
+   *   flags for the given entity and bundle will be returned.
+   *
+   * @return \Drupal\flag\FlagInterface[] $flags
+   *   An array of the structure [fid] = flag_object.
+   * @see \Drupal\flag\FlagServiceInterface::getFlags()
+   */
+  public function getFlags($entity_type = NULL, $bundle = NULL, AccountInterface $account = NULL);
 
 }
