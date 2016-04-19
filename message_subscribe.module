@@ -5,7 +5,6 @@
  * Subscribe API for the Message and Message notify modules.
  */
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\message\MessageInterface;
 
 /**
@@ -276,25 +275,6 @@ function message_subscribe_flag_get_flags($content_type = NULL, $content_subtype
 
   return $ms_flags;
 }
-
-/**
- * Implements hook_menu().
- */
-function message_subscribe_menu() {
-  $items = array();
-
-  $items['admin/config/system/message-subscribe'] = array(
-    'title' => 'Message subscribe settings',
-    'description' => 'Administer message subscribe',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('message_subscribe_admin_settings'),
-    'access arguments' => array('administer message subscribe'),
-    'file' => 'includes/message_subscribe.admin.inc',
-  );
-
-  return $items;
-}
-
 
 /**
  * Implements hook_cron_queue_info().
