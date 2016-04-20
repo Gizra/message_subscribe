@@ -86,7 +86,7 @@ class Subscribers implements SubscribersInterface {
    * {@inheritdoc}
    */
   public function getSubscribers(EntityInterface $entity, MessageInterface $message, array $options = [], array &$context = []) {
-    $context = !empty($context) ? $context : $this->getBasicContext($entity, $options, $context);
+    $context = !empty($context) ? $context : $this->getBasicContext($entity, !empty($options['skip context']), $context);
     $notify_message_owner = isset($options['notify message owner']) ? $options['notify message owner'] : $this->config->get('notify_own_actions');
 
     $uids = [];
@@ -108,8 +108,8 @@ class Subscribers implements SubscribersInterface {
         ->condition('uid', array_keys($uids), 'IN')
         ->execute();
 
-      if (!empty($results['user'])) {
-        $uids = array_intersect_key($uids, $results['user']);
+      if (!empty($results)) {
+        $uids = array_intersect_key($uids, $results);
       }
       else {
         // There are no blocked users to notify.

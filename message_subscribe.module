@@ -185,27 +185,14 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
       continue;
     }
 
-    $fids = array();
-    foreach ($flags as $flag) {
-      $fids[$flag->id()] = $flag->label();
-    }
-
     // Query all the entity IDs inside the given flags. We don't use
     // flag_get_content_flags() as we want to get all the flaggings of an
     // entity-type in a single query.
-    if (FLAG_API_VERSION == 2) {
-      $query = db_select('flag_content', 'fc')
-        ->condition('content_type', $entity_type)
-        ->condition('content_id', $entity_ids, 'IN');
-    }
-    else {
-      $query = db_select('flagging', 'fc')
-        ->condition('entity_type', $entity_type)
-        ->condition('entity_id', $entity_ids, 'IN');
-    }
-
-    $query->fields('fc')
-      ->condition('fid', array_keys($fids), 'IN')
+    $query = \Drupal::database()->select('flagging', 'fc')
+      ->fields('fc', ['flag_id', 'uid'])
+      ->condition('fc.entity_type', $entity_type)
+      ->condition('fc.entity_id', $entity_ids, 'IN')
+      ->condition('fc.flag_id', array_keys($flags), 'IN')
       ->condition('fc.uid', $subscribe_options['last uid'], '>')
       ->orderBy('fc.uid', 'ASC');
 
@@ -214,8 +201,8 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
       // If we're mpt notifying blocked users, we need to take this into account
       // in this query so that the range is accurate.
       if (empty($subscribe_options['notify blocked users'])) {
-        $query->join('users', 'users', 'users.uid = fc.uid');
-        $query->condition('users.status', '1', '=');
+        $query->join('users_field_data', 'users', 'users.uid = fc.uid');
+        $query->condition('users.status', '1');
       }
     }
 
@@ -225,8 +212,7 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
 
       $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : array('notifiers' => array());
       // Register the flag name.
-      $flag_name = $fids[$row->fid];
-      $uids[$row->uid]['flags'][] = $flag_name;
+      $uids[$row->uid]['flags'][] = $row->flag_id;
 
       if ($range) {
         --$range;

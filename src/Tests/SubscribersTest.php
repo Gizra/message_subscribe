@@ -136,7 +136,7 @@ class SubscribersTest extends WebTestBase {
 
     // Assert subscribers data.
     $expected_uids = [
-      $user2->uid => [
+      $user2->id() => [
         'notifiers' => [],
         'flags' => [
           'subscribe_node',
@@ -167,14 +167,14 @@ class SubscribersTest extends WebTestBase {
     $uids = $this->messageSubscribers->getSubscribers($node, $message, $subscribe_options);
 
     $expected_uids = [
-      $user2->uid => [
+      $user2->id() => [
         'notifiers' => [],
         'flags' => [
           'subscribe_node',
           'subscribe_user',
         ],
       ],
-      $user_blocked->uid => [
+      $user_blocked->id() => [
         'notifiers' => [],
         'flags' => [
           'subscribe_node',
@@ -201,14 +201,14 @@ class SubscribersTest extends WebTestBase {
     $this->flagService->flag($flags['subscribe_node'], $node, $user4);
 
     // Get subscribers from a given "last uid".
-    $subscribe_options = ['last uid' => $user2->uid];
-    $uids = $this->messageSubscribers->getSubscribers('node', $node, $message, $subscribe_options);
-    $this->assertEqual(array_keys($uids), [$user3->uid, $user4->uid], 'All subscribers from "last uid" were fetched.');
+    $subscribe_options = ['last uid' => $user2->id()];
+    $uids = $this->messageSubscribers->getSubscribers($node, $message, $subscribe_options);
+    $this->assertEqual(array_keys($uids), [$user3->id(), $user4->id()], 'All subscribers from "last uid" were fetched.');
 
     // Get a range of subscribers.
     $subscribe_options['range'] = 1;
-    $uids = $this->messageSubscribers->getSubscribers('node', $node, $message, $subscribe_options);
-    $this->assertEqual(array_keys($uids), [$user3->uid], 'All subscribers from "last uid" and "range" were fetched.');
+    $uids = $this->messageSubscribers->getSubscribers($node, $message, $subscribe_options);
+    $this->assertEqual(array_keys($uids), [$user3->id()], 'All subscribers from "last uid" and "range" were fetched.');
   }
 
   /**
@@ -247,13 +247,13 @@ class SubscribersTest extends WebTestBase {
 
     // Assert subscribers data.
     $expected_uids = [
-      $user1->uid => [
+      $user1->id() => [
         'notifiers' => [],
         'flags' => [
           'subscribe_node',
         ],
       ],
-      $user2->uid => [
+      $user2->id() => [
         'notifiers' => [],
         'flags' => [
           'subscribe_node',
