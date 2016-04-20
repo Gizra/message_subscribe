@@ -6,10 +6,12 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\flag\FlagServiceInterface;
 use Drupal\message\MessageInterface;
 use Drupal\message_notify\MessageNotifier;
+use Drupal\message_subscribe\Exception\MessageSubscribeException;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -53,6 +55,13 @@ class Subscribers implements SubscribersInterface {
   protected $moduleHandler;
 
   /**
+   * The message subscribe queue.
+   *
+   * @var \Drupal\Core\Queue\QueueInterface
+   */
+  protected $queue;
+
+  /**
    * Construct the service.
    *
    * @param \Drupal\flag\FlagServiceInterface $flag_service
@@ -66,12 +75,13 @@ class Subscribers implements SubscribersInterface {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler service.
    */
-  public function __construct(FlagServiceInterface $flag_service, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, MessageNotifier $message_notifier, ModuleHandlerInterface $module_handler) {
+  public function __construct(FlagServiceInterface $flag_service, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, MessageNotifier $message_notifier, ModuleHandlerInterface $module_handler, QueueFactory $queue) {
     $this->config = $config_factory->get('message_subscribe.settings');
     $this->entityTypeManager = $entity_type_manager;
     $this->flagService = $flag_service;
     $this->messageNotifier = $message_notifier;
     $this->moduleHandler = $module_handler;
+    $this->queue = $queue->get('message_subscribe');
   }
 
 
@@ -79,7 +89,117 @@ class Subscribers implements SubscribersInterface {
    * {@inheritdoc}
    */
   public function sendMessage(EntityInterface $entity, MessageInterface $message, array $notify_options = [], array $subscribe_options = [], array $context = []) {
-    // @todo
+    $use_queue = isset($subscribe_options['use queue']) ? $subscribe_options['use queue'] : \Drupal::config('message_subscribe.settings')->get('use_queue');
+    $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('notify_own_actions');
+
+    // Save message by default.
+    $subscribe_options += [
+      'save message' => TRUE,
+      'skip context' => FALSE,
+      'last uid' => 0,
+      'uids' => [],
+      'range' => $use_queue ? 100 : FALSE,
+      'end time' => FALSE,
+      'use queue' => $use_queue,
+      'queue' => FALSE,
+      'entity access' => TRUE,
+      'notify blocked users' => FALSE,
+      'notify message owner' => $notify_message_owner,
+    ];
+
+    if (empty($message->id()) && $subscribe_options['save message']) {
+      $message->save();
+    }
+
+    if ($use_queue) {
+      $id = $entity->id();
+    }
+
+    if ($use_queue && empty($subscribe_options['queue'])) {
+      if (empty($message->id())) {
+        throw new MessageSubscribeException('Cannot add a non-saved message to the queue.');
+      }
+
+      // Get the context once, so we don't need to process it every time
+      // a worker claims the item.
+      $context = $context ?: $this->getBasicContext($entity, $subscribe_options['skip context'], $context);
+
+      // Context is already set, skip when processing queue item.
+      $subscribe_options['skip context'] = TRUE;
+
+      // Add item to the queue.
+      $task = [
+        'message' => $message,
+        'entity' => $entity,
+        'notify_options' => $notify_options,
+        'subscribe_options' => $subscribe_options,
+        'context' => $context,
+      ];
+
+      // Exit now, as messages will be processed via queue API.
+      $this->queue->createItem($task);
+      return;
+    }
+
+    $message->message_subscribe = [];
+
+    // Retrieve all users subscribed.
+    $uids = [];
+    if ($subscribe_options['uids']) {
+      // We got a list of user IDs directly from the implementing module,
+      // However we need to adhere to the range.
+      $uids = $subscribe_options['range'] ? array_slice($subscribe_options['uids'], 0, $subscribe_options['range'], TRUE) : $subscribe_options['uids'];
+    }
+
+    if (empty($uids) && !$uids = $this->getSubscribers($entity, $message, $subscribe_options, $context)) {
+      // If we use a queue, it will be deleted.
+      return;
+    }
+
+    foreach ($uids as $uid => $values) {
+      $last_uid = $uid;
+      // Clone the message in case it will need to be saved, it won't
+      // overwrite the existing one.
+      $cloned_message = clone $message;
+      // Push a copy of the original message into the new one.
+      $cloned_message->original = $message;
+      unset($cloned_message->id);
+      $cloned_message->uid = $uid;
+
+      $values += ['notifiers' => []];
+
+      // Send the message using the required notifiers.
+      foreach ($values['notifiers'] as $notifier_name) {
+        $options = !empty($notify_options[$notifier_name]) ? $notify_options[$notifier_name] : [];
+        $options += [
+          'save on fail' => FALSE,
+          'save on success' => FALSE,
+        ];
+
+        $this->messageNotifier->send($cloned_message, $options, $notifier_name);
+
+        // Check we didn't timeout.
+        if ($use_queue && $subscribe_options['queue']['end time'] && time() < $subscribe_options['queue']['end time']) {
+          continue 2;
+        }
+      }
+    }
+
+    if ($use_queue) {
+      // Add item to the queue.
+      $task = [
+        'message' => $message,
+        'entity' => $entity,
+        'notify_options' => $notify_options,
+        'subscribe_options' => $subscribe_options,
+        'context' => $context,
+      ];
+
+      $task['subscribe_options']['last uid'] = $last_uid;
+
+      // Create a new queue item, with the last user ID.
+      $this->queue->createItem($task);
+    }
   }
 
   /**
