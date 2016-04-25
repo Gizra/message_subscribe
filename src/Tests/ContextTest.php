@@ -1,6 +1,13 @@
 <?php
 namespace Drupal\message_subscribe\Tests;
 
+use Drupal\comment\CommentInterface;
+use Drupal\comment\Entity\Comment;
+use Drupal\comment\Tests\CommentTestTrait;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
 use Drupal\simpletest\WebTestBase;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -14,10 +21,55 @@ use Drupal\taxonomy\Entity\Vocabulary;
  */
 class ContextTest extends WebTestBase {
 
+  use CommentTestTrait;
+  use EntityReferenceTestTrait;
+
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['message_subscribe', 'taxonomy', 'og'];
+  public static $modules = ['message_subscribe', 'taxonomy', 'og', 'comment'];
+
+  /**
+   * Test comment.
+   *
+   * @var \Drupal\comment\CommentInterface
+   */
+  protected $comment;
+
+  /**
+   * Test group.
+   *
+   * @var \Drupal\node\NodeInterface
+   */
+  protected $group;
+
+  /**
+   * Group content node.
+   *
+   * @var \Drupal\node\NodeInterface
+   */
+  protected $node;
+
+  /**
+   * The message subscribers service.
+   *
+   * @var \Drupal\message_subscribe\SubscribersInterface
+   */
+  protected $subscribers;
+
+  /**
+   * Test terms.
+   *
+   * @var \Drupal\taxonomy\TermInterface[]
+   */
+  protected $terms;
+
+  /**
+   * Test users.
+   *
+   * @var \Drupal\user\UserInterface[]
+   */
+  protected $users;
 
   /**
    * {@inheritdoc}
@@ -25,19 +77,22 @@ class ContextTest extends WebTestBase {
   function setUp() {
     parent::setUp();
 
-    $user1 = $this->drupalCreateUser();
-    $user2 = $this->drupalCreateUser();
-    $user3 = $this->drupalCreateUser();
+    foreach (range(1, 3) as $uid) {
+      $this->users[$uid] = $this->drupalCreateUser();
+    }
 
     // Create group node-type.
     $type = $this->drupalCreateContentType();
     $group_type = $type->id();
-    og_create_field(OG_GROUP_FIELD, 'node', $group_type);
+    Og::groupManager()->addGroup('node', $group_type);
 
     // Create node-type.
     $type = $this->drupalCreateContentType();
     $node_type = $type->id();
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $node_type);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $node_type);
+
+    // Enable comments on the node type.
+    $this->addDefaultCommentField('node', $node_type);
 
     // Create vocabulary and terms.
     $vocabulary = Vocabulary::create([
@@ -47,91 +102,47 @@ class ContextTest extends WebTestBase {
     $vocabulary->save();
 
     // Create terms.
-    $tids = [];
     foreach (range(1, 3) as $i) {
-      $term = Term::create([
+      $this->terms[$i] = Term::create([
         'name' => "term $i",
         'vid' => $vocabulary->id(),
         ]);
-      $term->save();
-      $tids[] = $term->id();
+      $this->terms[$i]->save();
     }
 
     // Create a multiple terms-reference field.
-    $field = [
-      'translatable' => FALSE,
-      'entity_types' => ['node'],
-      'settings' => [
-        'allowed_values' => [
-          [
-            'vocabulary' => 'terms',
-            'parent' => 0,
-          ],
-        ],
-      ],
-      'field_name' => 'field_terms_ref',
-      'type' => 'taxonomy_term_reference',
-      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-    ];
-    // @FIXME
-// Fields and field instances are now exportable configuration entities, and
-// the Field Info API has been removed.
-// 
-// 
-// @see https://www.drupal.org/node/2012896
-// $field = field_create_field($field);
-
-    $instance = [
-      'field_name' => 'field_terms_ref',
-      'bundle' => $node_type,
-      'entity_type' => 'node',
-    ];
-    // @FIXME
-// Fields and field instances are now exportable configuration entities, and
-// the Field Info API has been removed.
-// 
-// 
-// @see https://www.drupal.org/node/2012896
-// field_create_instance($instance);
-
+    $this->createEntityReferenceField('node', $node_type, 'field_terms_ref', $this->randomString(), 'taxonomy_term', 'default', [], FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
 
     // Create OG group.
     $settings = [];
     $settings['type'] = $group_type;
-    $settings[OG_GROUP_FIELD][\Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED][0]['value'] = 1;
-    $settings['uid'] = $user3->uid;
-    $group = $this->drupalCreateNode($settings);
+    $settings['uid'] = $this->users[3]->id();
+    $this->group = $this->drupalCreateNode($settings);
 
     // Create node.
-    $settings = [];
-    $settings['type'] = $node_type;
-    $settings['uid'] = $user1->uid;
-    $node = $this->drupalCreateNode($settings);
-
-    // Assign node to terms.
-    $wrapper = entity_metadata_wrapper('node', $node);
-    $wrapper->field_terms_ref->set($tids);
-    $wrapper->save();
-
-    // Assign node to group.
-    og_group('node', $group->nid, ['entity_type' => 'node', 'entity' => $node]);
+    $settings = [
+      'type' => $node_type,
+      'uid' => $this->users[1]->id(),
+      'field_terms_ref' => $this->terms,
+      OgGroupAudienceHelper::DEFAULT_FIELD => [
+        'target_id' => $this->group->id(),
+      ],
+    ];
+    $this->node = $this->drupalCreateNode($settings);
 
     // Add comment.
-    $comment = (object) [
+    $settings = [
       'subject' => 'topic',
-      'nid' => $node->nid,
-      'uid' => $user2->uid,
-      'cid' => FALSE,
-      'pid' => 0,
-      'homepage' => '',
-      'language' => \Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED,
+      'entity_type' => 'node',
+      'entity_id' => $this->node->id(),
+      'uid' => $this->users[2]->id(),
+      'field_name' => 'comment',
+      'status' => CommentInterface::PUBLISHED,
     ];
-    $comment->save();
+    $this->comment = Comment::create($settings);
+    $this->comment->save();
 
-    $this->node = $node;
-    $this->group = $group;
-    $this->comment = $comment;
-    $this->tids = $tids;
+    $this->subscribers = $this->container->get('message_subscribe.subscribers');
   }
 
   function testGetBasicContext() {
@@ -140,36 +151,39 @@ class ContextTest extends WebTestBase {
     $comment = $this->comment;
 
     // Get context from comment.
-    $context = message_subscribe_get_basic_context('comment', $comment);
+    $context = $this->subscribers->getBasicContext($comment);
 
     $expected_context = [];
-    $expected_context['comment'] = array_combine([$comment->cid], [$comment->cid]);
+    $expected_context['comment'] = array_combine([$comment->id()], [$comment->id()]);
     $expected_context['node'] = array_combine([
-      $node->nid,
-      $group->nid,
+      $node->id(),
+      $group->id(),
     ], [
-      $node->nid,
-      $group->nid,
+      $node->id(),
+      $group->id(),
     ]);
 
     $expected_context['user'] = array_combine([
-      $comment->uid,
-      $node->uid,
-      $group->uid,
+      $comment->getOwnerId(),
+      $node->getOwnerId(),
+      $group->getOwnerId(),
     ], [
-      $comment->uid,
-      $node->uid,
-      $group->uid,
+      $comment->getOwnerId(),
+      $node->getOwnerId(),
+      $group->getOwnerId(),
     ]);
 
-    $expected_context['taxonomy_term'] = array_combine($this->tids, $this->tids);
+    $expected_context['taxonomy_term'] = array_combine(array_keys($this->terms), array_keys($this->terms));
 
-    $this->assertEqual($context, $expected_context, 'Correct context from comment.');
+    $this->assertEqual($expected_context['comment'], $context['comment'], 'Correct comment context from comment.');
+    $this->assertEqual($expected_context['node'], $context['node'], 'Correct node context from comment.');
+    $this->assertEqual($expected_context['taxonomy_term'], $context['taxonomy_term'], 'Correct taxonomy_term context from comment.');
+    $this->assertEqual($expected_context['user'], $context['user'], 'Correct user context from comment.');
 
     // Pass existing context.
     $subscribe_options = ['skip context' => TRUE];
     $original_context = ['node' => [1 => 1], 'user' => [1 => 1]];
-    $context = message_subscribe_get_basic_context('comment', $comment, $subscribe_options, $original_context);
+    $context = $this->subscribers->getBasicContext($comment, $subscribe_options, $original_context);
 
     $this->assertEqual($original_context, $context, 'Correct context when skiping context.');
   }

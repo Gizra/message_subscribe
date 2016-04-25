@@ -12,6 +12,7 @@ use Drupal\flag\FlagServiceInterface;
 use Drupal\message\MessageInterface;
 use Drupal\message_notify\MessageNotifier;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
+use Drupal\og\Og;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -320,34 +321,32 @@ class Subscribers implements SubscribersInterface {
     if ($this->moduleHandler->moduleExists('og')) {
       // Iterate over existing nodes to extract the related groups.
       foreach ($nodes as $node) {
-        foreach (og_get_entity_groups('node', $node) as $group_type => $gids) {
+        // @todo This does not appear to work yet in OG.
+        foreach (Og::getGroupIds($node) as $group_type => $gids) {
           foreach ($gids as $gid) {
             $context[$group_type][$gid] = $gid;
           }
         }
       }
+      // Re-load nodes as the OG context may have added additional ones.
+      /** @var \Drupal\node\NodeInterface[] $nodes */
+      $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($context['node']);
     }
 
     foreach ($nodes as $node) {
       $context['user'][$node->getOwnerId()] = $node->getOwnerId();
 
-      // @todo Fix this
-      if (FALSE && $this->moduleHandler->moduleExists('taxonomy')) {
-        $context['taxonomy_term'] = !empty($context['taxonomy_term']) ? $context['taxonomy_term'] : [];
-
+      if ($this->moduleHandler->moduleExists('taxonomy')) {
         // Iterate over all taxonomy term reference fields, or entity-reference
         // fields that reference terms.
-        foreach (array_keys(field_info_instances('node', $node->type)) as $field_name) {
-          $field = field_info_field($field_name);
-
-          if ($field['type'] == 'taxonomy_term_reference' || ($field['type'] == 'entityreference' && $field['settings']['target_type'] == 'taxonomy_term')) {
-            $wrapper = entity_metadata_wrapper('node', $node);
-            if ($tids = $wrapper->{$field_name}->value(['identifier' => TRUE])) {
-              $tids = $field['cardinality'] == 1 ? [$tids] : $tids;
-              foreach ($tids as $tid) {
-                $context['taxonomy_term'][$tid] = $tid;
-              }
-            }
+        foreach ($node->getFieldDefinitions() as $field) {
+          if ($field->getType() != 'entity_reference' || $field->getSetting('target_type') != 'taxonomy_term') {
+            // Not an entity reference field, or not referencing a taxonomy term.
+            continue;
+          }
+          // Add referenced terms.
+          foreach ($node->get($field->getName()) as $tid) {
+            $context['taxonomy_term'][$tid->target_id] = $tid->target_id;
           }
         }
       }
