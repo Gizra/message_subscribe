@@ -7,7 +7,6 @@ php:
   - 7.0
 
 env:
-  - DRUPAL_CORE=8.0.x
   - DRUPAL_CORE=8.1.x
   - DRUPAL_CORE=8.2.x
 
@@ -39,8 +38,14 @@ before_script:
   - travis_retry git clone --branch $DRUPAL_CORE --depth 1 https://git.drupal.org/project/drupal.git
   - cd drupal
 
-  # Download testing dependencies.
-  # @todo Specify in `require-dev` in `composer.json`
+  # Download dependencies.
+  # @todo Specify in `require` and `require-dev` in `composer.json`
+  - cd modules
+  - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/amitaibu/og.git
+  - travis_retry git clone --branch 8.x-4.x --depth 1 https://git.drupal.org/project/flag.git
+  - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/Gizra/message.git
+  - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/Gizra/message_notify.git
+  - cd ..
 
   # Install Composer dependencies on 8.1.x and above.
   - test ${DRUPAL_CORE} == "8.0.x" || composer self-update && composer install
