@@ -1,0 +1,7 @@
+message_subscribe_ui.tab:
+  path: '/user/{account}/message-subscribe'
+  defaults:
+    _title: Subscriptions
+    _controller: '\Drupal\message_subscribe_ui\Controller\TemplateController::message_subscribe_ui_tab'
+  requirements:
+    _custom_access: '\Drupal\message_subscribe_ui\Controller\TemplateController::message_subscribe_ui_tab_access'

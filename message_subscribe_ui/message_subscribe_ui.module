@@ -1,10 +1,8 @@
 <?php
-
 /**
  * @file
  * Subscribe API for the Message and Message notify modules.
  */
-include_once 'message_subscribe_ui.features.inc';
 
 /**
  * Implements hook_menu().
@@ -59,7 +57,7 @@ function message_subscribe_permission() {
  *   The flag name.
  */
 function message_subscribe_ui_tab_access($account, $flag_name = NULL) {
-  global $user;
+  $user = \Drupal::currentUser();
 
   if (!$flag_name) {
     // We are inside /message-subscribe so get the first flag.
@@ -77,7 +75,7 @@ function message_subscribe_ui_tab_access($account, $flag_name = NULL) {
     return;
   }
 
-  if (user_access('administer message subscribe')) {
+  if (\Drupal::currentUser()->hasPermission('administer message subscribe')) {
     return TRUE;
   }
 
@@ -97,7 +95,7 @@ function message_subscribe_ui_tab_access($account, $flag_name = NULL) {
  *   The flag name.
  */
 function message_subscribe_ui_tab_title($account, $flag_name = NULL) {
-  global $user;
+  $user = \Drupal::currentUser();
 
   if (!$flag_name) {
     // We are inside /message-subscribe so get the first flag.
@@ -159,13 +157,23 @@ function message_subscribe_ui_get_view($account, $flag_name) {
 
   $entity_type = FLAG_API_VERSION == 3 ? $flag->entity_type : $flag->content_type;
 
-  $prefix = variable_get('flag_prefix', 'subscribe') . '_';
-  list($view_name, $display_id) = explode(':', variable_get('message_' . $flag->name, $prefix . $entity_type . ':default'));
+  // @FIXME
+// // @FIXME
+// // This looks like another module's variable. You'll need to rewrite this call
+// // to ensure that it uses the correct configuration object.
+// $prefix = variable_get('flag_prefix', 'subscribe') . '_';
+
+  // @FIXME
+// // @FIXME
+// // The correct configuration object could not be determined. You'll need to
+// // rewrite this call manually.
+// list($view_name, $display_id) = explode(':', variable_get('message_' . $flag->name, $prefix . $entity_type . ':default'));
+
 
   if (!$view = views_get_view($view_name)) {
     // View doesn't exist.
     $params = array('%name' => $view_name);
-    watchdog('message_subscribe', 'View %name does not exist.', $params);
+    \Drupal::logger('message_subscribe')->notice('View %name does not exist.', []);
     drupal_set_message(t('There View %name does not exist.', $params), 'error');
     return FALSE;
   }
@@ -184,7 +192,7 @@ function message_subscribe_ui_get_view($account, $flag_name) {
     $rel_flag = flag_get_flag($relationship['flag']);
     if (empty($rel_flag) || (isset($rel_flag->status) && $rel_flag->status === FALSE)) {
       $params = array('%name' => $relationship['flag']);
-      watchdog('message_subscribe', 'Flag %name is not setup correctly. It is probably disabled or have no bundles configured.', $params);
+      \Drupal::logger('message_subscribe')->notice('Flag %name is not setup correctly. It is probably disabled or have no bundles configured.', []);
       drupal_set_message(t('Flag %name is not setup correctly. It is probably disabled or have no bundles configured.', $params), 'error');
       return FALSE;
     }
