@@ -196,7 +196,6 @@ class SubscriptionController extends ControllerBase {
     }
 
     return $view;
-
   }
 
 }
