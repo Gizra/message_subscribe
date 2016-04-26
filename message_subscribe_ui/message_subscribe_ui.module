@@ -12,9 +12,9 @@ function message_subscribe_ui_menu() {
   $items['user/%user/message-subscribe'] = array(
     'title' => 'Subscriptions',
     'type' => MENU_LOCAL_TASK,
-    'page callback' => 'message_subscribe_ui_tab',
+    'page callback' => 'tab',
     'page arguments' => array(1),
-    'access callback' => 'message_subscribe_ui_tab_access',
+    'access callback' => 'tabAccess',
     'access arguments' => array(1),
   );
 
@@ -24,9 +24,9 @@ function message_subscribe_ui_menu() {
     $items['user/%user/message-subscribe/' . $flag_name] = array(
       'title callback' => 'message_subscribe_ui_tab_title',
       'title arguments' => array(1, $flag_name),
-      'page callback' => 'message_subscribe_ui_tab',
+      'page callback' => 'tab',
       'page arguments' => array(1, $flag_name),
-      'access callback' => 'message_subscribe_ui_tab_access',
+      'access callback' => 'tabAccess',
       'access arguments' => array(1, $flag_name),
       'type' => MENU_LOCAL_TASK,
     );
@@ -153,67 +153,4 @@ function message_subscribe_ui_tab($account, $flag_name = NULL) {
  *   The view, or FALSE if the view was not found
  */
 function message_subscribe_ui_get_view($account, $flag_name) {
-  $flag = flag_get_flag($flag_name);
-
-  $entity_type = FLAG_API_VERSION == 3 ? $flag->entity_type : $flag->content_type;
-
-  // @FIXME
-// // @FIXME
-// // This looks like another module's variable. You'll need to rewrite this call
-// // to ensure that it uses the correct configuration object.
-// $prefix = variable_get('flag_prefix', 'subscribe') . '_';
-
-  // @FIXME
-// // @FIXME
-// // The correct configuration object could not be determined. You'll need to
-// // rewrite this call manually.
-// list($view_name, $display_id) = explode(':', variable_get('message_' . $flag->name, $prefix . $entity_type . ':default'));
-
-
-  if (!$view = views_get_view($view_name)) {
-    // View doesn't exist.
-    $params = array('%name' => $view_name);
-    \Drupal::logger('message_subscribe')->notice('View %name does not exist.', []);
-    drupal_set_message(t('There View %name does not exist.', $params), 'error');
-    return FALSE;
-  }
-  $view->set_display($display_id);
-  $view->set_arguments(array($account->uid));
-
-  // Change the flag's relationship to point to our flag.
-  $relationships = $view->display_handler->get_option('relationships');
-  foreach ($relationships as $key => $relationship) {
-    if (strpos($key, 'flag_') !== 0) {
-      // Not a flag relationship.
-      continue;
-    }
-
-    // Check that the flag is valid.
-    $rel_flag = flag_get_flag($relationship['flag']);
-    if (empty($rel_flag) || (isset($rel_flag->status) && $rel_flag->status === FALSE)) {
-      $params = array('%name' => $relationship['flag']);
-      \Drupal::logger('message_subscribe')->notice('Flag %name is not setup correctly. It is probably disabled or have no bundles configured.', []);
-      drupal_set_message(t('Flag %name is not setup correctly. It is probably disabled or have no bundles configured.', $params), 'error');
-      return FALSE;
-    }
-
-    // Indicate we need to set the relationship.
-    $rel_set = FALSE;
-
-    if (strpos($relationship['flag'], $prefix) === 0) {
-      // "Subscribe" flag.
-      $rel_set = TRUE;
-    }
-    elseif (strpos($relationship['flag'], 'email') === 0) {
-      // "Email" flag.
-      $rel_set = TRUE;
-      $flag_name = 'email_' . str_replace($prefix, '', $flag_name);
-    }
-
-    if ($rel_set) {
-      $relationships[$key]['flag'] = $flag_name;
-      $view->display_handler->set_option('relationships', $relationships);
-    }
-  }
-  return $view;
 }
