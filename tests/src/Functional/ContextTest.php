@@ -1,5 +1,5 @@
 <?php
-namespace Drupal\message_subscribe\Tests;
+namespace Drupal\Tests\message_subscribe\Functional;
 
 use Drupal\comment\CommentInterface;
 use Drupal\comment\Entity\Comment;
@@ -8,20 +8,22 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\simpletest\WebTestBase;
+use Drupal\simpletest\ContentTypeCreationTrait;
+use Drupal\simpletest\NodeCreationTrait;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test getting context from entity.
  *
  * @group message_subscribe
- *
- * @todo This test depends on OG.
  */
-class ContextTest extends WebTestBase {
+class ContextTest extends BrowserTestBase {
 
   use CommentTestTrait;
+  use NodeCreationTrait;
+  use ContentTypeCreationTrait;
   use EntityReferenceTestTrait;
 
   /**
@@ -82,12 +84,12 @@ class ContextTest extends WebTestBase {
     }
 
     // Create group node-type.
-    $type = $this->drupalCreateContentType();
+    $type = $this->createContentType();
     $group_type = $type->id();
     Og::groupManager()->addGroup('node', $group_type);
 
     // Create node-type.
-    $type = $this->drupalCreateContentType();
+    $type = $this->createContentType();
     $node_type = $type->id();
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $node_type);
 
@@ -117,7 +119,7 @@ class ContextTest extends WebTestBase {
     $settings = [];
     $settings['type'] = $group_type;
     $settings['uid'] = $this->users[3]->id();
-    $this->group = $this->drupalCreateNode($settings);
+    $this->group = $this->createNode($settings);
 
     // Create node.
     $settings = [
@@ -128,7 +130,7 @@ class ContextTest extends WebTestBase {
         'target_id' => $this->group->id(),
       ],
     ];
-    $this->node = $this->drupalCreateNode($settings);
+    $this->node = $this->createNode($settings);
 
     // Add comment.
     $settings = [
@@ -175,16 +177,16 @@ class ContextTest extends WebTestBase {
 
     $expected_context['taxonomy_term'] = array_combine(array_keys($this->terms), array_keys($this->terms));
 
-    $this->assertEqual($expected_context['comment'], $context['comment'], 'Correct comment context from comment.');
-    $this->assertEqual($expected_context['node'], $context['node'], 'Correct node context from comment.');
-    $this->assertEqual($expected_context['taxonomy_term'], $context['taxonomy_term'], 'Correct taxonomy_term context from comment.');
-    $this->assertEqual($expected_context['user'], $context['user'], 'Correct user context from comment.');
+    $this->assertEquals($expected_context['comment'], $context['comment'], 'Correct comment context from comment.');
+    $this->assertEquals($expected_context['node'], $context['node'], 'Correct node context from comment.');
+    $this->assertEquals($expected_context['taxonomy_term'], $context['taxonomy_term'], 'Correct taxonomy_term context from comment.');
+    $this->assertEquals($expected_context['user'], $context['user'], 'Correct user context from comment.');
 
     // Pass existing context.
     $subscribe_options = ['skip context' => TRUE];
     $original_context = ['node' => [1 => 1], 'user' => [1 => 1]];
     $context = $this->subscribers->getBasicContext($comment, $subscribe_options, $original_context);
 
-    $this->assertEqual($original_context, $context, 'Correct context when skiping context.');
+    $this->assertEquals($original_context, $context, 'Correct context when skiping context.');
   }
 }
