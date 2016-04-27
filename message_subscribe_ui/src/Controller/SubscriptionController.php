@@ -3,7 +3,6 @@
 namespace Drupal\message_subscribe_ui\Controller;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -75,7 +74,9 @@ class SubscriptionController extends ControllerBase {
    *   The user account session.
    * @param \Drupal\flag\FlagInterface $flag
    *   (optional) The flag for which to display the view.
-   * @return \Drupal\Core\Access\AccessResultInterface Returns TRUE if access is granted.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   Returns TRUE if access is granted.
    */
   public function tabAccess(AccountInterface $user, FlagInterface $flag = NULL) {
     if (!$flag) {
@@ -121,11 +122,11 @@ class SubscriptionController extends ControllerBase {
    * Render the subscription management tab.
    *
    * @param \Drupal\user\UserInterface $user
-   *   The user account
-   * @param string $flag_name
-   *   The flag name.
+   *   The user account.
+   * @param \Drupal\flag\FlagInterface $flag
+   *   The flag to display subscriptions for.
    *
-   * @return array
+   * @return array A render array.
    *   A render array.
    */
   public function tab(UserInterface $user, FlagInterface $flag = NULL) {
@@ -146,6 +147,7 @@ class SubscriptionController extends ControllerBase {
    *   The user to pass in as the views argument.
    * @param \Drupal\flag\FlagInterface $flag
    *   The flag for which to find a matching view.
+   *
    * @return \Drupal\views\ViewExecutable
    *   The corresponding view executable.
    *
@@ -162,7 +164,6 @@ class SubscriptionController extends ControllerBase {
     $prefix = 'subscribe';
     $view_name = $prefix . '_' . $entity_type;
     $display_id = 'default';
-
 
     if (!$view = Views::getView($view_name)) {
       // View doesn't exist.
@@ -183,7 +184,7 @@ class SubscriptionController extends ControllerBase {
       // Check that the flag is valid.
       $rel_flag = $this->flagService->getFlagById($relationship['flag']);
       if (!$rel_flag || (!$rel_flag->isEnabled())) {
-        throw new MessageSubscribeException('Flag "'. $relationships['flag'] . '" is not setup correctly. It is probably disabled or have no bundles configured.');
+        throw new MessageSubscribeException('Flag "' . $relationships['flag'] . '" is not setup correctly. It is probably disabled or have no bundles configured.');
       }
 
       // Indicate we need to set the relationship.

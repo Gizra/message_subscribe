@@ -30,7 +30,7 @@ class MessageSubscribeUiLocalTask extends DeriverBase implements ContainerDerive
   }
 
   /**
-   * @inheritDoc
+   * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
