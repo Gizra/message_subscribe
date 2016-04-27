@@ -1,0 +1,5 @@
+use_queue: false
+notify_own_actions: false
+flag_prefix: subscribe
+default_notifiers:
+  - email

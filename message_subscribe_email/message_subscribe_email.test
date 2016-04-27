@@ -91,7 +91,7 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestHelp
     flag('flag', 'email_node', $this->node->nid, $this->user1);
 
     // Override default notifiers.
-    variable_set('message_subscribe_default_notifiers', array());
+    variable_set('default_notifiers', array());
   }
 
   /**
@@ -99,7 +99,7 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestHelp
    */
   function testGetSubscribers() {
     // Make sure we are notifying ourselves for this test.
-    variable_set('message_subscribe_notify_own_actions', TRUE);
+    variable_set('notify_own_actions', TRUE);
 
     $message = message_create('foo');
 
@@ -159,7 +159,7 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHe
     flag('flag', 'subscribe_node', $this->node->nid, $this->user1);
 
     // Override default notifiers.
-    variable_set('message_subscribe_default_notifiers', array());
+    variable_set('default_notifiers', array());
   }
 
   /**
@@ -167,7 +167,7 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHe
    */
   function testEmailNotifications() {
     // Make sure we are notifying ourselves for this test.
-    variable_set('message_subscribe_notify_own_actions', TRUE);
+    variable_set('notify_own_actions', TRUE);
 
     $message = message_create('foo');
 

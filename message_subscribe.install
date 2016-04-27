@@ -8,11 +8,11 @@
 /**
  * Implements hook_uninstall().
  *
- * Delete message_subscribe_default_notifiers variable from the database.
+ * Delete default_notifiers variable from the database.
  */
 function message_subscribe_uninstall() {
-  variable_del('message_subscribe_default_notifiers');
-  variable_del('message_subscribe_flag_prefix');
-  variable_del('message_subscribe_use_queue');
-  variable_del('message_subscribe_notify_own_actions');
+  \Drupal::config('message_subscribe.settings')->clear('default_notifiers')->save();
+  \Drupal::config('message_subscribe.settings')->clear('flag_prefix')->save();
+  \Drupal::config('message_subscribe.settings')->clear('use_queue')->save();
+  \Drupal::config('message_subscribe.settings')->clear('notify_own_actions')->save();
 }

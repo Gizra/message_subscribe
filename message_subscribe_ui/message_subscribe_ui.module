@@ -159,7 +159,7 @@ function message_subscribe_ui_get_view($account, $flag_name) {
 
   $entity_type = FLAG_API_VERSION == 3 ? $flag->entity_type : $flag->content_type;
 
-  $prefix = variable_get('message_subscribe_flag_prefix', 'subscribe') . '_';
+  $prefix = variable_get('flag_prefix', 'subscribe') . '_';
   list($view_name, $display_id) = explode(':', variable_get('message_' . $flag->name, $prefix . $entity_type . ':default'));
 
   if (!$view = views_get_view($view_name)) {
