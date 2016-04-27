@@ -14,11 +14,6 @@ use Drupal\message_subscribe\Exception\MessageSubscribeException;
 class QueueTest extends MessageSubscribeTestBase {
 
   /**
-   * {@inheritdoc}
-   */
-  public static $modules = ['message'];
-
-  /**
    * Node for testing.
    *
    * @var \Drupal\node\NodeInterface
@@ -30,9 +25,6 @@ class QueueTest extends MessageSubscribeTestBase {
    */
   public function setUp() {
     parent::setUp();
-
-    $this->installEntitySchema('flagging');
-    $this->installEntitySchema('message');
 
     // Override default notifiers.
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', [])->save();

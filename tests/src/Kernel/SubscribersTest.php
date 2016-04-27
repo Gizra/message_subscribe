@@ -1,19 +1,18 @@
 <?php
 
-namespace Drupal\Tests\message_subscribe\Functional;
+namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\Core\Session\AccountInterface;
 use Drupal\message\Entity\Message;
 use Drupal\message\Entity\MessageType;
 use Drupal\simpletest\NodeCreationTrait;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test getting subscribes from context.
  *
  * @group message_subscribe
  */
-class SubscribersTest extends BrowserTestBase {
+class SubscribersTest extends MessageSubscribeTestBase {
 
   use NodeCreationTrait;
 
@@ -48,13 +47,17 @@ class SubscribersTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['message_subscribe', 'flag', 'taxonomy'];
+  public static $modules = ['taxonomy'];
 
   /**
    * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
+
+    $this->installConfig(['message_subscribe']);
+    $this->installSchema('flag', ['flag_counts']);
+    $this->installSchema('node', ['node_access']);
 
     $this->flagService = $this->container->get('flag');
     $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
@@ -73,20 +76,20 @@ class SubscribersTest extends BrowserTestBase {
     $flag->enable();
     $flag->save();
 
-    $this->users[1] = $this->drupalCreateUser([
+    $this->users[1] = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
     ]);
-    $this->users[2] = $this->drupalCreateUser([
+    $this->users[2] = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
     ]);
     // User 3 is blocked.
-    $this->users[3] = $this->drupalCreateUser([
+    $this->users[3] = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
@@ -186,13 +189,13 @@ class SubscribersTest extends BrowserTestBase {
     ];
     $this->assertEquals($uids, $expected_uids, 'All expected subscribers were fetched, including blocked users.');
 
-    $user3 = $this->drupalCreateUser([
+    $user3 = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
     ]);
-    $user4 = $this->drupalCreateUser([
+    $user4 = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
