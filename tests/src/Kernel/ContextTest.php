@@ -6,12 +6,8 @@ use Drupal\comment\Entity\Comment;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
-use Drupal\simpletest\UserCreationTrait;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 
@@ -20,30 +16,20 @@ use Drupal\taxonomy\Entity\Vocabulary;
  *
  * @group message_subscribe
  */
-class ContextTest extends KernelTestBase {
+class ContextTest extends MessageSubscribeTestBase {
 
   use CommentTestTrait;
-  use NodeCreationTrait;
-  use ContentTypeCreationTrait;
   use EntityReferenceTestTrait;
-  use UserCreationTrait;
 
   /**
    * {@inheritdoc}
    */
   public static $modules = [
     'comment',
-    'field',
     'filter',
-    'flag',
-    'message_notify',
-    'message_subscribe',
-    'node',
     'og',
-    'system',
     'taxonomy',
     'text',
-    'user',
   ];
 
   /**
@@ -94,14 +80,11 @@ class ContextTest extends KernelTestBase {
   public function setUp() {
     parent::setUp();
 
-    $this->installSchema('system', ['sequences']);
     $this->installSchema('comment', ['comment_entity_statistics']);
     $this->installEntitySchema('comment');
-    $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('taxonomy_term');
-    $this->installEntitySchema('user');
-    $this->installConfig(['comment', 'field', 'filter', 'node', 'og']);
+    $this->installConfig(['comment', 'og']);
 
     foreach (range(1, 3) as $uid) {
       $this->users[$uid] = $this->createUser();

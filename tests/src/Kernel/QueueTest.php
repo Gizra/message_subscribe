@@ -1,35 +1,22 @@
 <?php
 
-namespace Drupal\Tests\message_subscribe\Functional;
+namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\message\Entity\Message;
 use Drupal\message\Entity\MessageType;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test queue integration.
  *
  * @group message_subscribe
  */
-class QueueTest extends BrowserTestBase {
-
-  use ContentTypeCreationTrait;
-  use NodeCreationTrait;
+class QueueTest extends MessageSubscribeTestBase {
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['message_subscribe', 'node'];
-
-  /**
-   * The message subscribers service.
-   *
-   * @var \Drupal\message_subscribe\SubscribersInterface
-   */
-  protected $messageSubscribers;
+  public static $modules = ['message'];
 
   /**
    * Node for testing.
@@ -43,6 +30,9 @@ class QueueTest extends BrowserTestBase {
    */
   public function setUp() {
     parent::setUp();
+
+    $this->installEntitySchema('flagging');
+    $this->installEntitySchema('message');
 
     // Override default notifiers.
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', [])->save();
@@ -64,7 +54,7 @@ class QueueTest extends BrowserTestBase {
     $node_type = $type->id();
 
     // Create node.
-    $user1 = $this->drupalCreateUser();
+    $user1 = $this->createUser();
     $settings = [];
     $settings['type'] = $node_type;
     $settings['uid'] = $user1->id();
