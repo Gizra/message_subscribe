@@ -75,3 +75,5 @@ script:
   - $HOME/.composer/vendor/bin/phpcs --report=full --standard=Drupal $TESTDIR
   # Run the PHPUnit tests which also include the kernel tests.
   - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/$MODULE_NAME
+  # Run legacy simpletests.
+  - php core/scripts/run-tests.sh --color --verbose --php `which php` --directory modules/$MODULE_NAME/src/Tests --dburl $SIMPLETEST_DB --url $SIMPLETEST_BASE_URL --sqlite ./.db.sqlite
