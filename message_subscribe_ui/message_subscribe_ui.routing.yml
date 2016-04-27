@@ -5,7 +5,11 @@ message_subscribe_ui.tab:
     _controller: '\Drupal\message_subscribe_ui\Controller\SubscriptionController::tab'
   requirements:
     _custom_access: '\Drupal\message_subscribe_ui\Controller\SubscriptionController::tabAccess'
-  options:
-    parameters:
-      user:
-        type: entity:user
+
+message_subscribe_ui.tab.flag:
+  path: '/user/{user}/message-subscribe/{flag}'
+  defaults:
+    _title_callback: '\Drupal\message_subscribe_ui\Controller\SubscriptionController::tabTitle'
+    _controller: '\Drupal\message_subscribe_ui\Controller\SubscriptionController::tab'
+  requirements:
+    _custom_access: '\Drupal\message_subscribe_ui\Controller\SubscriptionController::tabAccess'

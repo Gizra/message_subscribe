@@ -73,20 +73,18 @@ class SubscriptionController extends ControllerBase {
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user account session.
-   * @param string $flag_name
-   *   The flag name
-   *
-   * @return AccessResultInterface
-   *   Returns TRUE if access is granted.
+   * @param \Drupal\flag\FlagInterface $flag
+   *   (optional) The flag for which to display the view.
+   * @return \Drupal\Core\Access\AccessResultInterface Returns TRUE if access is granted.
    */
-  public function tabAccess(AccountInterface $user, $flag_name = NULL) {
-    if (!$flag_name) {
+  public function tabAccess(AccountInterface $user, FlagInterface $flag = NULL) {
+    if (!$flag) {
       // We are inside /message-subscribe so get the first flag.
-      $flag_name = key($this->subscribers->getFlags());
+      $flags = $this->subscribers->getFlags();
+      $flag = reset($flags);
     }
 
-
-    if (!$flag = $this->flagService->getFlagById($flag_name)) {
+    if (!$flag) {
       // No flag, or flag is disabled.
       return AccessResult::forbidden();
     }
@@ -108,6 +106,18 @@ class SubscriptionController extends ControllerBase {
   }
 
   /**
+   * Provides the page title for a given tab.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to display subscriptions for.
+   * @param \Drupal\flag\FlagInterface $flag
+   *   The flag for which to display subscriptions.
+   */
+  public function tabTitle(AccountInterface $user, FlagInterface $flag) {
+    return $flag->label();
+  }
+
+  /**
    * Render the subscription management tab.
    *
    * @param \Drupal\user\UserInterface $user
@@ -118,13 +128,14 @@ class SubscriptionController extends ControllerBase {
    * @return array
    *   A render array.
    */
-  public function tab(UserInterface $user, $flag_name = NULL) {
-    if (!$flag_name) {
+  public function tab(UserInterface $user, FlagInterface $flag = NULL) {
+    if (!$flag) {
       // We are inside /message-subscribe so get the first flag.
-      $flag_name = key($this->subscribers->getFlags());
+      $flags = $this->subscribers->getFlags();
+      $flag = reset($flags);
     }
 
-    $view = $this->getView($user, $this->flagService->getFlagById($flag_name));
+    $view = $this->getView($user, $flag);
     return $view ? $view->preview() : FALSE;
   }
 
