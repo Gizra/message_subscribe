@@ -18,7 +18,7 @@ class MessageSubscribeAdminSettingsTest extends SystemConfigFormTestBase {
   public static $modules = [
     'message_subscribe',
     'field',
-    'message_notify_test'
+    'message_notify_test',
   ];
 
   /**

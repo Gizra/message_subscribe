@@ -76,7 +76,7 @@ class QueueTest extends BrowserTestBase {
   /**
    * Test base queue processing logic.
    */
-  function testQueue() {
+  public function testQueue() {
     $node = $this->node;
     $message = Message::create([
       'type' => 'foo',
@@ -128,11 +128,12 @@ class QueueTest extends BrowserTestBase {
   }
 
   /**
-   * Test cron-based queue handling. These are very basic checks that ensure
-   * the cron worker callback functions as expected. No formal subscription
-   * processing is triggered here.
+   * Test cron-based queue handling.
+   *
+   * These are very basic checks that ensure the cron worker callback functions
+   * as expected. No formal subscription processing is triggered here.
    */
-  function testQueueCron() {
+  public function testQueueCron() {
     $node = $this->node;
     $message = Message::create(['type' => 'foo']);
     $queue = \Drupal::queue('message_subscribe');

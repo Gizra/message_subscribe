@@ -7,8 +7,12 @@ php:
   - 7.0
 
 env:
+  matrix:
   - DRUPAL_CORE=8.1.x
   - DRUPAL_CORE=8.2.x
+  global:
+    MODULE_NAME='message_subscribe'
+    CODER_VERSION='8.2.*'
 
 mysql:
   database: drupal
@@ -50,8 +54,12 @@ before_script:
   # Install Composer dependencies on 8.1.x and above.
   - test ${DRUPAL_CORE} == "8.0.x" || composer self-update && composer install
 
+  # Coder.
+  - composer global require drupal/coder:$CODER_VERSION
+  - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/
+
   # Reference OG in the Drupal site.
-  - ln -s $TESTDIR modules/message_subscribe
+  - ln -s $TESTDIR modules/$MODULE_NAME
 
   # Start a web server on port 8888 in the background.
   - nohup php -S localhost:8888 > /dev/null 2>&1 &
@@ -63,5 +71,7 @@ before_script:
   - export SIMPLETEST_BASE_URL=http://localhost:8888
 
 script:
+  # Coding standards.
+  - $HOME/.composer/vendor/bin/phpcs --report=full --standard=Drupal $TESTDIR
   # Run the PHPUnit tests which also include the kernel tests.
-  - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/message_subscribe
+  - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/$MODULE_NAME

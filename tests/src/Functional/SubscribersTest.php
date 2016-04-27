@@ -53,7 +53,7 @@ class SubscribersTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->flagService = $this->container->get('flag');
@@ -114,7 +114,7 @@ class SubscribersTest extends BrowserTestBase {
     // Create a dummy message-type.
     $message_type = MessageType::create([
       'type' => 'foo',
-      'message_text' => ['value' => 'Example text.']
+      'message_text' => ['value' => 'Example text.'],
     ]);
     $message_type->save();
 
@@ -125,7 +125,7 @@ class SubscribersTest extends BrowserTestBase {
   /**
    * Test getting the subscribers list.
    */
-  function testGetSubscribers() {
+  public function testGetSubscribers() {
     $message = Message::create([
       'type' => 'foo',
       'uid' => $this->users[1],
@@ -217,7 +217,7 @@ class SubscribersTest extends BrowserTestBase {
   /**
    * Testing the exclusion of the entity author from the subscribers lists.
    */
-  function testGetSubscribersExcludeSelf() {
+  public function testGetSubscribersExcludeSelf() {
     // Test the affect of the variable when set to FALSE (do not notify self).
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', FALSE)->save();
     $message = Message::create([
@@ -270,11 +270,11 @@ class SubscribersTest extends BrowserTestBase {
   /**
    * Assert subscribers list is entity-access aware.
    */
-  function testEntityAccess() {
+  public function testEntityAccess() {
     // Make sure we are notifying ourselves for this test.
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', TRUE)->save();
 
-    $message = Message::create(['type' =>'foo']);
+    $message = Message::create(['type' => 'foo']);
 
     $node = $this->nodes[0];
     $node->setPublished(FALSE);
@@ -295,4 +295,5 @@ class SubscribersTest extends BrowserTestBase {
     $uids = $this->messageSubscribers->getSubscribers($node, $message, $subscribe_options);
     $this->assertEquals(array_keys($uids), [$user1->id(), $user2->id()], 'All users (even without access) returned for subscribers list.');
   }
+
 }

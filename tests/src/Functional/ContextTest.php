@@ -76,7 +76,7 @@ class ContextTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     foreach (range(1, 3) as $uid) {
@@ -108,7 +108,7 @@ class ContextTest extends BrowserTestBase {
       $this->terms[$i] = Term::create([
         'name' => "term $i",
         'vid' => $vocabulary->id(),
-        ]);
+      ]);
       $this->terms[$i]->save();
     }
 
@@ -147,7 +147,10 @@ class ContextTest extends BrowserTestBase {
     $this->subscribers = $this->container->get('message_subscribe.subscribers');
   }
 
-  function testGetBasicContext() {
+  /**
+   * Test basic context method.
+   */
+  public function testGetBasicContext() {
     $node = $this->node;
     $group = $this->group;
     $comment = $this->comment;
@@ -189,4 +192,5 @@ class ContextTest extends BrowserTestBase {
 
     $this->assertEquals($original_context, $context, 'Correct context when skiping context.');
   }
+
 }
