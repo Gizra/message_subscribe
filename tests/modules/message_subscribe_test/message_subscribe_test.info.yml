@@ -1,0 +1,7 @@
+name: 'Message subscribe test module'
+description: 'Functionality to assist message subscribe testing.'
+type: module
+core: 8.x
+dependencies:
+  - message_subscribe
+package: Testing

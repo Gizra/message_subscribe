@@ -9,23 +9,8 @@ use Drupal\message\MessageInterface;
 
 /**
  * Implements hook_message_subscribe_get_subscribers().
- *
- * @param $context
- *   Array keyed with the entity type and array of entity IDs as the
- *   value. According to this context this function will retrieve the
- *   related subscribers.
- * @param $message
- *   The message object.
- *
- * @return
- *   Array keyed with the user ID and the value:
- *   - "flags": Array with the flag names that resulted with including
- *   the user.
- *   - "notifiers": Array with the Message notifier name plugins.
- *
- * @see flag_get_content_flags()
  */
-function message_subscribe_message_subscribe_get_subscribers(MessageInterface $message, $subscribe_options = [], $context = []) {
+function message_subscribe_message_subscribe_get_subscribers(MessageInterface $message, array $subscribe_options = [], array $context = []) {
   $uids = [];
 
   $subscribe_options += [

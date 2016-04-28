@@ -83,6 +83,7 @@ class SubscribersTest extends UnitTestCase {
    * Helper to generate a new subscriber service with mock services.
    *
    * @return \Drupal\message_subscribe\SubscribersInterface
+   *   The subscribers service object.
    */
   protected function getSubscriberService() {
     return new Subscribers(
@@ -125,7 +126,9 @@ class SubscribersTest extends UnitTestCase {
 
     // Matching prefix.
     $flag_service = $this->prophesize(FlagServiceInterface::class);
-    $flag_service->getFlags(NULL, NULL, NULL)->willReturn(['foo' => $flag, 'bar' => $flag, 'blah_foo' => $flag]);
+    $flag_service->getFlags(NULL, NULL, NULL)->willReturn(
+      ['foo' => $flag, 'bar' => $flag, 'blah_foo' => $flag]
+    );
     $this->flagService = $flag_service->reveal();
     $subscribers = $this->getSubscriberService();
     $this->assertEquals(['blah_foo' => $flag], $subscribers->getFlags());

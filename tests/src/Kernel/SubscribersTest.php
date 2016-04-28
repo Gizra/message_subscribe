@@ -299,4 +299,35 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $this->assertEquals(array_keys($uids), [$user1->id(), $user2->id()], 'All users (even without access) returned for subscribers list.');
   }
 
+  /**
+   * Ensure hooks are firing correctly.
+   */
+  public function testHooks() {
+    $this->enableModules(['message_subscribe_test']);
+
+    $message = Message::create([
+      'type' => 'foo',
+      'uid' => $this->users[1],
+    ]);
+
+    // Create a 4th user that the test module will add.
+    $this->users[4] = $this->createUser();
+
+    $node = $this->nodes[0];
+    $uids = $this->messageSubscribers->getSubscribers($node, $message);
+    // @see message_subscribe_test.module
+    $this->assertTrue(\Drupal::state('message_subscribe_test')->get('hook_called'));
+    $this->assertTrue(\Drupal::state('message_subscribe_test')->get('alter_hook_called'));
+    $this->assertEquals([
+      4 => [
+        'flags' => ['foo_flag'],
+        'notifiers' => ['sms'],
+      ],
+      10001 => [
+        'flags' => ['bar_flag'],
+        'notifiers' => ['email'],
+      ],
+    ], $uids);
+  }
+
 }
