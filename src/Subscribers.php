@@ -75,6 +75,8 @@ class Subscribers implements SubscribersInterface {
    *   The message notification service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler service.
+   * @param \Drupal\Core\Queue\QueueFactory $queue
+   *   The queue service.
    */
   public function __construct(FlagServiceInterface $flag_service, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, MessageNotifier $message_notifier, ModuleHandlerInterface $module_handler, QueueFactory $queue) {
     $this->config = $config_factory->get('message_subscribe.settings');
