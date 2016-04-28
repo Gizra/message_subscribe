@@ -320,7 +320,6 @@ class Subscribers implements SubscribersInterface {
     if ($this->moduleHandler->moduleExists('og')) {
       // Iterate over existing nodes to extract the related groups.
       foreach ($nodes as $node) {
-        // @todo This does not appear to work yet in OG.
         foreach (Og::getGroupIds($node) as $group_type => $gids) {
           foreach ($gids as $gid) {
             $context[$group_type][$gid] = $gid;
