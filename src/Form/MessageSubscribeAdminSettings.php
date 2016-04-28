@@ -69,9 +69,6 @@ class MessageSubscribeAdminSettings extends ConfigFormBase {
       '#default_value' => $config->get('notify_own_actions'),
     ];
 
-    // @todo
-    // If the message_subscribe_ui module is enabled, expose each flag with
-    // the ability to select a corresponding view.
     $form['flag_prefix'] = [
       '#type' => 'textfield',
       '#title' => t('Flag prefix'),
