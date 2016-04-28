@@ -25,13 +25,13 @@ use Drupal\message\MessageInterface;
  *
  * @see flag_get_content_flags()
  */
-function message_subscribe_message_subscribe_get_subscribers(MessageInterface $message, $subscribe_options = array(), $context = array()) {
-  $uids = array();
+function message_subscribe_message_subscribe_get_subscribers(MessageInterface $message, $subscribe_options = [], $context = []) {
+  $uids = [];
 
-  $subscribe_options += array(
+  $subscribe_options += [
     'last uid' => 0,
     'range' => FALSE,
-  );
+  ];
 
   // Determine if a range is needed for the query.
   $range = $subscribe_options['range'];
@@ -72,7 +72,7 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
 
     foreach ($result as $row) {
 
-      $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : array('notifiers' => array());
+      $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : ['notifiers' => []];
       // Register the flag name.
       $uids[$row->uid]['flags'][] = $row->flag_id;
 
