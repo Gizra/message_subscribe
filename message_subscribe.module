@@ -8,27 +8,6 @@
 use Drupal\message\MessageInterface;
 
 /**
- * Process a message, and send to subscribed users.
- *
- * @param $entity_type
- *   The entity type.
- * @param $entity
- *   The entity object.
- * @param $message
- *   The Message object.
- * @param $notify_options
- *   Optional; Array of options to pass to message_notify_send_message()
- *   keyed by the notifier name.
- * @param $subscribe_options
- *   Optional;
- * @param $context
- * @return Message
- *  The message object.
- */
-function message_subscribe_send_message($entity_type, $entity, Message $message, $notify_options = array(), $subscribe_options = array(), $context = array()) {
-}
-
-/**
  * Implements hook_message_subscribe_get_subscribers().
  *
  * @param $context
