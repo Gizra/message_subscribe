@@ -1,10 +1,11 @@
 <?php
-namespace Drupal\message_subscribe_email;
+namespace Drupal\Tests\message_subscribe_email\Kernel;
+use Drupal\Tests\message_subscribe_email\Kernel\MessageSubscribeEmailTestBase;
 
 /**
  * Test getting email subscribes from context.
  */
-class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestHelper {
+class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase {
 
   public static function getInfo() {
     return array(
