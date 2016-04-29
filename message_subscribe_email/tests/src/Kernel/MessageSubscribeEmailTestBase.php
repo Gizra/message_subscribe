@@ -80,7 +80,7 @@ abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {
 
     // Create node.
     $settings = [];
-    $settings['type'] = $node_type;
+    $settings['type'] = $node_type->id();
     $settings['uid'] = $this->users[1]->id();
     $this->nodes[1] = $this->createNode($settings);
 

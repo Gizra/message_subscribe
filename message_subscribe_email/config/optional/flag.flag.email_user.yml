@@ -1,0 +1,29 @@
+id: email_user
+entity_type: user
+label: Users
+bundles: {  }
+flag_short: 'Send email'
+flag_long: ''
+flag_message: ''
+unflag_short: "Don't send email"
+unflag_long: ''
+unflag_message: ''
+unflag_denied_text: ''
+weight: 0
+status: false
+langcode: en
+dependencies:
+  module:
+    - user
+roles: null
+flag_type: entity:user
+link_type: reload
+flagTypeConfig:
+  show_in_links:
+    - full
+    - teaser
+  show_as_field: 1
+  show_on_form: 0
+  show_contextual_link: 0
+  access_uid: '0'
+linkTypeConfig: {  }
