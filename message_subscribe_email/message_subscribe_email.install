@@ -5,12 +5,29 @@
  * Install, update, and uninstall functions for the message_subscribe_email module.
  */
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+
 /**
  * Implements hook_install().
  *
  * Change message subscription to the new views and create a new field.
  */
 function message_subscribe_email_install() {
+  // Add the `message_subscribe_email` field to the user form.
+  $display = EntityFormDisplay::load('user.user.default');
+  if (!$display->getComponent('message_subscribe_email')) {
+    $settings = [
+      'type' => 'boolean_checkbox',
+      'weight' => 25,
+      'settings' => [
+        'display_label' => TRUE,
+      ],
+      'third_party_settings' => [],
+    ];
+    $display->setComponent('message_subscribe_email', $settings);
+    $display->save();
+  }
+
   $variables = array(
     'message_subscribe_node' => 'subscribe_node_email:default',
     'message_subscribe_term' => 'subscribe_taxonomy_term_email:default',
@@ -20,62 +37,7 @@ function message_subscribe_email_install() {
   );
 
   foreach ($variables as $name => $value) {
-    // @FIXME
-// // @FIXME
-// // The correct configuration object could not be determined. You'll need to
-// // rewrite this call manually.
-// variable_set($name, $value);
-
-  }
-
-  // Add "message subscribe email" field to users.
-  $field_name = 'message_subscribe_email';
-  if (!field_info_field($field_name)) {
-    $field = array(
-      'field_name' => $field_name,
-      'type' => 'list_boolean',
-      'entity_types' => array('user'),
-      'cardinality' => 1,
-      'settings' => array(
-        'allowed_values' => array(0 => 'Don\'t email', 1 => 'Email'),
-        'allowed_values_function' => '',
-      ),
-    );
-    // @FIXME
-// Fields and field instances are now exportable configuration entities, and
-// the Field Info API has been removed.
-// 
-// 
-// @see https://www.drupal.org/node/2012896
-// $field = field_create_field($field);
-
-  }
-
-  if (!field_info_instance('user', $field_name, 'user')) {
-    $instance = array(
-      'field_name' => $field_name,
-      'bundle' => 'user',
-      'entity_type' => 'user',
-      'label' => t('Email subscriptions'),
-      'description' => t('Email option will be checked automatically when subscribing to something.'),
-      'required' => FALSE,
-      'display_label' => 1,
-      'default_value' => array(0 => array('value' => 1)),
-      'widget' => array(
-        'settings' => array(
-        ),
-        'type' => 'options_onoff',
-        'weight' => 0,
-      ),
-    );
-    // @FIXME
-// Fields and field instances are now exportable configuration entities, and
-// the Field Info API has been removed.
-// 
-// 
-// @see https://www.drupal.org/node/2012896
-// field_create_instance($instance);
-
+//    variable_set($name, $value);
   }
 }
 
@@ -84,17 +46,6 @@ function message_subscribe_email_install() {
  * Implements hook_uninstall().
  */
 function message_subscribe_email_uninstall() {
-  // Delete field instance from user.
-  $field = field_info_instance('user', 'message_subscribe_email', 'user');
-  // @FIXME
-// Fields and field instances are now exportable configuration entities, and
-// the Field Info API has been removed.
-// 
-// 
-// @see https://www.drupal.org/node/2012896
-// field_delete_instance($field);
-
-
   // Revert message to default values if they haven't been changed.
   $variables = array(
     'message_subscribe_node' => 'subscribe_node_email:default',
@@ -105,18 +56,8 @@ function message_subscribe_email_uninstall() {
   );
 
   foreach ($variables as $name => $value) {
-    // @FIXME
-// // @FIXME
-// // The correct configuration object could not be determined. You'll need to
-// // rewrite this call manually.
-// if (variable_get($name) == $value) {
-//       // @FIXME
-// // // @FIXME
-// // // The correct configuration object could not be determined. You'll need to
-// // // rewrite this call manually.
-// // variable_del($name);
-// 
-//     }
-
+ //   if (variable_get($name) == $value) {
+  //    variable_del($name);
+   // }
   }
 }
