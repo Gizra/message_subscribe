@@ -3,6 +3,7 @@
 namespace Drupal\message_subscribe_ui\Controller;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -18,6 +19,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Default controller for the message_subscribe_ui module.
  */
 class SubscriptionController extends ControllerBase {
+
+  /**
+   * The message subscribe settings.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $config;
 
   /**
    * The current user.
@@ -49,11 +57,14 @@ class SubscriptionController extends ControllerBase {
    *   The flag service manager.
    * @param \Drupal\message_subscribe\SubscribersInterface $subscribers
    *   The message subscribers service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    */
-  public function __construct(AccountProxyInterface $current_user, FlagServiceInterface $flag_service, SubscribersInterface $subscribers) {
+  public function __construct(AccountProxyInterface $current_user, FlagServiceInterface $flag_service, SubscribersInterface $subscribers, ConfigFactoryInterface $config_factory) {
     $this->currentUser = $current_user;
     $this->flagService = $flag_service;
     $this->subscribers = $subscribers;
+    $this->config = $config_factory->get('message_subscribe.settings');
   }
 
   /**
@@ -63,7 +74,8 @@ class SubscriptionController extends ControllerBase {
     return new static(
       $container->get('current_user'),
       $container->get('flag'),
-      $container->get('message_subscribe.subscribers')
+      $container->get('message_subscribe.subscribers'),
+      $container->get('config.factory')
     );
   }
 
@@ -109,12 +121,13 @@ class SubscriptionController extends ControllerBase {
   /**
    * Provides the page title for a given tab.
    *
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   The user to display subscriptions for.
    * @param \Drupal\flag\FlagInterface $flag
    *   The flag for which to display subscriptions.
+   *
+   * @return string
+   *   The tab title as defined by the flag.
    */
-  public function tabTitle(AccountInterface $user, FlagInterface $flag) {
+  public function tabTitle(FlagInterface $flag) {
     return $flag->label();
   }
 
@@ -137,7 +150,11 @@ class SubscriptionController extends ControllerBase {
     }
 
     $view = $this->getView($user, $flag);
-    return $view ? $view->preview() : FALSE;
+    $result = $view->preview();
+
+    // Add cache tags for this flag.
+    $result['#cache']['tags'] = $flag->getCacheTags();
+    return $result;
   }
 
   /**
@@ -160,10 +177,10 @@ class SubscriptionController extends ControllerBase {
 
     $entity_type = $flag->getFlaggableEntityTypeId();
 
-    // @todo Make these configurable again.
-    $prefix = 'subscribe';
-    $view_name = $prefix . '_' . $entity_type;
-    $display_id = 'default';
+    $prefix = $this->config->get('flag_prefix');
+    // View name + display ID.
+    $default_view_name = $prefix . '_' . $entity_type . ':default';
+    list($view_name, $display_id) = explode(':', $flag->getThirdPartySetting('message_subscribe_ui', 'view_name', $default_view_name));
 
     if (!$view = Views::getView($view_name)) {
       // View doesn't exist.
