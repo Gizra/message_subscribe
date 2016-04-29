@@ -20,7 +20,12 @@ function message_subscribe_email_install() {
   );
 
   foreach ($variables as $name => $value) {
-    variable_set($name, $value);
+    // @FIXME
+// // @FIXME
+// // The correct configuration object could not be determined. You'll need to
+// // rewrite this call manually.
+// variable_set($name, $value);
+
   }
 
   // Add "message subscribe email" field to users.
@@ -36,7 +41,14 @@ function message_subscribe_email_install() {
         'allowed_values_function' => '',
       ),
     );
-    $field = field_create_field($field);
+    // @FIXME
+// Fields and field instances are now exportable configuration entities, and
+// the Field Info API has been removed.
+// 
+// 
+// @see https://www.drupal.org/node/2012896
+// $field = field_create_field($field);
+
   }
 
   if (!field_info_instance('user', $field_name, 'user')) {
@@ -56,7 +68,14 @@ function message_subscribe_email_install() {
         'weight' => 0,
       ),
     );
-    field_create_instance($instance);
+    // @FIXME
+// Fields and field instances are now exportable configuration entities, and
+// the Field Info API has been removed.
+// 
+// 
+// @see https://www.drupal.org/node/2012896
+// field_create_instance($instance);
+
   }
 }
 
@@ -67,7 +86,14 @@ function message_subscribe_email_install() {
 function message_subscribe_email_uninstall() {
   // Delete field instance from user.
   $field = field_info_instance('user', 'message_subscribe_email', 'user');
-  field_delete_instance($field);
+  // @FIXME
+// Fields and field instances are now exportable configuration entities, and
+// the Field Info API has been removed.
+// 
+// 
+// @see https://www.drupal.org/node/2012896
+// field_delete_instance($field);
+
 
   // Revert message to default values if they haven't been changed.
   $variables = array(
@@ -79,8 +105,18 @@ function message_subscribe_email_uninstall() {
   );
 
   foreach ($variables as $name => $value) {
-    if (variable_get($name) == $value) {
-      variable_del($name);
-    }
+    // @FIXME
+// // @FIXME
+// // The correct configuration object could not be determined. You'll need to
+// // rewrite this call manually.
+// if (variable_get($name) == $value) {
+//       // @FIXME
+// // // @FIXME
+// // // The correct configuration object could not be determined. You'll need to
+// // // rewrite this call manually.
+// // variable_del($name);
+// 
+//     }
+
   }
 }

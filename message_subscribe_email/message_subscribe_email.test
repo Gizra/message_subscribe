@@ -91,7 +91,12 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestHelp
     flag('flag', 'email_node', $this->node->nid, $this->user1);
 
     // Override default notifiers.
-    variable_set('default_notifiers', array());
+    // @FIXME
+// // @FIXME
+// // This looks like another module's variable. You'll need to rewrite this call
+// // to ensure that it uses the correct configuration object.
+// variable_set('default_notifiers', array());
+
   }
 
   /**
@@ -99,7 +104,12 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestHelp
    */
   function testGetSubscribers() {
     // Make sure we are notifying ourselves for this test.
-    variable_set('notify_own_actions', TRUE);
+    // @FIXME
+// // @FIXME
+// // This looks like another module's variable. You'll need to rewrite this call
+// // to ensure that it uses the correct configuration object.
+// variable_set('notify_own_actions', TRUE);
+
 
     $message = message_create('foo');
 
@@ -135,7 +145,12 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestHelp
     message_subscribe_send_message('node', $node, $message, array(), $subscribe_options);
 
     // Assert sent emails.
-    $email_count = count(variable_get('drupal_test_email_collector', array()));
+    // @FIXME
+// // @FIXME
+// // This looks like another module's variable. You'll need to rewrite this call
+// // to ensure that it uses the correct configuration object.
+// $email_count = count(variable_get('drupal_test_email_collector', array()));
+
     $this->assertEqual($email_count, 1, 'Only one user was sent an email.');
   }
 }
@@ -159,7 +174,12 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHe
     flag('flag', 'subscribe_node', $this->node->nid, $this->user1);
 
     // Override default notifiers.
-    variable_set('default_notifiers', array());
+    // @FIXME
+// // @FIXME
+// // This looks like another module's variable. You'll need to rewrite this call
+// // to ensure that it uses the correct configuration object.
+// variable_set('default_notifiers', array());
+
   }
 
   /**
@@ -167,7 +187,12 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHe
    */
   function testEmailNotifications() {
     // Make sure we are notifying ourselves for this test.
-    variable_set('notify_own_actions', TRUE);
+    // @FIXME
+// // @FIXME
+// // This looks like another module's variable. You'll need to rewrite this call
+// // to ensure that it uses the correct configuration object.
+// variable_set('notify_own_actions', TRUE);
+
 
     $message = message_create('foo');
 

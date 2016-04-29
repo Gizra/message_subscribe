@@ -16,7 +16,12 @@ function message_subscribe_email_flag_access($flag, $content_id, $action, $accou
     $user_flags = flag_get_user_flags($entity_type, $content_id, $account->uid);
 
     $name = str_replace('email_', '', $flag->name);
-    $prefix = variable_get('flag_prefix', 'subscribe') . '_';
+    // @FIXME
+// // @FIXME
+// // This looks like another module's variable. You'll need to rewrite this call
+// // to ensure that it uses the correct configuration object.
+// $prefix = variable_get('flag_prefix', 'subscribe') . '_';
+
     // Disable access to the flag when the subscribe flag is unflagged, but
     // allow unflagging.
     return $action == 'unflag' || !empty($user_flags[$prefix . $name]);
@@ -53,7 +58,12 @@ function message_subscribe_email_flag_unflag($flag, $entity_id, $account, $flagg
  *  The flagging entity.
  */
 function message_subscribe_email_flag($action, $flag, $content_id, $account) {
-  $prefix = variable_get('flag_prefix', 'subscribe') . '_';
+  // @FIXME
+// // @FIXME
+// // This looks like another module's variable. You'll need to rewrite this call
+// // to ensure that it uses the correct configuration object.
+// $prefix = variable_get('flag_prefix', 'subscribe') . '_';
+
   if (strpos($flag->name, $prefix) === 0) {
     // The flag is a subscription flag.
     $wrapper = entity_metadata_wrapper('user', $account);
@@ -260,7 +270,7 @@ function message_subscribe_email_flag_default_flags() {
   );
 
 
-  if (module_exists('og')) {
+  if (\Drupal::moduleHandler()->moduleExists('og')) {
     // Exported flag: "Email groups".
     $flags['email_og'] = array(
       'entity_type' => 'node',
@@ -313,7 +323,7 @@ function message_subscribe_email_flag_default_flags() {
     unset($flags['email_node']['import_roles'], $flags['email_term']['import_roles'], $flags['email_user']['import_roles']);
     unset($flags['email_node']['entity_type'], $flags['email_term']['entity_type'], $flags['email_user']['entity_type']);
 
-    if (module_exists('og')) {
+    if (\Drupal::moduleHandler()->moduleExists('og')) {
       $flags['email_og']['api_version'] = 2;
       $flags['email_og']['content_type'] = 'node';
       $flags['email_og']['roles'] = $flags['email_og']['import_roles'];
