@@ -1,19 +1,18 @@
 <?php
 
-namespace Drupal\Tests\message_subscribe\Functional;
+namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\Core\Session\AccountInterface;
 use Drupal\message\Entity\Message;
 use Drupal\message\Entity\MessageType;
 use Drupal\simpletest\NodeCreationTrait;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test getting subscribes from context.
  *
  * @group message_subscribe
  */
-class SubscribersTest extends BrowserTestBase {
+class SubscribersTest extends MessageSubscribeTestBase {
 
   use NodeCreationTrait;
 
@@ -48,13 +47,17 @@ class SubscribersTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['message_subscribe', 'flag', 'taxonomy'];
+  public static $modules = ['taxonomy'];
 
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
+
+    $this->installConfig(['message_subscribe']);
+    $this->installSchema('flag', ['flag_counts']);
+    $this->installSchema('node', ['node_access']);
 
     $this->flagService = $this->container->get('flag');
     $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
@@ -73,20 +76,20 @@ class SubscribersTest extends BrowserTestBase {
     $flag->enable();
     $flag->save();
 
-    $this->users[1] = $this->drupalCreateUser([
+    $this->users[1] = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
     ]);
-    $this->users[2] = $this->drupalCreateUser([
+    $this->users[2] = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
     ]);
     // User 3 is blocked.
-    $this->users[3] = $this->drupalCreateUser([
+    $this->users[3] = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
@@ -114,7 +117,7 @@ class SubscribersTest extends BrowserTestBase {
     // Create a dummy message-type.
     $message_type = MessageType::create([
       'type' => 'foo',
-      'message_text' => ['value' => 'Example text.']
+      'message_text' => ['value' => 'Example text.'],
     ]);
     $message_type->save();
 
@@ -125,7 +128,7 @@ class SubscribersTest extends BrowserTestBase {
   /**
    * Test getting the subscribers list.
    */
-  function testGetSubscribers() {
+  public function testGetSubscribers() {
     $message = Message::create([
       'type' => 'foo',
       'uid' => $this->users[1],
@@ -186,13 +189,13 @@ class SubscribersTest extends BrowserTestBase {
     ];
     $this->assertEquals($uids, $expected_uids, 'All expected subscribers were fetched, including blocked users.');
 
-    $user3 = $this->drupalCreateUser([
+    $user3 = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
       'unflag subscribe_user',
     ]);
-    $user4 = $this->drupalCreateUser([
+    $user4 = $this->createUser([
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag subscribe_user',
@@ -217,7 +220,7 @@ class SubscribersTest extends BrowserTestBase {
   /**
    * Testing the exclusion of the entity author from the subscribers lists.
    */
-  function testGetSubscribersExcludeSelf() {
+  public function testGetSubscribersExcludeSelf() {
     // Test the affect of the variable when set to FALSE (do not notify self).
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', FALSE)->save();
     $message = Message::create([
@@ -270,11 +273,11 @@ class SubscribersTest extends BrowserTestBase {
   /**
    * Assert subscribers list is entity-access aware.
    */
-  function testEntityAccess() {
+  public function testEntityAccess() {
     // Make sure we are notifying ourselves for this test.
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', TRUE)->save();
 
-    $message = Message::create(['type' =>'foo']);
+    $message = Message::create(['type' => 'foo']);
 
     $node = $this->nodes[0];
     $node->setPublished(FALSE);
@@ -295,4 +298,36 @@ class SubscribersTest extends BrowserTestBase {
     $uids = $this->messageSubscribers->getSubscribers($node, $message, $subscribe_options);
     $this->assertEquals(array_keys($uids), [$user1->id(), $user2->id()], 'All users (even without access) returned for subscribers list.');
   }
+
+  /**
+   * Ensure hooks are firing correctly.
+   */
+  public function testHooks() {
+    $this->enableModules(['message_subscribe_test']);
+
+    $message = Message::create([
+      'type' => 'foo',
+      'uid' => $this->users[1],
+    ]);
+
+    // Create a 4th user that the test module will add.
+    $this->users[4] = $this->createUser();
+
+    $node = $this->nodes[0];
+    $uids = $this->messageSubscribers->getSubscribers($node, $message);
+    // @see message_subscribe_test.module
+    $this->assertTrue(\Drupal::state('message_subscribe_test')->get('hook_called'));
+    $this->assertTrue(\Drupal::state('message_subscribe_test')->get('alter_hook_called'));
+    $this->assertEquals([
+      4 => [
+        'flags' => ['foo_flag'],
+        'notifiers' => ['sms'],
+      ],
+      10001 => [
+        'flags' => ['bar_flag'],
+        'notifiers' => ['email'],
+      ],
+    ], $uids);
+  }
+
 }

@@ -75,6 +75,8 @@ class Subscribers implements SubscribersInterface {
    *   The message notification service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler service.
+   * @param \Drupal\Core\Queue\QueueFactory $queue
+   *   The queue service.
    */
   public function __construct(FlagServiceInterface $flag_service, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, MessageNotifier $message_notifier, ModuleHandlerInterface $module_handler, QueueFactory $queue) {
     $this->config = $config_factory->get('message_subscribe.settings');
@@ -84,7 +86,6 @@ class Subscribers implements SubscribersInterface {
     $this->moduleHandler = $module_handler;
     $this->queue = $queue->get('message_subscribe');
   }
-
 
   /**
    * {@inheritdoc}
@@ -321,7 +322,6 @@ class Subscribers implements SubscribersInterface {
     if ($this->moduleHandler->moduleExists('og')) {
       // Iterate over existing nodes to extract the related groups.
       foreach ($nodes as $node) {
-        // @todo This does not appear to work yet in OG.
         foreach (Og::getGroupIds($node) as $group_type => $gids) {
           foreach ($gids as $gid) {
             $context[$group_type][$gid] = $gid;
@@ -341,7 +341,7 @@ class Subscribers implements SubscribersInterface {
         // fields that reference terms.
         foreach ($node->getFieldDefinitions() as $field) {
           if ($field->getType() != 'entity_reference' || $field->getSetting('target_type') != 'taxonomy_term') {
-            // Not an entity reference field, or not referencing a taxonomy term.
+            // Not an entity reference field or not referencing a taxonomy term.
             continue;
           }
           // Add referenced terms.

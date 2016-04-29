@@ -8,51 +8,15 @@
 use Drupal\message\MessageInterface;
 
 /**
- * Process a message, and send to subscribed users.
- *
- * @param $entity_type
- *   The entity type.
- * @param $entity
- *   The entity object.
- * @param $message
- *   The Message object.
- * @param $notify_options
- *   Optional; Array of options to pass to message_notify_send_message()
- *   keyed by the notifier name.
- * @param $subscribe_options
- *   Optional;
- * @param $context
- * @return Message
- *  The message object.
- */
-function message_subscribe_send_message($entity_type, $entity, Message $message, $notify_options = array(), $subscribe_options = array(), $context = array()) {
-}
-
-/**
  * Implements hook_message_subscribe_get_subscribers().
- *
- * @param $context
- *   Array keyed with the entity type and array of entity IDs as the
- *   value. According to this context this function will retrieve the
- *   related subscribers.
- * @param $message
- *   The message object.
- *
- * @return
- *   Array keyed with the user ID and the value:
- *   - "flags": Array with the flag names that resulted with including
- *   the user.
- *   - "notifiers": Array with the Message notifier name plugins.
- *
- * @see flag_get_content_flags()
  */
-function message_subscribe_message_subscribe_get_subscribers(MessageInterface $message, $subscribe_options = array(), $context = array()) {
-  $uids = array();
+function message_subscribe_message_subscribe_get_subscribers(MessageInterface $message, array $subscribe_options = [], array $context = []) {
+  $uids = [];
 
-  $subscribe_options += array(
+  $subscribe_options += [
     'last uid' => 0,
     'range' => FALSE,
-  );
+  ];
 
   // Determine if a range is needed for the query.
   $range = $subscribe_options['range'];
@@ -93,7 +57,7 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
 
     foreach ($result as $row) {
 
-      $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : array('notifiers' => array());
+      $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : ['notifiers' => []];
       // Register the flag name.
       $uids[$row->uid]['flags'][] = $row->flag_id;
 

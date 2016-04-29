@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\message_subscribe;
+
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\message\MessageInterface;
@@ -18,8 +19,8 @@ interface SubscribersInterface {
    * @param \Drupal\message\MessageInterface $message
    *   The message object.
    * @param array $notify_options
-   *   (optional) An array of options to be passed to the message notifier service. See
-   *   `\Drupal\message_notify\MessageNotifier::send()`.
+   *   (optional) An array of options to be passed to the message notifier
+   *   service. See `\Drupal\message_notify\MessageNotifier::send()`.
    * @param array $subscribe_options
    *   (optional) Array with the following optional values:
    *   - 'save message' (defaults to TRUE) Determine if the Message should be
@@ -29,16 +30,7 @@ interface SubscribersInterface {
    *   - 'last uid' (defaults to 0) Only query UIDs greater than this UID.
    *   - 'uids': Array of user IDs to be processed. Setting this, will cause
    *     skipping `self::getSubscribers()` to get the subscribed
-   *     users. For example:
-   *
-   * @code
-   *     $subscribe_options['uids'] = array(
-   *       1 => array(
-   *        'notifiers' => array('email'),
-   *       ),
-   *     );
-   * @endcode
-   *
+   *     users.
    *   - 'range': (defaults to FALSE) limit the number of items to fetch in the
    *     subscribers query.
    *   - 'end time': The timestamp of the time limit for the function to
@@ -64,7 +56,13 @@ interface SubscribersInterface {
    *   entity, the implementing module might pass along with the node
    *   itself, the node author and related taxonomy terms.
    *
+   *   Example usage.
    * @code
+   *   $subscribe_options['uids'] = array(
+   *     1 => array(
+   *       'notifiers' => array('email'),
+   *     ),
+   *   );
    *   $context = array(
    *     'node' => array(1),
    *     // The node author.
@@ -73,7 +71,6 @@ interface SubscribersInterface {
    *     'taxonomy_term' => array(100, 200, 300)
    *   );
    * @endcode
-   *
    */
   public function sendMessage(EntityInterface $entity, MessageInterface $message, array $notify_options = [], array $subscribe_options = [], array $context = []);
 
@@ -89,7 +86,7 @@ interface SubscribersInterface {
    *   `$subscribe_options` array for `self::sendMessage()`.
    * @param array $context
    *   (optional) The context array, passed by reference. This has the same
-   *   elements as the `$context` paramater for `self::sendMessage()`
+   *   elements as the `$context` paramater for `self::sendMessage()`.
    *
    * @return array
    *   Array keyed with the user IDs to send notifications to, and an array with
@@ -142,6 +139,7 @@ interface SubscribersInterface {
    *
    * @return \Drupal\flag\FlagInterface[] $flags
    *   An array of the structure [fid] = flag_object.
+   *
    * @see \Drupal\flag\FlagServiceInterface::getFlags()
    */
   public function getFlags($entity_type = NULL, $bundle = NULL, AccountInterface $account = NULL);

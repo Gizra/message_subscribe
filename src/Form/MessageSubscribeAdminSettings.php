@@ -4,8 +4,10 @@ namespace Drupal\message_subscribe\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element;
 
+/**
+ * Settings form for Message Subscribe.
+ */
 class MessageSubscribeAdminSettings extends ConfigFormBase {
 
   /**
@@ -37,6 +39,9 @@ class MessageSubscribeAdminSettings extends ConfigFormBase {
     return ['message_subscribe.settings'];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
     /** @var \Drupal\Core\Plugin\DefaultPluginManager $message_notifiers */
@@ -63,29 +68,6 @@ class MessageSubscribeAdminSettings extends ConfigFormBase {
       '#description' => t('Determines if the user that caused the message notification receive a message about their actions. e.g. If I add a comment to a node, should I get an email saying I added a comment to a node?'),
       '#default_value' => $config->get('notify_own_actions'),
     ];
-
-    $prefix = $config->get('flag_prefix') . '_';
-
-    // @todo
-    // For every subscription flag, show a view selection.
-    // foreach (message_subscribe_flag_get_flags() as $flag) {
-    //   $name = 'message_' . $flag->name;
-    //   $params = ['@title' => $flag->title];
-    //   $entity_type = FLAG_API_VERSION == 3 ? $flag->entity_type : $flag->content_type;
-    //
-    // // @FIXME
-    // // The correct configuration object could not be determined. You'll need to
-    // // rewrite this call manually.
-    // $form[$name] = array(
-    //       '#type' => 'select',
-    //       '#title' => t('View for flag <em>@title</em>', $params),
-    //       '#description' => t('Select the View that should be used for flag @title.', $params),
-    //       '#options' => views_get_views_as_options(),
-    //       '#default_value' => variable_get($name, $prefix . $entity_type . ':default'),
-    //       '#required' => TRUE,
-    //     );
-    //
-    //   }
 
     $form['flag_prefix'] = [
       '#type' => 'textfield',

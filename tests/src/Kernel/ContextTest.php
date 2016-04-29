@@ -1,5 +1,5 @@
 <?php
-namespace Drupal\Tests\message_subscribe\Functional;
+namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\comment\CommentInterface;
 use Drupal\comment\Entity\Comment;
@@ -8,28 +8,29 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test getting context from entity.
  *
  * @group message_subscribe
  */
-class ContextTest extends BrowserTestBase {
+class ContextTest extends MessageSubscribeTestBase {
 
   use CommentTestTrait;
-  use NodeCreationTrait;
-  use ContentTypeCreationTrait;
   use EntityReferenceTestTrait;
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['message_subscribe', 'taxonomy', 'og', 'comment'];
+  public static $modules = [
+    'comment',
+    'filter',
+    'og',
+    'taxonomy',
+    'text',
+  ];
 
   /**
    * Test comment.
@@ -76,11 +77,17 @@ class ContextTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
+    $this->installSchema('comment', ['comment_entity_statistics']);
+    $this->installEntitySchema('comment');
+    $this->installEntitySchema('og_membership');
+    $this->installEntitySchema('taxonomy_term');
+    $this->installConfig(['comment', 'og']);
+
     foreach (range(1, 3) as $uid) {
-      $this->users[$uid] = $this->drupalCreateUser();
+      $this->users[$uid] = $this->createUser();
     }
 
     // Create group node-type.
@@ -108,7 +115,7 @@ class ContextTest extends BrowserTestBase {
       $this->terms[$i] = Term::create([
         'name' => "term $i",
         'vid' => $vocabulary->id(),
-        ]);
+      ]);
       $this->terms[$i]->save();
     }
 
@@ -147,7 +154,10 @@ class ContextTest extends BrowserTestBase {
     $this->subscribers = $this->container->get('message_subscribe.subscribers');
   }
 
-  function testGetBasicContext() {
+  /**
+   * Test basic context method.
+   */
+  public function testGetBasicContext() {
     $node = $this->node;
     $group = $this->group;
     $comment = $this->comment;
@@ -189,4 +199,5 @@ class ContextTest extends BrowserTestBase {
 
     $this->assertEquals($original_context, $context, 'Correct context when skiping context.');
   }
+
 }

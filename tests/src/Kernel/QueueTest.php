@@ -1,35 +1,17 @@
 <?php
 
-namespace Drupal\Tests\message_subscribe\Functional;
+namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\message\Entity\Message;
 use Drupal\message\Entity\MessageType;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test queue integration.
  *
  * @group message_subscribe
  */
-class QueueTest extends BrowserTestBase {
-
-  use ContentTypeCreationTrait;
-  use NodeCreationTrait;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static $modules = ['message_subscribe', 'node'];
-
-  /**
-   * The message subscribers service.
-   *
-   * @var \Drupal\message_subscribe\SubscribersInterface
-   */
-  protected $messageSubscribers;
+class QueueTest extends MessageSubscribeTestBase {
 
   /**
    * Node for testing.
@@ -64,7 +46,7 @@ class QueueTest extends BrowserTestBase {
     $node_type = $type->id();
 
     // Create node.
-    $user1 = $this->drupalCreateUser();
+    $user1 = $this->createUser();
     $settings = [];
     $settings['type'] = $node_type;
     $settings['uid'] = $user1->id();
@@ -76,7 +58,7 @@ class QueueTest extends BrowserTestBase {
   /**
    * Test base queue processing logic.
    */
-  function testQueue() {
+  public function testQueue() {
     $node = $this->node;
     $message = Message::create([
       'type' => 'foo',
@@ -128,11 +110,12 @@ class QueueTest extends BrowserTestBase {
   }
 
   /**
-   * Test cron-based queue handling. These are very basic checks that ensure
-   * the cron worker callback functions as expected. No formal subscription
-   * processing is triggered here.
+   * Test cron-based queue handling.
+   *
+   * These are very basic checks that ensure the cron worker callback functions
+   * as expected. No formal subscription processing is triggered here.
    */
-  function testQueueCron() {
+  public function testQueueCron() {
     $node = $this->node;
     $message = Message::create(['type' => 'foo']);
     $queue = \Drupal::queue('message_subscribe');
