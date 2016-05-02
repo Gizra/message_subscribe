@@ -19,7 +19,7 @@ dependencies:
     - og
 roles: null
 flag_type: entity:node
-link_type: reload
+link_type: ajax_link
 flagTypeConfig:
   show_in_links:
     - full
