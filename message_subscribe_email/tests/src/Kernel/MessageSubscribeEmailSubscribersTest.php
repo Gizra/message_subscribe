@@ -1,5 +1,7 @@
 <?php
 namespace Drupal\Tests\message_subscribe_email\Kernel;
+use Drupal\Core\Test\AssertMailTrait;
+use Drupal\message\Entity\Message;
 use Drupal\Tests\message_subscribe_email\Kernel\MessageSubscribeEmailTestBase;
 
 /**
@@ -7,34 +9,29 @@ use Drupal\Tests\message_subscribe_email\Kernel\MessageSubscribeEmailTestBase;
  */
 class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase {
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Get email subscribers',
-      'description' => 'Get email subscribers from content.',
-      'group' => 'Message subscribe',
-    );
-  }
+  use AssertMailTrait;
 
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
     parent::setUp();
 
-    // Opt out of default email notifications.
-    $wrapper = entity_metadata_wrapper('user', $this->user1);
-    $wrapper->message_subscribe_email->set(FALSE);
-    $wrapper = entity_metadata_wrapper('user', $this->user2);
-    $wrapper->message_subscribe_email->set(FALSE);
-
-    flag('flag', 'subscribe_node', $this->node->nid, $this->user1);
-    flag('flag', 'subscribe_node', $this->node->nid, $this->user2);
-
-    flag('flag', 'email_node', $this->node->nid, $this->user1);
+    // Opt out of default email notifications and subscribe to node 1.
+    $flag = $this->flagService->getFlagById('subscribe_node');
+    foreach (range(1, 2) as $i) {
+      $this->users[$i]->message_subscribe_email = 0;
+      $this->users[$i]->save();
+      $this->flagService->flag($flag, $this->nodes[1], $this->users[$i]);
+    }
+    // Flag user 1 for email notifications.
+    $flag = $this->flagService->getFlagById('email_node');
+    $this->flagService->flag($flag, $this->nodes[1], $this->users[1]);
 
     // Override default notifiers.
-    // @FIXME
-// // @FIXME
-// // This looks like another module's variable. You'll need to rewrite this call
-// // to ensure that it uses the correct configuration object.
-// variable_set('default_notifiers', array());
+    $this->config('message_subscribe.settings')
+      ->set('default_notifiers', [])
+      ->save();
 
   }
 
@@ -43,53 +40,45 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
    */
   function testGetSubscribers() {
     // Make sure we are notifying ourselves for this test.
-    // @FIXME
-// // @FIXME
-// // This looks like another module's variable. You'll need to rewrite this call
-// // to ensure that it uses the correct configuration object.
-// variable_set('notify_own_actions', TRUE);
+    $this->config('message_subscribe.settings')
+      ->set('notify_own_actions', TRUE)
+      ->save();
 
+    $message = Message::create(['type' => $this->messageType->id()]);
 
-    $message = message_create('foo');
+    $node = $this->nodes[1];
+    $user1 = $this->users[1];
+    $user2 = $this->users[2];
 
-    $node = $this->node;
-    $user1 = $this->user1;
-    $user2 = $this->user2;
-
-    $uids = message_subscribe_get_subscribers('node', $node, $message);
+    $uids = $this->messageSubscribers->getSubscribers($node, $message);
 
     // Assert subscribers data.
-    $expected_uids = array(
-      $user1->uid => array(
-        'notifiers' => array(
+    $expected_uids = [
+      $user1->id() => [
+        'notifiers' => [
           'email' => 'email',
-        ),
-        'flags' => array(
+        ],
+        'flags' => [
           'subscribe_node',
-        ),
-      ),
-      $user2->uid => array(
-        'notifiers' => array(),
-        'flags' => array(
+        ],
+      ],
+      $user2->id() => [
+        'notifiers' => [],
+        'flags' => [
           'subscribe_node',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
 
-    $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched.');
+    $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
 
-    $subscribe_options = array(
+    $subscribe_options = [
       'uids' => $uids,
-    );
-    message_subscribe_send_message('node', $node, $message, array(), $subscribe_options);
+    ];
+    $this->messageSubscribers->sendMessage($node, $message, [], $subscribe_options);
 
     // Assert sent emails.
-    // @FIXME
-// // @FIXME
-// // This looks like another module's variable. You'll need to rewrite this call
-// // to ensure that it uses the correct configuration object.
-// $email_count = count(variable_get('drupal_test_email_collector', array()));
-
-    $this->assertEqual($email_count, 1, 'Only one user was sent an email.');
+    $mails = $this->getMails();
+    $this->assertEquals(1, count($mails), 'Only one user was sent an email.');
   }
 }

@@ -51,6 +51,8 @@ abstract class MessageSubscribeTestBase extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installConfig(['field', 'filter', 'node']);
+
+    $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
   }
 
 }

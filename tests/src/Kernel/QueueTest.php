@@ -51,8 +51,6 @@ class QueueTest extends MessageSubscribeTestBase {
     $settings['type'] = $node_type;
     $settings['uid'] = $user1->id();
     $this->node = $this->createNode($settings);
-
-    $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
   }
 
   /**

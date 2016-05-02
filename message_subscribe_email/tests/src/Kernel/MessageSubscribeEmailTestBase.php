@@ -51,6 +51,7 @@ abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {
     parent::setUp();
 
     $this->flagService = $this->container->get('flag');
+    $this->installSchema('flag', ['flag_counts']);
 
     // Create node-type.
     $node_type = $this->createContentType();

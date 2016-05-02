@@ -1,32 +1,29 @@
 <?php
 namespace Drupal\Tests\message_subscribe_email\Kernel;
+
+use Drupal\message\Entity\Message;
 use Drupal\Tests\message_subscribe_email\Kernel\MessageSubscribeEmailTestBase;
 
 /**
  * Test automatic email notification flagging.
+ *
+ * @group message_subscribe_email
  */
 class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBase {
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Check email notifications',
-      'description' => 'Check automatic email notifications for content.',
-      'group' => 'Message subscribe',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
     parent::setUp();
 
-    flag('flag', 'subscribe_node', $this->node->nid, $this->user1);
+    $flag = $this->flagService->getFlagById('subscribe_node');
+    $this->flagService->flag($flag, $this->nodes[1], $this->users[1]);
 
     // Override default notifiers.
-    // @FIXME
-// // @FIXME
-// // This looks like another module's variable. You'll need to rewrite this call
-// // to ensure that it uses the correct configuration object.
-// variable_set('default_notifiers', array());
-
+    $this->config('message_subscribe.settings')
+      ->set('default_notifiers', [])
+      ->save();
   }
 
   /**
@@ -34,54 +31,52 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
    */
   function testEmailNotifications() {
     // Make sure we are notifying ourselves for this test.
-    // @FIXME
-// // @FIXME
-// // This looks like another module's variable. You'll need to rewrite this call
-// // to ensure that it uses the correct configuration object.
-// variable_set('notify_own_actions', TRUE);
+    $this->config('message_subscribe.settings')
+      ->set('notify_own_actions', TRUE)
+      ->save();
 
+    $message = Message::create(['type' => $this->messageType->id()]);
 
-    $message = message_create('foo');
+    $node = $this->nodes[1];
+    $user1 = $this->users[1];
 
-    $node = $this->node;
-    $user1 = $this->user1;
-
-    $uids = message_subscribe_get_subscribers('node', $node, $message);
+    $uids = $this->messageSubscribers->getSubscribers($node, $message);
 
     // Assert subscribers data.
-    $expected_uids = array(
-      $user1->uid => array(
-        'notifiers' => array(
+    $expected_uids = [
+      $user1->id() => [
+        'notifiers' => [
           'email' => 'email',
-        ),
-        'flags' => array(
+        ],
+        'flags' => [
           'subscribe_node',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
 
-    $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched.');
+    $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
 
-    flag('unflag', 'subscribe_node', $node->nid, $user1);
+    $this->flagService->unflag($this->flagService->getFlagById('subscribe_node'), $node, $user1);
 
     // Opt out of default email notifications.
-    $wrapper = entity_metadata_wrapper('user', $user1);
-    $wrapper->message_subscribe_email->set(FALSE);
+    $user1->message_subscribe_email = 0;
+    $user1->save();
 
-    flag('flag', 'subscribe_node', $node->nid, $user1);
+    $this->flagService->flag($this->flagService->getFlagById('subscribe_node'), $node, $user1);
 
-    $uids = message_subscribe_get_subscribers('node', $node, $message);
+    $uids = $this->messageSubscribers->getSubscribers($node, $message);
 
     // Assert subscribers data.
-    $expected_uids = array(
-      $user1->uid => array(
-        'notifiers' => array(),
-        'flags' => array(
+    $expected_uids = [
+      $user1->id() => [
+        'notifiers' => [],
+        'flags' => [
           'subscribe_node',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
 
-    $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched.');
+    $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
   }
+
 }
