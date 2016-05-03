@@ -50,8 +50,8 @@ abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {
   function setUp() {
     parent::setUp();
 
+    $this->installConfig(['message_subscribe_email']);
     $this->flagService = $this->container->get('flag');
-    $this->installSchema('flag', ['flag_counts']);
 
     // Create node-type.
     $node_type = $this->createContentType();
@@ -88,6 +88,15 @@ abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {
     // Create a dummy message-type.
     $this->messageType = MessageType::create(['type' => 'foo']);
     $this->messageType->save();
+
+    $this->config('message_subscribe.settings')
+      // Override default notifiers.
+      ->set('default_notifiers', [])
+      // Make sure we are notifying ourselves for this test.
+      ->set('notify_own_actions', TRUE)
+      ->save();
+
+    $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
   }
 
 }

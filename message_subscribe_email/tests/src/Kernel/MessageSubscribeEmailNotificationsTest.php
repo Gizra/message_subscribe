@@ -19,22 +19,12 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
 
     $flag = $this->flagService->getFlagById('subscribe_node');
     $this->flagService->flag($flag, $this->nodes[1], $this->users[1]);
-
-    // Override default notifiers.
-    $this->config('message_subscribe.settings')
-      ->set('default_notifiers', [])
-      ->save();
   }
 
   /**
    * Test opting in/out of default email notifications.
    */
   function testEmailNotifications() {
-    // Make sure we are notifying ourselves for this test.
-    $this->config('message_subscribe.settings')
-      ->set('notify_own_actions', TRUE)
-      ->save();
-
     $message = Message::create(['type' => $this->messageType->id()]);
 
     $node = $this->nodes[1];

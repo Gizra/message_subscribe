@@ -6,6 +6,8 @@
 
 /**
  * Implements hook_flag_access().
+ *
+ * @todo Flag access is broken. See https://www.drupal.org/node/2584647.
  */
 function message_subscribe_email_flag_access($flag, $content_id, $action, $account) {
   if (strpos($flag->name, 'email_') === 0) {
@@ -29,54 +31,6 @@ function message_subscribe_email_flag_access($flag, $content_id, $action, $accou
 }
 
 /**
- * Implements hook_flag_flag().
- */
-function message_subscribe_email_flag_flag($flag, $entity_id, $account, $flagging) {
-  message_subscribe_email_flag('flag', $flag, $entity_id, $account);
-}
-
-/**
- * Implements hook_flag_unflag().
- */
-function message_subscribe_email_flag_unflag($flag, $entity_id, $account, $flagging) {
-  message_subscribe_email_flag('unflag', $flag, $entity_id, $account);
-}
-
-/**
- * When flagging subscription flags, check if user wants email notifications
- * and flag the user for emails accordingly.
- *
- * @param $op
- *  The operation being performed: one of 'flag' or 'unflag'.
- * @param $flag
- *  The flag object.
- * @param $entity_id
- *  The id of the entity the flag is on.
- * @param $account
- *  The user account performing the action.
- * @param $flagging_id
- *  The flagging entity.
- */
-function message_subscribe_email_flag($action, $flag, $content_id, $account) {
-  // @FIXME
-// // @FIXME
-// // This looks like another module's variable. You'll need to rewrite this call
-// // to ensure that it uses the correct configuration object.
-// $prefix = variable_get('flag_prefix', 'subscribe') . '_';
-
-  if (strpos($flag->name, $prefix) === 0) {
-    // The flag is a subscription flag.
-    $wrapper = entity_metadata_wrapper('user', $account);
-    if ($wrapper->message_subscribe_email->value() || $action == 'unflag') {
-      // User wants to use email for the subscription.
-      // Flag or unflag user for emailing according to action taken.
-      $name = str_replace($prefix, '', $flag->name);
-      flag($action, 'email_' . $name, $content_id, $account);
-    }
-  }
-}
-
-/**
  * Get Email subscribe related flags ids.
  *
  * Return Flag ids realted to email subscriptions.
@@ -90,16 +44,14 @@ function message_subscribe_email_flag($action, $flag, $content_id, $account) {
  * @param $account
  *   Optional. The user accont to filter available flags. If not set, all
  *   flags for will this node will be returned.
- * @param $reset
- *   Optional. Reset the internal query cache.
  *
  * @return $flags
  *   An array of the structure [fid] = flag_object.
  *
- * @see flag_get_flags()
+ * @todo convert this to a service/manager class.
  */
-function message_subscribe_email_flag_get_flags($content_type = NULL, $content_subtype = NULL, $account = NULL, $reset = FALSE) {
-  $flags = flag_get_flags($content_type, $content_subtype, $account, $reset);
+function message_subscribe_email_flag_get_flags($content_type = NULL, $content_subtype = NULL, $account = NULL) {
+  $flags = \Drupal::service('flag')->getFlags($content_type, $content_subtype, $account);
   $email_flags = array();
   foreach ($flags as $flag_name => $flag) {
     // Check that the flag is using name convention.
@@ -129,18 +81,12 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
 
   $flag_ids = array();
   foreach ($flags as $flag) {
-    $flag_ids[] = $flag->fid;
+    $flag_ids[] = $flag->id();
   }
 
-  if (FLAG_API_VERSION == 2) {
-    $query = db_select('flag_content', 'f');
-  }
-  else {
-    $query = db_select('flagging', 'f');
-  }
-
+  $query = db_select('flagging', 'f');
   $result = $query->fields('f', array('uid'))
-    ->condition('fid', $flag_ids, 'IN')
+    ->condition('flag_id', $flag_ids, 'IN')
     ->condition('uid', array_keys($uids), 'IN')
     ->groupBy('uid')
     ->execute()

@@ -27,23 +27,12 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
     // Flag user 1 for email notifications.
     $flag = $this->flagService->getFlagById('email_node');
     $this->flagService->flag($flag, $this->nodes[1], $this->users[1]);
-
-    // Override default notifiers.
-    $this->config('message_subscribe.settings')
-      ->set('default_notifiers', [])
-      ->save();
-
   }
 
   /**
    * Test getting the subscribers list.
    */
   function testGetSubscribers() {
-    // Make sure we are notifying ourselves for this test.
-    $this->config('message_subscribe.settings')
-      ->set('notify_own_actions', TRUE)
-      ->save();
-
     $message = Message::create(['type' => $this->messageType->id()]);
 
     $node = $this->nodes[1];
@@ -80,5 +69,6 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
     // Assert sent emails.
     $mails = $this->getMails();
     $this->assertEquals(1, count($mails), 'Only one user was sent an email.');
+    $this->assertEquals('message_notify_' . $this->messageType->id(), $mails[0]['id']);
   }
 }

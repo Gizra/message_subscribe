@@ -46,13 +46,12 @@ abstract class MessageSubscribeTestBase extends KernelTestBase {
     parent::setUp();
 
     $this->installSchema('system', ['sequences']);
+    $this->installSchema('flag', ['flag_counts']);
     $this->installEntitySchema('flagging');
     $this->installEntitySchema('message');
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
-    $this->installConfig(['field', 'filter', 'node']);
-
-    $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
+    $this->installConfig(['field', 'filter', 'node', 'message_subscribe']);
   }
 
 }

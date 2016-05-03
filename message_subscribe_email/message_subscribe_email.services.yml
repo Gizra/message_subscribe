@@ -1,0 +1,6 @@
+services:
+  message_subscribe_email.flag_subscriber:
+    class: \Drupal\message_subscribe_email\EventSubscriber\FlagEvents
+    arguments: ['@config.factory', '@flag']
+    tags:
+      - { name: event_subscriber }
