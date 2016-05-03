@@ -2,7 +2,6 @@
 namespace Drupal\Tests\message_subscribe_email\Kernel;
 use Drupal\Core\Test\AssertMailTrait;
 use Drupal\message\Entity\Message;
-use Drupal\Tests\message_subscribe_email\Kernel\MessageSubscribeEmailTestBase;
 
 /**
  * Test getting email subscribes from context.
@@ -14,7 +13,7 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Opt out of default email notifications and subscribe to node 1.
@@ -32,7 +31,7 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
   /**
    * Test getting the subscribers list.
    */
-  function testGetSubscribers() {
+  public function testGetSubscribers() {
     $message = Message::create(['type' => $this->messageType->id()]);
 
     $node = $this->nodes[1];
@@ -71,4 +70,5 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
     $this->assertEquals(1, count($mails), 'Only one user was sent an email.');
     $this->assertEquals('message_notify_' . $this->messageType->id(), $mails[0]['id']);
   }
+
 }

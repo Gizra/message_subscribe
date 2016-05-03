@@ -65,13 +65,14 @@ class FlagEvents implements EventSubscriberInterface {
   /**
    * React to entity unflagging.
    *
-   * @param \Drupal\flag\Event\FlaggingEvent $event
+   * @param \Drupal\flag\Event\UnflaggingEvent $event
    *   The flagging event.
    */
   public function onUnflag(UnflaggingEvent $event) {
     // Unflagging can happen in bulk, so loop through all flaggings.
-    foreach ($event->getFlaggings() as $flagging)
-    $this->triggerEmailFlag($flagging, 'unflag');
+    foreach ($event->getFlaggings() as $flagging) {
+      $this->triggerEmailFlag($flagging, 'unflag');
+    }
   }
 
   /**

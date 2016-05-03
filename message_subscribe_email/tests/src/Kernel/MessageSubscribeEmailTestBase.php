@@ -47,7 +47,7 @@ abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->installConfig(['message_subscribe_email']);

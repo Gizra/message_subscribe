@@ -2,7 +2,6 @@
 namespace Drupal\Tests\message_subscribe_email\Kernel;
 
 use Drupal\message\Entity\Message;
-use Drupal\Tests\message_subscribe_email\Kernel\MessageSubscribeEmailTestBase;
 
 /**
  * Test automatic email notification flagging.
@@ -14,7 +13,7 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $flag = $this->flagService->getFlagById('subscribe_node');
@@ -24,7 +23,7 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
   /**
    * Test opting in/out of default email notifications.
    */
-  function testEmailNotifications() {
+  public function testEmailNotifications() {
     $message = Message::create(['type' => $this->messageType->id()]);
 
     $node = $this->nodes[1];
