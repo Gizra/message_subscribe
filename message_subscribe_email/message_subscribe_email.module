@@ -31,39 +31,6 @@ function message_subscribe_email_flag_access($flag, $content_id, $action, $accou
 }
 
 /**
- * Get Email subscribe related flags ids.
- *
- * Return Flag ids realted to email subscriptions.
- *
- * The flag name should start with "email_".
- *
- * @param $content_type
- *   Optional. The type of content for which to load the flags. Usually 'node'.
- * @param $content_subtype
- *   Optional. The node type for which to load the flags.
- * @param $account
- *   Optional. The user accont to filter available flags. If not set, all
- *   flags for will this node will be returned.
- *
- * @return $flags
- *   An array of the structure [fid] = flag_object.
- *
- * @todo convert this to a service/manager class.
- */
-function message_subscribe_email_flag_get_flags($content_type = NULL, $content_subtype = NULL, $account = NULL) {
-  $flags = \Drupal::service('flag')->getFlags($content_type, $content_subtype, $account);
-  $email_flags = array();
-  foreach ($flags as $flag_name => $flag) {
-    // Check that the flag is using name convention.
-    if (strpos($flag_name, 'email') === 0) {
-      $email_flags[$flag_name] = $flag;
-    }
-  }
-
-  return $email_flags;
-}
-
-/**
  * Implements hook_message_subscribe_get_subscribers_alter().
  *
  * Filters out subscribes to show only email subscribers.
@@ -74,7 +41,8 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
     return;
   }
 
-  if (!$flags = message_subscribe_email_flag_get_flags()) {
+  /** @var \Drupal\flag\FlagInterface[] $flags */
+  if (!$flags = \Drupal::service('message_subscribe_email.manager')->getFlags()) {
     // No subscribe email related flags.
     return;
   }
