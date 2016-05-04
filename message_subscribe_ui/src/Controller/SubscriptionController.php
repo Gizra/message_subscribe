@@ -203,25 +203,6 @@ class SubscriptionController extends ControllerBase {
       if (!$rel_flag || (!$rel_flag->isEnabled())) {
         throw new MessageSubscribeException('Flag "' . $relationships['flag'] . '" is not setup correctly. It is probably disabled or have no bundles configured.');
       }
-
-      // Indicate we need to set the relationship.
-      $rel_set = FALSE;
-      $flag_name = $flag->id();
-
-      if (strpos($relationship['flag'], $prefix) === 0) {
-        // "Subscribe" flag.
-        $rel_set = TRUE;
-      }
-      elseif (strpos($relationship['flag'], 'email') === 0) {
-        // "Email" flag.
-        $rel_set = TRUE;
-        $flag_name = 'email_' . str_replace($prefix, '', $flag_name);
-      }
-
-      if ($rel_set) {
-        $relationships[$key]['flag'] = $flag_name;
-        $view->display_handler->setOption('relationships', $relationships);
-      }
     }
 
     return $view;

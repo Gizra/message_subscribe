@@ -3,7 +3,7 @@ core: 8.x
 project: message_subscribe
 package: Message
 dependencies:
-  - message_subscribe
+  - message_subscribe_ui
   - flag
   - views
 type: module

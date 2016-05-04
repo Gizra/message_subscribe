@@ -28,32 +28,39 @@ function message_subscribe_email_install() {
     $display->save();
   }
 
-  $variables = array(
-    'message_subscribe_node' => 'subscribe_node_email:default',
-    'message_subscribe_term' => 'subscribe_taxonomy_term_email:default',
-    'message_subscribe_user' => 'subscribe_user_email:default',
+  // Update the UI to use the email views.
+  $flags = [
+    // Flag name => view name + display.
+    'subscribe_node' => 'subscribe_node_email:default',
+    'subscribe_term' => 'subscribe_taxonomy_term_email:default',
+    'subscribe_user' => 'subscribe_user_email:default',
     // Setup OG in case it exists.
-    'message_subscribe_og' => 'subscribe_node_email:default',
-  );
-
-  foreach ($variables as $name => $value) {
-//    variable_set($name, $value);
+    'subscribe_og' => 'subscribe_node_email:default',
+  ];
+  foreach ($flags as $flag_id => $view_name) {
+    if ($flag = \Drupal::service('flag')->getFlagById($flag_id)) {
+      // Verify this hasn't been already overridden.
+      $existing = $flag->getThirdPartySetting('message_subscribe_ui', 'view_name');
+      if (!$existing || ($existing == str_replace('_email', '', $view_name))) {
+        $flag->setThirdPartySetting('message_subscribe_ui', 'view_name', $view_name);
+        $flag->save();
+      }
+    }
   }
 }
-
 
 /**
  * Implements hook_uninstall().
  */
 function message_subscribe_email_uninstall() {
   // Revert message to default values if they haven't been changed.
-  $variables = array(
+  $variables = [
     'message_subscribe_node' => 'subscribe_node_email:default',
     'message_subscribe_term' => 'subscribe_taxonomy_term_email:default',
     'message_subscribe_user' => 'subscribe_user_email:default',
     // Revert OG in case it exists.
     'message_subscribe_og' => 'subscribe_node_email:default',
-  );
+  ];
 
   foreach ($variables as $name => $value) {
  //   if (variable_get($name) == $value) {

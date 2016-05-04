@@ -4,12 +4,16 @@
  * Code for the  message subscribe email feature.
  */
 
+use Drupal\Core\Session\AccountInterface;
+use Drupal\flag\FlagInterface;
+
 /**
  * Implements hook_flag_access().
  *
  * @todo Flag access is broken. See https://www.drupal.org/node/2584647.
  */
-function message_subscribe_email_flag_access($flag, $content_id, $action, $account) {
+function message_subscribe_email_flag_access(FlagInterface $flag, $action, AccountInterface $account) {
+  return;
   if (strpos($flag->name, 'email_') === 0) {
 
     $entity_type = FLAG_API_VERSION == 3 ? $flag->entity_type : $flag->content_type;

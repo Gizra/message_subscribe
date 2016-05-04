@@ -1,6 +1,6 @@
 id: email_user
 entity_type: user
-label: Users
+label: Email users
 bundles: {  }
 flag_short: 'Send email'
 flag_long: ''
