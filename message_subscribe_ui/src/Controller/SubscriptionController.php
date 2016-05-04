@@ -111,7 +111,7 @@ class SubscriptionController extends ControllerBase {
       return AccessResult::allowed();
     }
 
-    if (!$flag->access('unflag', $user) || $user->id() != $this->currentUser->id()) {
+    if (!$flag->hasActionAccess('unflag', $user) || $user->id() != $this->currentUser->id()) {
       return AccessResult::forbidden();
     }
 

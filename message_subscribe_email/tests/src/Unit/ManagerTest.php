@@ -55,7 +55,7 @@ class ManagerTest extends UnitTestCase {
       ['email_one' => $flag, 'email_two' => $flag],
       ['foo_flag' => $flag, 'email_one' => $flag, 'email_two' => $flag],
     ];
-    
+
     return $return;
   }
 

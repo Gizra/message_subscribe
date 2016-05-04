@@ -14,7 +14,7 @@ use Drupal\Core\Entity\Entity\EntityFormDisplay;
  */
 function message_subscribe_email_install() {
   // Add the `message_subscribe_email` field to the user form.
-  $display = EntityFormDisplay::load('user.user.default');
+  $display = entity_get_form_display('user', 'user', 'default');
   if (!$display->getComponent('message_subscribe_email')) {
     $settings = [
       'type' => 'boolean_checkbox',
