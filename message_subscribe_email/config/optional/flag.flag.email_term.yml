@@ -1,8 +1,7 @@
 id: email_term
 entity_type: taxonomy_term
 label: Email terms
-bundles:
-  - tags
+bundles: {  }
 flag_short: 'Send email'
 flag_long: ''
 flag_message: ''

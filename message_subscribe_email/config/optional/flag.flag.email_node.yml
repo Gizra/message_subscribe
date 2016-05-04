@@ -1,9 +1,7 @@
 id: email_node
 entity_type: node
 label: Email content
-bundles:
-  - article
-  - page
+bundles: {  }
 flag_short: 'Send email'
 flag_long: ''
 flag_message: ''

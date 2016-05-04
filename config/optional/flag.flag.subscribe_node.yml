@@ -1,9 +1,7 @@
 id: subscribe_node
 entity_type: node
 label: Content
-bundles:
-  - article
-  - page
+bundles: {  }
 flag_short: Subscribe
 flag_long: ''
 flag_message: 'You are now subscribed to this item.'

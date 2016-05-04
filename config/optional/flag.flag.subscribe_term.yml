@@ -1,8 +1,7 @@
 id: subscribe_term
 entity_type: taxonomy_term
 label: Terms
-bundles:
-  - tags
+bundles: {  }
 flag_short: Subscribe
 flag_long: ''
 flag_message: 'You are now subscribed to this item.'
