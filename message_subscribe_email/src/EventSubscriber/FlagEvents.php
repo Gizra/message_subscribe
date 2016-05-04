@@ -102,7 +102,7 @@ class FlagEvents implements EventSubscriberInterface {
         if ($action == 'flag') {
           $this->flagService->flag($flag, $flagging->getFlaggable(), $flagging->getOwner());
         }
-        else {
+        elseif ($flag->isFlagged($flagging->getFlaggable(), $flagging->getOwner())) {
           $this->flagService->unflag($flag, $flagging->getFlaggable(), $flagging->getOwner());
         }
       }
