@@ -1,0 +1,30 @@
+id: email_node
+entity_type: node
+label: Email content
+bundles: {  }
+flag_short: 'Send email'
+flag_long: ''
+flag_message: ''
+unflag_short: "Don't send email"
+unflag_long: ''
+unflag_message: ''
+unflag_denied_text: ''
+weight: 0
+status: false
+langcode: en
+dependencies:
+  module:
+    - node
+roles: null
+flag_type: entity:node
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links:
+    full: full
+    teaser: teaser
+  show_as_field: 1
+  show_on_form: 0
+  show_contextual_link: 0
+  i18n: null
+  access_author: ''
+linkTypeConfig: {  }

@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Test implementations of message_subscribe hooks.
+ */
+
+use Drupal\message\MessageInterface;
+
+/**
+ * Implements hook_message_subscribe_get_subscribers().
+ */
+function message_subscribe_test_message_subscribe_get_subscribers(MessageInterface $message, $subscribe_options = [], $context = []) {
+  // Set state variable.
+  \Drupal::state('message_subscribe_test')->set('hook_called', TRUE);
+
+  // Add user 4.
+  return [
+    4 => [
+      'flags' => ['foo_flag'],
+      'notifiers' => ['sms'],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_message_subscribe_test_message_subscribe_get_subscribers_alter().
+ */
+function message_subscribe_test_message_subscribe_get_subscribers_alter(array &$uids, array $values) {
+  // Set state variable.
+  \Drupal::state('message_subscribe_test')->set('alter_hook_called', TRUE);
+
+  // Add non-existent user 10001.
+  $uids[10001] = [
+    'flags' => ['bar_flag'],
+    'notifiers' => ['email'],
+  ];
+
+  // Remove user 2.
+  unset($uids[2]);
+}
