@@ -60,10 +60,15 @@ class ViewsTest extends BrowserTestBase {
     // Add a few users.
     $permissions = [
       'access content',
+      'access user profiles',
       'flag subscribe_node',
       'unflag subscribe_node',
       'flag email_node',
       'unflag email_node',
+      'flag subscribe_user',
+      'unflag subscribe_user',
+      'flag email_user',
+      'unflag email_user',
     ];
     foreach (range(1, 3) as $i) {
       $users[$i] = $this->drupalCreateUser($permissions);
@@ -92,9 +97,15 @@ class ViewsTest extends BrowserTestBase {
     $node = $this->createNode(['type' => $type->id()]);
     $flag = $this->flagService->getFlagById('subscribe_node');
     $this->flagService->flag($flag, $node, $users[2]);
-    $this->drupalGet($node->toUrl()->toString());
     $this->drupalGet('user/' . $users[2]->id() . '/message-subscribe/subscribe_node');
     $this->assertSession()->pageTextContains($node->label());
+    $this->assertSession()->pageTextContains(t("Don't send email"));
+
+    // Subscribe user 2 to user 1.
+    $flag = $this->flagService->getFlagById('subscribe_user');
+    $this->flagService->flag($flag, $users[1], $users[2]);
+    $this->drupalGet('user/' . $users[2]->id() . '/message-subscribe/subscribe_user');
+    $this->assertSession()->pageTextContains($users[1]->label());
     $this->assertSession()->pageTextContains(t("Don't send email"));
   }
 
