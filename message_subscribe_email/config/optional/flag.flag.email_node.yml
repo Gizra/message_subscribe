@@ -1,13 +1,13 @@
-id: subscribe_node
+id: email_node
 entity_type: node
-label: Content
+label: Email content
 bundles: {  }
-flag_short: Subscribe
+flag_short: 'Send email'
 flag_long: ''
-flag_message: 'You are now subscribed to this item.'
-unflag_short: Unsubscribe
+flag_message: ''
+unflag_short: "Don't send email"
 unflag_long: ''
-unflag_message: 'You are no longer subscribed to this item.'
+unflag_message: ''
 unflag_denied_text: ''
 weight: 0
 status: false

@@ -55,8 +55,6 @@ class SubscribersTest extends MessageSubscribeTestBase {
   public function setUp() {
     parent::setUp();
 
-    $this->installConfig(['message_subscribe']);
-    $this->installSchema('flag', ['flag_counts']);
     $this->installSchema('node', ['node_access']);
 
     $this->flagService = $this->container->get('flag');

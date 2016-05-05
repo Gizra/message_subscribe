@@ -26,11 +26,14 @@ class QueueTest extends MessageSubscribeTestBase {
   public function setUp() {
     parent::setUp();
 
-    // Override default notifiers.
-    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', [])->save();
+    $this->config('message_subscribe.settings')
+      // Override default notifiers.
+      ->set('default_notifiers', [])
+      // Enable using queue.
+      ->set('use_queue', TRUE)
+      ->save();
 
-    // Enable using queue.
-    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('use_queue', TRUE)->save();
+    $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
 
     // Create a dummy message-type.
     $message_type = MessageType::create([
@@ -51,8 +54,6 @@ class QueueTest extends MessageSubscribeTestBase {
     $settings['type'] = $node_type;
     $settings['uid'] = $user1->id();
     $this->node = $this->createNode($settings);
-
-    $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
   }
 
   /**

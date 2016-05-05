@@ -1,0 +1,8 @@
+name: 'Message subscribe UI'
+description: 'Message subscribe UI'
+core: 8.x
+package: Message
+dependencies:
+  - message_subscribe
+  - views
+type: module
