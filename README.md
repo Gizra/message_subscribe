@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Gizra/message_subscribe.svg?branch=7.x-1.x)](https://travis-ci.org/Gizra/message_subscribe)
+[![Build Status](https://travis-ci.org/Gizra/message_subscribe.svg?branch=8.x-1.x)](https://travis-ci.org/Gizra/message_subscribe)
 
 Message-subscribe provides a subscription system on top of Flag and
 Message-notify; providing a scalable solution for sending mass messages
