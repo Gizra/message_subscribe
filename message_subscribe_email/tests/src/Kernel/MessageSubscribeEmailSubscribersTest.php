@@ -5,6 +5,8 @@ use Drupal\message\Entity\Message;
 
 /**
  * Test getting email subscribes from context.
+ *
+ * @group message_subscribe
  */
 class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase {
 
