@@ -11,8 +11,8 @@
  * Delete default_notifiers variable from the database.
  */
 function message_subscribe_uninstall() {
-  \Drupal::config('message_subscribe.settings')->clear('default_notifiers')->save();
-  \Drupal::config('message_subscribe.settings')->clear('flag_prefix')->save();
-  \Drupal::config('message_subscribe.settings')->clear('use_queue')->save();
-  \Drupal::config('message_subscribe.settings')->clear('notify_own_actions')->save();
+  \Drupal::configFactory()->getEditable('message_subscribe.settings')->clear('default_notifiers')->save();
+  \Drupal::configFactory()->getEditable('message_subscribe.settings')->clear('flag_prefix')->save();
+  \Drupal::configFactory()->getEditable('message_subscribe.settings')->clear('use_queue')->save();
+  \Drupal::configFactory()->getEditable('message_subscribe.settings')->clear('notify_own_actions')->save();
 }
