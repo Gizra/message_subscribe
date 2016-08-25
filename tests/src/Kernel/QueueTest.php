@@ -3,7 +3,7 @@
 namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\message\Entity\Message;
-use Drupal\message\Entity\MessageType;
+use Drupal\message\Entity\MessageTemplate;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
 
 /**
@@ -36,8 +36,8 @@ class QueueTest extends MessageSubscribeTestBase {
     $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
 
     // Create a dummy message-type.
-    $message_type = MessageType::create([
-      'type' => 'foo',
+    $message_type = MessageTemplate::create([
+      'template' => 'foo',
       'message_text' => [
         'value' => 'Example text.',
       ],
@@ -62,7 +62,7 @@ class QueueTest extends MessageSubscribeTestBase {
   public function testQueue() {
     $node = $this->node;
     $message = Message::create([
-      'type' => 'foo',
+      'template' => 'foo',
     ]);
 
     $subscribe_options = [];
@@ -118,7 +118,7 @@ class QueueTest extends MessageSubscribeTestBase {
    */
   public function testQueueCron() {
     $node = $this->node;
-    $message = Message::create(['type' => 'foo']);
+    $message = Message::create(['template' => 'foo']);
     $queue = \Drupal::queue('message_subscribe');
 
     // Start with a control case.

@@ -17,3 +17,11 @@ message_subscribe.settings:
       sequence:
         type: string
         label: 'Message notifier'
+
+flag.flag.*.third_party.message_subscribe_ui:
+  type: mapping
+  label: 'Message subscribe settings'
+  mapping:
+    view_name:
+      type: string
+      label: 'View name'
