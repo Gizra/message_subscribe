@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * @file
  * Hooks provided by the Message subscribe module.

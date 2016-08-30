@@ -1,4 +1,5 @@
 <?php
+
 namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\comment\CommentInterface;

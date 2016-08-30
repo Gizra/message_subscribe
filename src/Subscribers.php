@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\message_subscribe;
+
 use Drupal\comment\CommentInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -13,7 +14,6 @@ use Drupal\message\MessageInterface;
 use Drupal\message_notify\MessageNotifier;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
 use Drupal\og\MembershipManagerInterface;
-use Drupal\og\Og;
 use Drupal\user\EntityOwnerInterface;
 
 /**

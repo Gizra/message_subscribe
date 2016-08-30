@@ -57,6 +57,7 @@ interface SubscribersInterface {
    *   itself, the node author and related taxonomy terms.
    *
    *   Example usage.
+   *
    * @code
    *   $subscribe_options['uids'] = array(
    *     1 => array(

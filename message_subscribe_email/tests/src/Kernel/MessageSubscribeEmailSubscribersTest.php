@@ -1,4 +1,5 @@
 <?php
+
 namespace Drupal\Tests\message_subscribe_email\Kernel;
 
 use Drupal\Core\Test\AssertMailTrait;

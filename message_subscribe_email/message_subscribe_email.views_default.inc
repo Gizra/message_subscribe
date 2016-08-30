@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * message_subscribe_email.views_default.inc
