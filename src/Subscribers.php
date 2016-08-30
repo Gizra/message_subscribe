@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\message_subscribe;
+
 use Drupal\comment\CommentInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -12,7 +13,7 @@ use Drupal\flag\FlagServiceInterface;
 use Drupal\message\MessageInterface;
 use Drupal\message_notify\MessageNotifier;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
-use Drupal\og\Og;
+use Drupal\og\MembershipManagerInterface;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -56,6 +57,15 @@ class Subscribers implements SubscribersInterface {
   protected $moduleHandler;
 
   /**
+   * The group membership manager service.
+   *
+   * This is only available if the OG module is enabled.
+   *
+   * @var \Drupal\og\MembershipManagerInterface
+   */
+  protected $membershipManager;
+
+  /**
    * The message subscribe queue.
    *
    * @var \Drupal\Core\Queue\QueueInterface
@@ -85,6 +95,16 @@ class Subscribers implements SubscribersInterface {
     $this->messageNotifier = $message_notifier;
     $this->moduleHandler = $module_handler;
     $this->queue = $queue->get('message_subscribe');
+  }
+
+  /**
+   * Set the group membership manager service.
+   *
+   * @param \Drupal\og\MembershipManagerInterface $membership_manager
+   *   The group membership manager service.
+   */
+  public function setMembershipManager(MembershipManagerInterface $membership_manager) {
+    $this->membershipManager = $membership_manager;
   }
 
   /**
@@ -322,7 +342,7 @@ class Subscribers implements SubscribersInterface {
     if ($this->moduleHandler->moduleExists('og')) {
       // Iterate over existing nodes to extract the related groups.
       foreach ($nodes as $node) {
-        foreach (Og::getGroupIds($node) as $group_type => $gids) {
+        foreach ($this->membershipManager->getGroupIds($node) as $group_type => $gids) {
           foreach ($gids as $gid) {
             $context[$group_type][$gid] = $gid;
           }

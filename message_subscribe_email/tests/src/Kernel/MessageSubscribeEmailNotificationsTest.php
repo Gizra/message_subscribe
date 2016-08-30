@@ -1,4 +1,5 @@
 <?php
+
 namespace Drupal\Tests\message_subscribe_email\Kernel;
 
 use Drupal\message\Entity\Message;
@@ -24,7 +25,7 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
    * Test opting in/out of default email notifications.
    */
   public function testEmailNotifications() {
-    $message = Message::create(['type' => $this->messageType->id()]);
+    $message = Message::create(['template' => $this->messageTemplate->id()]);
 
     $node = $this->nodes[1];
     $user1 = $this->users[1];

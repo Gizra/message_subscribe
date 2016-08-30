@@ -4,7 +4,7 @@ namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\Core\Session\AccountInterface;
 use Drupal\message\Entity\Message;
-use Drupal\message\Entity\MessageType;
+use Drupal\message\Entity\MessageTemplate;
 use Drupal\simpletest\NodeCreationTrait;
 
 /**
@@ -113,8 +113,8 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $this->flagService->flag($flags['subscribe_user'], $this->users[1], $this->users[2]);
 
     // Create a dummy message-type.
-    $message_type = MessageType::create([
-      'type' => 'foo',
+    $message_type = MessageTemplate::create([
+      'template' => 'foo',
       'message_text' => ['value' => 'Example text.'],
     ]);
     $message_type->save();
@@ -128,7 +128,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
    */
   public function testGetSubscribers() {
     $message = Message::create([
-      'type' => 'foo',
+      'template' => 'foo',
       'uid' => $this->users[1],
     ]);
 
@@ -153,7 +153,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
 
     // Test none of users will get message if only blocked user is subscribed.
     $message = Message::create([
-      'type' => 'foo',
+      'template' => 'foo',
       'uid' => $this->users[1],
     ]);
 
@@ -222,7 +222,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
     // Test the affect of the variable when set to FALSE (do not notify self).
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', FALSE)->save();
     $message = Message::create([
-      'type' => 'foo',
+      'template' => 'foo',
       'uid' => $this->users[1],
     ]);
 
@@ -275,7 +275,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
     // Make sure we are notifying ourselves for this test.
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', TRUE)->save();
 
-    $message = Message::create(['type' => 'foo']);
+    $message = Message::create(['template' => 'foo']);
 
     $node = $this->nodes[0];
     $node->setPublished(FALSE);
@@ -304,7 +304,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $this->enableModules(['message_subscribe_test']);
 
     $message = Message::create([
-      'type' => 'foo',
+      'template' => 'foo',
       'uid' => $this->users[1],
     ]);
 

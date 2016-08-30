@@ -1,5 +1,7 @@
 <?php
+
 namespace Drupal\Tests\message_subscribe_email\Kernel;
+
 use Drupal\Core\Test\AssertMailTrait;
 use Drupal\message\Entity\Message;
 
@@ -34,7 +36,7 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
    * Test getting the subscribers list.
    */
   public function testGetSubscribers() {
-    $message = Message::create(['type' => $this->messageType->id()]);
+    $message = Message::create(['template' => $this->messageTemplate->id()]);
 
     $node = $this->nodes[1];
     $user1 = $this->users[1];
@@ -70,7 +72,7 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
     // Assert sent emails.
     $mails = $this->getMails();
     $this->assertEquals(1, count($mails), 'Only one user was sent an email.');
-    $this->assertEquals('message_notify_' . $this->messageType->id(), $mails[0]['id']);
+    $this->assertEquals('message_notify_' . $this->messageTemplate->id(), $mails[0]['id']);
   }
 
 }

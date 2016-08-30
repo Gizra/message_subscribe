@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\message_subscribe_email\Kernel;
 
-use Drupal\message\Entity\MessageType;
+use Drupal\message\Entity\MessageTemplate;
 use Drupal\Tests\message_subscribe\Kernel\MessageSubscribeTestBase;
 
 /**
@@ -24,11 +24,11 @@ abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {
   protected $flagService;
 
   /**
-   * Message type.
+   * Message template.
    *
-   * @var \Drupal\message\MessageTypeInterface
+   * @var \Drupal\message\MessageTemplateInterface
    */
-  protected $messageType;
+  protected $messageTemplate;
 
   /**
    * Nodes to test with.
@@ -86,8 +86,8 @@ abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {
     $this->nodes[1] = $this->createNode($settings);
 
     // Create a dummy message-type.
-    $this->messageType = MessageType::create(['type' => 'foo']);
-    $this->messageType->save();
+    $this->messageTemplate = MessageTemplate::create(['template' => 'foo']);
+    $this->messageTemplate->save();
 
     $this->config('message_subscribe.settings')
       // Override default notifiers.
