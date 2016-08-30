@@ -45,7 +45,7 @@ before_script:
   # Download dependencies.
   # @todo Specify in `require` and `require-dev` in `composer.json`
   - cd modules
-  - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/amitaibu/og.git
+  - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/Gizra/og.git
   - travis_retry git clone --branch 8.x-4.x --depth 1 https://git.drupal.org/project/flag.git
   - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/Gizra/message.git
   - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/Gizra/message_notify.git

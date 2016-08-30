@@ -93,7 +93,7 @@ class ContextTest extends MessageSubscribeTestBase {
     // Create group node-type.
     $type = $this->createContentType();
     $group_type = $type->id();
-    Og::groupManager()->addGroup('node', $group_type);
+    Og::groupTypeManager()->addGroup('node', $group_type);
 
     // Create node-type.
     $type = $this->createContentType();
