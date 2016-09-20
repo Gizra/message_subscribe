@@ -521,4 +521,47 @@ class MessageSubscribeQueueTest extends DrupalWebTestCase {
     $this->cronRun();
     $this->assertEqual($queue->numberOfItems(), 0, 'Message item 2 processed by cron.');
   }
+
+  /**
+   * Test that if we get a list of user IDs directly from
+   * the implementing module, the messages are sent respecting
+   * the range value.
+   */
+  function testProvidedUserIdsAreSplitAccordingToRangeValue() {
+
+    $user1 = $this->drupalCreateUser();
+    $user2 = $this->drupalCreateUser();
+    $user3 = $this->drupalCreateUser();
+
+    $message = message_create('foo', array());
+
+    $subscribe_options = array(
+      'uids' => array(
+        $user1->uid => array('notifiers' => array('email')),
+        $user2->uid => array('notifiers' => array('email')),
+        $user3->uid => array('notifiers' => array('email')),
+      ),
+      'skip context' => TRUE,
+      'range' => 1,
+      'last uid' => $user1->uid,
+    );
+
+    message_subscribe_send_message('node', $this->node, $message, array(), $subscribe_options);
+
+    // Run cron.
+    $this->cronRun();
+
+    $captured_emails = variable_get('drupal_test_email_collector', array());
+    $this->assertEqual(2, count($captured_emails), 'The amount of recipients is the same as amount of emails captured according to "subscribe_options".');
+
+    $recipients = array();
+    foreach ($captured_emails as $captured_email) {
+      $recipients[] = $captured_email['to'];
+    }
+
+    $this->assertFalse(in_array($user1->mail, $recipients), 'User 1 mail is not in the recipient list as it was defined as "last uid".');
+    $this->assertTrue(in_array($user2->mail, $recipients), 'User 2 mail is in the recipient list.');
+    $this->assertTrue(in_array($user3->mail, $recipients), 'User 3 mail is in the recipient list.');
+  }
+
 }
