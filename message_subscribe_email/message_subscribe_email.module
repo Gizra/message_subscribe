@@ -4,33 +4,32 @@
  * Code for the  message subscribe email feature.
  */
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\flag\FlagInterface;
 
 /**
- * Implements hook_flag_access().
- *
- * @todo Flag access is broken. See https://www.drupal.org/node/2584647.
+ * Implements hook_flag_action_access().
  */
-function message_subscribe_email_flag_access(FlagInterface $flag, $action, AccountInterface $account) {
-  return;
-  if (strpos($flag->name, 'email_') === 0) {
-
-    $entity_type = FLAG_API_VERSION == 3 ? $flag->entity_type : $flag->content_type;
+function message_subscribe_email_flag_action_access($action, FlagInterface $flag, AccountInterface $account, EntityInterface $flaggable = NULL) {
+  // The 'unflag' action is always allowed here, so only check 'flag'.
+  if ($action === 'flag' && $flaggable && strpos($flag->id(), 'email_') === 0) {
 
     // Get the other flags on that same content.
-    $user_flags = flag_get_user_flags($entity_type, $content_id, $account->uid);
+    /** @var \Drupal\flag\FlaggingInterface[] $user_flaggings */
+    $user_flaggings = \Drupal::service('flag')->getAllEntityFlaggings($flaggable, $account);
+    $user_flags = [];
+    foreach ($user_flaggings as $flagging) {
+      $user_flags[$flagging->getFlagId()] = $flagging;
+    }
 
-    $name = str_replace('email_', '', $flag->name);
-    // @FIXME
-// // @FIXME
-// // This looks like another module's variable. You'll need to rewrite this call
-// // to ensure that it uses the correct configuration object.
-// $prefix = variable_get('flag_prefix', 'subscribe') . '_';
+    // Find the corresponding subscribe_* flag.
+    $name = str_replace('email_', '', $flag->id());
+    $prefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
 
-    // Disable access to the flag when the subscribe flag is unflagged, but
-    // allow unflagging.
-    return $action == 'unflag' || !empty($user_flags[$prefix . $name]);
+    // Disable access to the flag when the subscribe flag is unflagged.
+    return AccessResult::forbiddenIf(empty($user_flags[$prefix . $name]));
   }
 }
 
