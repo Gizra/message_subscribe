@@ -249,15 +249,16 @@ function message_subscribe_get_subscribers($entity_type, $entity, Message $messa
     }
   }
 
-  foreach ($uids as $uid => $values) {
-    // See if the author of the entity gets notified.
-    if (!$notify_message_owner && $entity->uid == $uid) {
-      unset($uids[$uid]);
-    }
+  // See if the author of the entity gets notified.
+  if (!$notify_message_owner && array_key_exists ($entity->uid , $uids)) {
+    unset($uids[$entity->uid]);
+  }
 
+  $accounts = user_load_multiple(array_keys($uids));
+
+  foreach ($uids as $uid => $values) {
     if (!empty($subscribe_options['entity access'])) {
-      $account = user_load($uid);
-      if (!entity_access('view', $entity_type, $entity, $account)) {
+      if (!entity_access('view', $entity_type, $entity, $accounts[$uid])) {
         // User doesn't have access to view the entity.
         unset($uids[$uid]);
       }
