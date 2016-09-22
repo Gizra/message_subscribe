@@ -111,7 +111,7 @@ class SubscriptionController extends ControllerBase {
       return AccessResult::allowed();
     }
 
-    if (!$flag->hasActionAccess('unflag', $user) || $user->id() != $this->currentUser->id()) {
+    if (!$flag->actionAccess('unflag', $user) || $user->id() != $this->currentUser->id()) {
       return AccessResult::forbidden();
     }
 
@@ -139,7 +139,7 @@ class SubscriptionController extends ControllerBase {
    * @param \Drupal\flag\FlagInterface $flag
    *   The flag to display subscriptions for.
    *
-   * @return array A render array.
+   * @return array
    *   A render array.
    */
   public function tab(UserInterface $user, FlagInterface $flag = NULL) {

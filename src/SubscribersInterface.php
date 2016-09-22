@@ -138,7 +138,7 @@ interface SubscribersInterface {
    *   (optional) The user account to filter available flags. If not set, all
    *   flags for the given entity and bundle will be returned.
    *
-   * @return \Drupal\flag\FlagInterface[] $flags
+   * @return \Drupal\flag\FlagInterface[]
    *   An array of the structure [fid] = flag_object.
    *
    * @see \Drupal\flag\FlagServiceInterface::getFlags()

@@ -69,4 +69,27 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
     $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
   }
 
+  /**
+   * Verify flag action access for the email_* flags.
+   */
+  public function testFlagActionAccess() {
+    $node = $this->nodes[1];
+    $user = $this->users[1];
+    $email_flag = $this->flagService->getFlagById('email_node');
+    $subscribe_flag = $this->flagService->getFlagById('subscribe_node');
+
+    // When the item is flagged, flag and unflag access should be available.
+    $access = $email_flag->actionAccess('flag', $user, $node);
+    $this->assertTrue($access->isAllowed());
+    $access = $email_flag->actionAccess('unflag', $user);
+    $this->assertTrue($access->isAllowed());
+
+    // Unflag the entity, and now only the unflag action should be available.
+    $this->flagService->unflag($subscribe_flag, $node, $user);
+    $access = $email_flag->actionAccess('flag', $user, $node);
+    $this->assertFalse($access->isAllowed());
+    $access = $email_flag->actionAccess('unflag', $user, $node);
+    $this->assertTrue($access->isAllowed());
+  }
+
 }
