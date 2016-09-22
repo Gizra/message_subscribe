@@ -26,7 +26,7 @@ class FlagEvents implements EventSubscriberInterface {
   /**
    * The flag service.
    *
-   * @var \Drupal\flag\FlagServiceInterface $flag_service
+   * @var \Drupal\flag\FlagServiceInterface
    */
   protected $flagService;
 
