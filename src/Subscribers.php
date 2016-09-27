@@ -191,7 +191,7 @@ class Subscribers implements SubscribersInterface {
       $values += ['notifiers' => []];
 
       // Send the message using the required notifiers.
-      foreach ($values['notifiers'] as $notifier_name) {
+      foreach (array_unique($values['notifiers']) as $notifier_name) {
         $options = !empty($notify_options[$notifier_name]) ? $notify_options[$notifier_name] : [];
         $options += [
           'save on fail' => FALSE,
@@ -386,6 +386,9 @@ class Subscribers implements SubscribersInterface {
     if (empty($notifiers)) {
       return;
     }
+    // Use notifier names as keys to avoid potential duplication of notifiers
+    // by other modules' hooks.
+    $notifiers = array_combine($notifiers, $notifiers);
     foreach (array_keys($uids) as $uid) {
       $uids[$uid]['notifiers'] += $notifiers;
     }
