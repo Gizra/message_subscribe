@@ -51,6 +51,13 @@ before_script:
   - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/Gizra/message_notify.git
   - cd ..
 
+  # Patch Flag for Config Entity flaggings.
+  # @todo Remove once https://www.drupal.org/node/2678756 is committed.
+  - cd modules/flag
+  - curl https://www.drupal.org/files/issues/2678756-20.patch > patch.txt
+  - git apply patch.txt && rm patch.txt
+  - cd -
+
   # Install Composer dependencies on 8.1.x and above.
   - test ${DRUPAL_CORE} == "8.0.x" || composer self-update && composer install
 

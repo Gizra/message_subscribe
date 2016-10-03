@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies: {  }
+id: subscribe_node_type
+label: 'Content type'
+bundles: {  }
+entity_type: node_type
+enabled: false
+global: false
+weight: 0
+flag_short: Subscribe
+flag_long: ''
+flag_message: 'You are now subscribed to this content type.'
+unflag_short: Unsubscribe
+unflag_long: ''
+unflag_message: 'You are no longer subscribed to this content type.'
+unflag_denied_text: ''
+flag_type: 'entity:node_type'
+link_type: ajax_link
+flagTypeConfig:
+  show_in_links: {  }
+  show_as_field: 1
+  show_on_form: 0
+  show_contextual_link: 0
+linkTypeConfig: {  }
+
