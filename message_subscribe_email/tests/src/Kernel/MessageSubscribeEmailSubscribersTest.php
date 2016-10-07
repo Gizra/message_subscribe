@@ -103,9 +103,7 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
         ],
       ],
       $user2->id() => [
-        'notifiers' => [
-          'email' => 'email',
-        ],
+        'notifiers' => [],
         'flags' => [
           'subscribe_node',
         ],
@@ -121,7 +119,7 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
 
     // Assert sent emails.
     $mails = $this->getMails();
-    $this->assertEquals(2, count($mails), 'Both users were sent an email.');
+    $this->assertEquals(1, count($mails), 'Only user 1 was sent an email.');
     $this->assertEquals('message_notify_' . $this->messageTemplate->id(), $mails[0]['id']);
   }
 
