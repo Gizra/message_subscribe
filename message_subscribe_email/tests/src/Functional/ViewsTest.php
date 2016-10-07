@@ -45,6 +45,16 @@ class ViewsTest extends BrowserTestBase {
 
     $this->flagService = $this->container->get('flag');
     $this->messageSubscribers = $this->container->get('message_subscribe.subscribers');
+
+    // Enable flags.
+    foreach (['node', 'og', 'term', 'user'] as $entity_type) {
+      foreach (['email', 'subscribe'] as $flag_type) {
+        if ($flag = $this->flagService->getFlagById($flag_type . '_' . $entity_type)) {
+          $flag->enable();
+          $flag->save();
+        }
+      }
+    }
   }
 
   /**

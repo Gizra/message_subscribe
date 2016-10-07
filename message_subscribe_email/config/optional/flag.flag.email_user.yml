@@ -10,7 +10,7 @@ unflag_long: ''
 unflag_message: ''
 unflag_denied_text: ''
 weight: 0
-status: false
+enabled: false
 langcode: en
 dependencies:
   module:
