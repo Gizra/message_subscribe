@@ -111,8 +111,8 @@ class Subscribers implements SubscribersInterface {
    * {@inheritdoc}
    */
   public function sendMessage(EntityInterface $entity, MessageInterface $message, array $notify_options = [], array $subscribe_options = [], array $context = []) {
-    $use_queue = isset($subscribe_options['use queue']) ? $subscribe_options['use queue'] : \Drupal::config('message_subscribe.settings')->get('use_queue');
-    $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('notify_own_actions');
+    $use_queue = isset($subscribe_options['use queue']) ? $subscribe_options['use queue'] : $this->config->get('use_queue');
+    $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : $this->config->get('notify_own_actions');
 
     // Save message by default.
     $subscribe_options += [
