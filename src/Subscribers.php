@@ -182,11 +182,11 @@ class Subscribers implements SubscribersInterface {
       $last_uid = $uid;
       // Clone the message in case it will need to be saved, it won't
       // overwrite the existing one.
-      $cloned_message = clone $message;
+      $cloned_message = $message->createDuplicate();
       // Push a copy of the original message into the new one.
       $cloned_message->original = $message;
-      unset($cloned_message->id);
-      $cloned_message->uid = $uid;
+      // Set the owner to this user.
+      $cloned_message->setOwnerId($uid);
 
       $values += ['notifiers' => []];
 
