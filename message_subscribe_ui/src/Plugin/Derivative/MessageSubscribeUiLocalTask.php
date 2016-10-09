@@ -3,6 +3,7 @@
 namespace Drupal\message_subscribe_ui\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\message_subscribe\SubscribersInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -46,6 +47,12 @@ class MessageSubscribeUiLocalTask extends DeriverBase implements ContainerDerive
 
     $first = TRUE;
     foreach ($this->subscribers->getFlags() as $flag) {
+      // @todo Remove this once config entities can have views with
+      // relationships.
+      if (!\Drupal::entityTypeManager()->getDefinition($flag->getFlaggableEntityTypeId()) instanceof ContentEntityTypeInterface) {
+        continue;
+      }
+
       $this->derivatives[$flag->id()] = [
         'title' => $flag->label(),
         // First route gets the same route name as the parent (in order to

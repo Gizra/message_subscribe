@@ -2,9 +2,11 @@
 
 namespace Drupal\Tests\message_subscribe\Kernel;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\message\Entity\Message;
 use Drupal\message\Entity\MessageTemplate;
+use Drupal\node\Entity\NodeType;
 use Drupal\simpletest\NodeCreationTrait;
 
 /**
@@ -71,6 +73,10 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $flag->save();
 
     $flag = $flags['subscribe_user'];
+    $flag->enable();
+    $flag->save();
+
+    $flag = $flags['subscribe_node_type'];
     $flag->enable();
     $flag->save();
 
@@ -326,6 +332,26 @@ class SubscribersTest extends MessageSubscribeTestBase {
         'notifiers' => ['email'],
       ],
     ], $uids);
+  }
+
+  /**
+   * Tests config entity subscriptions.
+   */
+  public function testConfigEntities() {
+    // Subscribe user 2 to 'article' nodes.
+    $flag = $this->flagService->getFlagById('subscribe_node_type');
+    $node_type = NodeType::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+    $node_type->save();
+    $this->flagService->flag($flag, $node_type, $this->users[2]);
+    $message = Message::create([
+      'template' => 'foo',
+      'uid' => $this->users[2],
+    ]);
+    $subscribers = $this->messageSubscribers->getSubscribers($node_type, $message);
+    $this->assertNotEmpty($subscribers[$this->users[2]->id()]);
   }
 
 }

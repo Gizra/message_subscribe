@@ -5,6 +5,7 @@ namespace Drupal\message_subscribe_ui\Controller;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\flag\FlagInterface;
@@ -146,7 +147,13 @@ class SubscriptionController extends ControllerBase {
     if (!$flag) {
       // We are inside /message-subscribe so get the first flag.
       $flags = $this->subscribers->getFlags();
-      $flag = reset($flags);
+
+      // Grab the first non-config entity flag.
+      foreach ($flags as $flag) {
+        if (\Drupal::entityTypeManager()->getDefinition($flag->getFlaggableEntityTypeId()) instanceof ContentEntityTypeInterface) {
+          break;
+        }
+      }
     }
 
     $view = $this->getView($user, $flag);
@@ -165,8 +172,9 @@ class SubscriptionController extends ControllerBase {
    * @param \Drupal\flag\FlagInterface $flag
    *   The flag for which to find a matching view.
    *
-   * @return \Drupal\views\ViewExecutable
-   *   The corresponding view executable.
+   * @return \Drupal\views\ViewExecutable|bool
+   *   The corresponding view executable. FALSE if the entity type is not a
+   *   content entity.
    *
    * @throws \Drupal\message_subscribe\Exception\MessageSubscribeException
    *   - If a view corresponding to the `subscribe_ENTITY_TYPE_ID` does not
