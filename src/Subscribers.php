@@ -111,8 +111,8 @@ class Subscribers implements SubscribersInterface {
    * {@inheritdoc}
    */
   public function sendMessage(EntityInterface $entity, MessageInterface $message, array $notify_options = [], array $subscribe_options = [], array $context = []) {
-    $use_queue = isset($subscribe_options['use queue']) ? $subscribe_options['use queue'] : \Drupal::config('message_subscribe.settings')->get('use_queue');
-    $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : \Drupal::config('message_subscribe.settings')->get('notify_own_actions');
+    $use_queue = isset($subscribe_options['use queue']) ? $subscribe_options['use queue'] : $this->config->get('use_queue');
+    $notify_message_owner = isset($subscribe_options['notify message owner']) ? $subscribe_options['notify message owner'] : $this->config->get('notify_own_actions');
 
     // Save message by default.
     $subscribe_options += [
@@ -182,11 +182,11 @@ class Subscribers implements SubscribersInterface {
       $last_uid = $uid;
       // Clone the message in case it will need to be saved, it won't
       // overwrite the existing one.
-      $cloned_message = clone $message;
+      $cloned_message = $message->createDuplicate();
       // Push a copy of the original message into the new one.
       $cloned_message->original = $message;
-      unset($cloned_message->id);
-      $cloned_message->uid = $uid;
+      // Set the owner to this user.
+      $cloned_message->setOwnerId($uid);
 
       $values += ['notifiers' => []];
 

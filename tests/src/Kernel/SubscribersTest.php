@@ -3,18 +3,19 @@
 namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Test\AssertMailTrait;
 use Drupal\message\Entity\Message;
-use Drupal\message\Entity\MessageTemplate;
-use Drupal\simpletest\NodeCreationTrait;
 
 /**
  * Test getting subscribes from context.
  *
  * @group message_subscribe
+ *
+ * @coversDefaultClass \Drupal\message_subscribe\Subscribers
  */
 class SubscribersTest extends MessageSubscribeTestBase {
 
-  use NodeCreationTrait;
+  use AssertMailTrait;
 
   /**
    * Flag service.
@@ -112,13 +113,6 @@ class SubscribersTest extends MessageSubscribeTestBase {
     // User2 flags User1.
     $this->flagService->flag($flags['subscribe_user'], $this->users[1], $this->users[2]);
 
-    // Create a dummy message-type.
-    $message_type = MessageTemplate::create([
-      'template' => 'foo',
-      'message_text' => ['value' => 'Example text.'],
-    ]);
-    $message_type->save();
-
     // Override default notifiers.
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', [])->save();
   }
@@ -128,7 +122,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
    */
   public function testGetSubscribers() {
     $message = Message::create([
-      'template' => 'foo',
+      'template' => $this->template->id(),
       'uid' => $this->users[1],
     ]);
 
@@ -153,7 +147,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
 
     // Test none of users will get message if only blocked user is subscribed.
     $message = Message::create([
-      'template' => 'foo',
+      'template' => $this->template->id(),
       'uid' => $this->users[1],
     ]);
 
@@ -222,7 +216,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
     // Test the affect of the variable when set to FALSE (do not notify self).
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', FALSE)->save();
     $message = Message::create([
-      'template' => 'foo',
+      'template' => $this->template->id(),
       'uid' => $this->users[1],
     ]);
 
@@ -275,7 +269,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
     // Make sure we are notifying ourselves for this test.
     \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('notify_own_actions', TRUE)->save();
 
-    $message = Message::create(['template' => 'foo']);
+    $message = Message::create(['template' => $this->template->id()]);
 
     $node = $this->nodes[0];
     $node->setPublished(FALSE);
@@ -304,7 +298,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $this->enableModules(['message_subscribe_test']);
 
     $message = Message::create([
-      'template' => 'foo',
+      'template' => $this->template->id(),
       'uid' => $this->users[1],
     ]);
 
@@ -326,6 +320,70 @@ class SubscribersTest extends MessageSubscribeTestBase {
         'notifiers' => ['email'],
       ],
     ], $uids);
+  }
+
+  /**
+   * Tests sendMessage method.
+   *
+   * @covers ::sendMessage
+   */
+  public function testSendMessage() {
+    // Enable a notifier.
+    $this->config('message_subscribe.settings')
+      // Override default notifiers.
+      ->set('default_notifiers', ['email'])
+      ->save();
+
+    // Add a few more users.
+    $flags = $this->flagService->getFlags();
+    foreach (range(4, 10) as $i) {
+      $this->users[$i] = $this->createUser([
+        'access content',
+        'flag subscribe_node',
+        'unflag subscribe_node',
+        'flag subscribe_user',
+        'unflag subscribe_user',
+      ]);
+
+      $this->flagService->flag($flags['subscribe_node'], $this->nodes[0], $this->users[$i]);
+    }
+
+    // Send notifications for node 1.
+    // Pass in the save message argument to the notifier.
+    $notify_options = [
+      'email' => [
+        'save on fail' => TRUE,
+        'save on success' => TRUE,
+      ],
+    ];
+    $subscribe_options = [
+      'notify message owner' => TRUE,
+    ];
+    $message = Message::create(['template' => $this->template->id()]);
+    $this->messageSubscribers->sendMessage($this->nodes[0], $message, $notify_options, $subscribe_options);
+
+    // Verify that each of the users has a copy of the message.
+    $mails = $this->getMails();
+    $no_message_count = $message_count = 0;
+    foreach ($this->users as $account) {
+      /** @var \Drupal\Core\Entity\Query\QueryInterface $query */
+      $query = $this->container->get('entity_type.manager')->getStorage('message')->getQuery();
+      $query->condition('uid', $account->id());
+      $result = $query->execute();
+
+      // Users 2 through 3 won't have access.
+      if (!$account->hasPermission('access content') || $account->isBlocked()) {
+        $this->assertEmpty($result);
+        $no_message_count++;
+      }
+      else {
+        $this->assertEquals(1, count($result), '1 message was saved for user ' . $account->id());
+        $message_count++;
+      }
+    }
+    $this->assertEquals(2, $no_message_count);
+    $this->assertEquals(8, $message_count);
+    $this->assertEquals(count($mails), $message_count);
   }
 
 }
