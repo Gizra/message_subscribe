@@ -9,13 +9,20 @@
         "irc": "irc://irc.freenode.org/drupal",
         "source": "https://cgit.drupalcode.org/message_subscribe"
     },
+    "repositories": {
+      "drupal": {
+        "type": "composer",
+          "url": "https://packagist.drupal-composer.org"
+      }
+    },
     "require": {
       "drupal/flag": "~8.4.0",
       "drupal/message": "~8.1.0",
       "drupal/message_notify": "~8.1.0"
     },
     "require-dev": {
-      "drupal/og": "~8.1.0"
+      "drupal/og": "~8.1.0",
+      "drupal/coder": "^8.2"
     },
     "minimum-stability": "dev"
 }
