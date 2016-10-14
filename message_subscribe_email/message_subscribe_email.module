@@ -61,10 +61,15 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
     ->condition('uid', array_keys($uids), 'IN')
     ->groupBy('uid')
     ->execute()
-    ->fetchAll();
+    ->fetchAllAssoc('uid');
 
-  foreach ($result as $row) {
-    // Add 'email' to the list of notifiers.
-    $uids[$row->uid]['notifiers']['email'] = 'email';
+  foreach ($uids as $uid => $data) {
+    if (!in_array($uid, array_keys($result))) {
+      unset($uids[$uid]['notifiers']['email']);
+    }
+    else {
+      // Ensure the email notifier is set for email subscribers.
+      $uids[$uid]['notifiers']['email'] = 'email';
+    }
   }
 }
