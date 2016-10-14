@@ -4,7 +4,6 @@ namespace Drupal\Tests\message_subscribe\Kernel;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\message\Tests\MessageTemplateCreateTrait;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
 use Drupal\simpletest\UserCreationTrait;
@@ -15,7 +14,7 @@ use Drupal\simpletest\UserCreationTrait;
 abstract class MessageSubscribeTestBase extends KernelTestBase {
 
   use ContentTypeCreationTrait;
-  use MessageTemplateCreateTrait;
+  use \Drupal\Tests\message\Kernel\MessageTemplateCreateTrait;
   use NodeCreationTrait;
   use UserCreationTrait;
 
