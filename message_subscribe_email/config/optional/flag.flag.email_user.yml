@@ -22,8 +22,8 @@ flagTypeConfig:
   show_in_links:
     - full
     - teaser
-  show_as_field: 1
-  show_on_form: 0
-  show_contextual_link: 0
-  access_uid: '0'
+  show_as_field: true
+  show_on_form: false
+  show_contextual_link: false
+  access_uid: false
 linkTypeConfig: {  }

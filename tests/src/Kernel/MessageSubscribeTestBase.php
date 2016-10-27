@@ -7,6 +7,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
 use Drupal\simpletest\UserCreationTrait;
+use Drupal\Tests\message\Kernel\MessageTemplateCreateTrait;
 
 /**
  * Base class for messsage subscribe kernel tests.
@@ -14,7 +15,7 @@ use Drupal\simpletest\UserCreationTrait;
 abstract class MessageSubscribeTestBase extends KernelTestBase {
 
   use ContentTypeCreationTrait;
-  use \Drupal\Tests\message\Kernel\MessageTemplateCreateTrait;
+  use MessageTemplateCreateTrait;
   use NodeCreationTrait;
   use UserCreationTrait;
 
