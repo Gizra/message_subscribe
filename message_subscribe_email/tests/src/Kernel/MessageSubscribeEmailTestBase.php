@@ -78,12 +78,14 @@ abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {
 
     $this->users[1] = $this->createUser($permissions);
     $this->users[2] = $this->createUser($permissions);
+    $this->users[3] = $this->createUser($permissions);
 
-    // Create node.
+    // Create nodes.
     $settings = [];
     $settings['type'] = $node_type->id();
     $settings['uid'] = $this->users[1]->id();
     $this->nodes[1] = $this->createNode($settings);
+    $this->nodes[2] = $this->createNode($settings);
 
     // Create a dummy message-type.
     $this->messageTemplate = MessageTemplate::create(['template' => 'foo']);
