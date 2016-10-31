@@ -27,14 +27,11 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
   public function testEmailNotifications() {
     $message = Message::create(['template' => $this->messageTemplate->id()]);
 
-    $node = $this->nodes[1];
-    $user1 = $this->users[1];
-
-    $uids = $this->messageSubscribers->getSubscribers($node, $message);
+    $uids = $this->messageSubscribers->getSubscribers($this->nodes[1], $message);
 
     // Assert subscribers data.
     $expected_uids = [
-      $user1->id() => [
+      $this->users[1]->id() => [
         'notifiers' => [
           'email' => 'email',
         ],
@@ -46,19 +43,22 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
 
     $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
 
-    $this->flagService->unflag($this->flagService->getFlagById('subscribe_node'), $node, $user1);
+    $this->flagService->unflag($this->flagService->getFlagById('subscribe_node'), $this->nodes[1], $this->users[1]);
+
+    // Subscribe to node 2 *with* email notifications.
+    $this->flagService->flag($this->flagService->getFlagById('subscribe_node'), $this->nodes[2], $this->users[1]);
 
     // Opt out of default email notifications.
-    $user1->message_subscribe_email = 0;
-    $user1->save();
+    $this->users[1]->message_subscribe_email = 0;
+    $this->users[1]->save();
 
-    $this->flagService->flag($this->flagService->getFlagById('subscribe_node'), $node, $user1);
+    $this->flagService->flag($this->flagService->getFlagById('subscribe_node'), $this->nodes[1], $this->users[1]);
 
-    $uids = $this->messageSubscribers->getSubscribers($node, $message);
+    $uids = $this->messageSubscribers->getSubscribers($this->nodes[1], $message);
 
     // Assert subscribers data.
     $expected_uids = [
-      $user1->id() => [
+      $this->users[1]->id() => [
         'notifiers' => [],
         'flags' => [
           'subscribe_node',

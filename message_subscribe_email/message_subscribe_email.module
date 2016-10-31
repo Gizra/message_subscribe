@@ -59,6 +59,9 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
   $result = $query->fields('f', array('uid'))
     ->condition('flag_id', $flag_ids, 'IN')
     ->condition('uid', array_keys($uids), 'IN')
+    // Ensure to grab the correct flagging.
+    ->condition('entity_type', $values['entity_type'])
+    ->condition('entity_id', $values['entity']->id())
     ->groupBy('uid')
     ->execute()
     ->fetchAllAssoc('uid');
