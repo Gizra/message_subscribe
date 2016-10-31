@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\message_subscribe_email\Unit;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\ImmutableConfig;
 use Drupal\flag\FlagInterface;
 use Drupal\flag\FlagServiceInterface;
 use Drupal\message_subscribe_email\Manager;
@@ -32,7 +34,12 @@ class ManagerTest extends UnitTestCase {
     $flag_service = $this->prophesize(FlagServiceInterface::class);
     $flag_service->getFlags()->willReturn($flags);
 
-    $manager = new Manager($flag_service->reveal());
+    $config = $this->prophesize(ImmutableConfig::class);
+    $config->get('flag_prefix')->willReturn('non_standard_prefix');
+    $config_factory = $this->prophesize(ConfigFactoryInterface::class);
+    $config_factory->get('message_subscribe_email.settings')->willReturn($config->reveal());
+
+    $manager = new Manager($flag_service->reveal(), $config_factory->reveal());
     $this->assertEquals($expected, $manager->getFlags());
   }
 
@@ -52,8 +59,15 @@ class ManagerTest extends UnitTestCase {
 
     // A few matching flags.
     $return[] = [
-      ['email_one' => $flag, 'email_two' => $flag],
-      ['foo_flag' => $flag, 'email_one' => $flag, 'email_two' => $flag],
+      [
+        'non_standard_prefix_one' => $flag,
+        'non_standard_prefix_two' => $flag,
+      ],
+      [
+        'foo_flag' => $flag,
+        'non_standard_prefix_one' => $flag,
+        'non_standard_prefix_two' => $flag,
+      ],
     ];
 
     return $return;

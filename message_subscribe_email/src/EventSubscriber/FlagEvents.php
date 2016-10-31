@@ -17,11 +17,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class FlagEvents implements EventSubscriberInterface {
 
   /**
-   * Message subscribe settings.
+   * Config factory service.
    *
-   * @var \Drupal\Core\Config\ImmutableConfig
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $config;
+  protected $configFactory;
 
   /**
    * The flag service.
@@ -39,7 +39,7 @@ class FlagEvents implements EventSubscriberInterface {
    *   The flag service.
    */
   public function __construct(ConfigFactoryInterface $config_factory, FlagServiceInterface $flag_service) {
-    $this->config = $config_factory->get('message_subscribe.settings');
+    $this->configFactory = $config_factory;
     $this->flagService = $flag_service;
   }
 
@@ -88,13 +88,13 @@ class FlagEvents implements EventSubscriberInterface {
    *   flag.
    */
   protected function triggerEmailFlag(FlaggingInterface $flagging, $action) {
-    if (strpos($flagging->getFlagId(), $this->config->get('flag_prefix') . '_') === 0) {
+    if (strpos($flagging->getFlagId(), $this->configFactory->get('message_subscribe.settings')->get('flag_prefix') . '_') === 0) {
       // The flag is a subscription flag.
       if ($flagging->getOwner()->message_subscribe_email->value || $action == 'unflag') {
         // User wants to use email for the subscription, or the subscription is
         // being removed.
-        $prefix = $this->config->get('flag_prefix');
-        $email_flag_name = 'email_' . str_replace($prefix . '_', '', $flagging->getFlagId());
+        $prefix = $this->configFactory->get('message_subscribe.settings')->get('flag_prefix');
+        $email_flag_name = $this->configFactory->get('message_subscribe_email.settings')->get('flag_prefix') . '_' . str_replace($prefix . '_', '', $flagging->getFlagId());
         $flag = $this->flagService->getFlagById($email_flag_name);
         if (!$flag) {
           throw new MessageSubscribeException('There is no corresponding email flag (' . $email_flag_name . ') for the ' . $flagging->getFlagId() . ' flag.');

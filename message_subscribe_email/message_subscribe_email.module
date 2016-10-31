@@ -6,6 +6,7 @@
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\flag\FlagInterface;
 
@@ -14,7 +15,8 @@ use Drupal\flag\FlagInterface;
  */
 function message_subscribe_email_flag_action_access($action, FlagInterface $flag, AccountInterface $account, EntityInterface $flaggable = NULL) {
   // The 'unflag' action is always allowed here, so only check 'flag'.
-  if ($action === 'flag' && $flaggable && strpos($flag->id(), 'email_') === 0) {
+  $prefix = \Drupal::config('message_subscribe_email.settings')->get('flag_prefix') . '_';
+  if ($action === 'flag' && $flaggable && strpos($flag->id(), $prefix) === 0) {
 
     // Get the other flags on that same content.
     /** @var \Drupal\flag\FlaggingInterface[] $user_flaggings */
@@ -25,11 +27,11 @@ function message_subscribe_email_flag_action_access($action, FlagInterface $flag
     }
 
     // Find the corresponding subscribe_* flag.
-    $name = str_replace('email_', '', $flag->id());
-    $prefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
+    $name = str_replace($prefix, '', $flag->id());
+    $subscribe_prefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
 
     // Disable access to the flag when the subscribe flag is unflagged.
-    return AccessResult::forbiddenIf(empty($user_flags[$prefix . $name]));
+    return AccessResult::forbiddenIf(empty($user_flags[$subscribe_prefix . $name]));
   }
 }
 
@@ -75,4 +77,29 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
       $uids[$uid]['notifiers']['email'] = 'email';
     }
   }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function message_subscribe_email_form_message_subscribe_admin_settings_alter(array &$form, FormStateInterface $form_state) {
+  // Add the email prefix settings.
+  $form['message_subscribe_email_flag_prefix'] = [
+    '#type' => 'textfield',
+    '#title' => t('Email flag prefix'),
+    '#description' => t('The prefix that will be used to identify email subscription flags.'),
+    '#default_value' => \Drupal::configFactory()->getEditable('message_subscribe_email.settings')->get('flag_prefix'),
+    '#required' => TRUE,
+  ];
+  $form['#submit'][] = 'message_subscribe_email_message_subscribe_admin_settings_form_submit';
+}
+
+/**
+ * Submit callback.
+ */
+function message_subscribe_email_message_subscribe_admin_settings_form_submit(array $form, FormStateInterface $form_state) {
+  \Drupal::configFactory()
+    ->getEditable('message_subscribe_email.settings')
+    ->set('flag_prefix', $form_state->getValue('message_subscribe_email_flag_prefix'))
+    ->save();
 }
