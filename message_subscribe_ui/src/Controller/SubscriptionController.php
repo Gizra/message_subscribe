@@ -152,8 +152,8 @@ class SubscriptionController extends ControllerBase {
     $view = $this->getView($user, $flag);
     $result = $view->preview();
 
-    // Add cache tags for this flag.
-    $result['#cache']['tags'] = $flag->getCacheTags();
+    // Add cache tags for this flag and view.
+    $result['#cache']['tags'] = $flag->getCacheTags() + $view->getCacheTags();
     return $result;
   }
 

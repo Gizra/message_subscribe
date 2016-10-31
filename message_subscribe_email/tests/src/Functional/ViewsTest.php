@@ -108,6 +108,7 @@ class ViewsTest extends BrowserTestBase {
     $flag = $this->flagService->getFlagById('subscribe_node');
     $this->flagService->flag($flag, $node, $users[2]);
     $this->drupalGet('user/' . $users[2]->id() . '/message-subscribe/subscribe_node');
+    // The node title (label) appears on the list of subscribed content.
     $this->assertSession()->pageTextContains($node->label());
     $this->assertSession()->pageTextContains(t("Don't send email"));
 
@@ -117,6 +118,16 @@ class ViewsTest extends BrowserTestBase {
     $this->drupalGet('user/' . $users[2]->id() . '/message-subscribe/subscribe_user');
     $this->assertSession()->pageTextContains($users[1]->label());
     $this->assertSession()->pageTextContains(t("Don't send email"));
+
+    // Login user 3.
+    $this->drupalLogin($users[3]);
+    $this->drupalGet('user/' . $users[3]->id() . '/message-subscribe');
+    $this->assertSession()->pageTextContains(t('You are not subscribed to any items.'));
+    $flag = $this->flagService->getFlagById('subscribe_node');
+    $this->flagService->flag($flag, $node, $users[3]);
+    $this->drupalGet('user/' . $users[3]->id() . '/message-subscribe');
+    // The node title (label) appears on the list of subscribed content.
+    $this->assertSession()->pageTextContains($node->label());
   }
 
 }
