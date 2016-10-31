@@ -102,7 +102,7 @@ class SubscriptionController extends ControllerBase {
       return AccessResult::forbidden();
     }
 
-    if (!$flag->isEnabled()) {
+    if (!$flag->status()) {
       // The flag is disabled.
       return AccessResult::forbidden();
     }
@@ -200,7 +200,7 @@ class SubscriptionController extends ControllerBase {
 
       // Check that the flag is valid.
       $rel_flag = $this->flagService->getFlagById($relationship['flag']);
-      if (!$rel_flag || (!$rel_flag->isEnabled())) {
+      if (!$rel_flag || (!$rel_flag->status())) {
         throw new MessageSubscribeException('Flag "' . $relationships['flag'] . '" is not setup correctly. It is probably disabled or have no bundles configured.');
       }
     }
