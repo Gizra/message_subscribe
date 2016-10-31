@@ -6,4 +6,4 @@ services:
       - { name: event_subscriber }
   message_subscribe_email.manager:
     class: \Drupal\message_subscribe_email\Manager
-    arguments: ['@flag']
+    arguments: ['@flag', '@config.factory']

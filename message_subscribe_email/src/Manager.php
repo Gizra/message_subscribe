@@ -2,12 +2,20 @@
 
 namespace Drupal\message_subscribe_email;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\flag\FlagServiceInterface;
 
 /**
  * Utility functions for the Message Subscribe Email module.
  */
 class Manager {
+
+  /**
+   * Message subscribe settings.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $config;
 
   /**
    * The flag service.
@@ -21,9 +29,12 @@ class Manager {
    *
    * @param \Drupal\flag\FlagServiceInterface $flag_service
    *   The flag service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    */
-  public function __construct(FlagServiceInterface $flag_service) {
+  public function __construct(FlagServiceInterface $flag_service, ConfigFactoryInterface $config_factory) {
     $this->flagService = $flag_service;
+    $this->config = $config_factory->get('message_subscribe_email.settings');
   }
 
   /**
@@ -42,7 +53,7 @@ class Manager {
     $email_flags = [];
     foreach ($this->flagService->getFlags() as $flag_name => $flag) {
       // Check that the flag is using name convention.
-      if (strpos($flag_name, 'email') === 0) {
+      if (strpos($flag_name, $this->config->get('flag_prefix')) === 0) {
         $email_flags[$flag_name] = $flag;
       }
     }
