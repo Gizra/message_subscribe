@@ -6,6 +6,7 @@ use Drupal\comment\CommentInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\Session\AccountInterface;
@@ -261,7 +262,7 @@ class Subscribers implements SubscribersInterface {
 
     foreach ($uids as $uid => $values) {
       // See if the author of the entity gets notified.
-      if ($entity instanceof EntityOwnerInterface && !$notify_message_owner && ($entity->getOwnerId() == $uid)) {
+      if (!$notify_message_owner && $this->isEntityOwner($entity, $uid)) {
         unset($uids[$uid]);
       }
 
@@ -288,6 +289,30 @@ class Subscribers implements SubscribersInterface {
 
     return $uids;
 
+  }
+
+  /**
+   * Helper method to determine if the given entity belongs to the given user.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to check ownership of.
+   * @param int $uid
+   *   The user ID to check for ownership.
+   *
+   * @return bool
+   *   Returns TRUE if the entity is owned by the given user ID.
+   */
+  protected function isEntityOwner(EntityInterface $entity, $uid) {
+    // Special handling for entites implementing RevisionLogInterface.
+    $is_owner = FALSE;
+    if ($entity instanceof RevisionLogInterface) {
+      $is_owner = $entity->getRevisionUserId() == $uid;
+    }
+    elseif ($entity instanceof EntityOwnerInterface) {
+      $is_owner = $entity->getOwnerId() == $uid;
+    }
+
+    return $is_owner;
   }
 
   /**

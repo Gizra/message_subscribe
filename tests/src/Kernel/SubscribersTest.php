@@ -386,4 +386,57 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $this->assertEquals(count($mails), $message_count);
   }
 
+  /**
+   * Tests entity owner sending specific to node entites.
+   *
+   * @covers ::getSubscribers
+   */
+  public function testNotifyEntityOwner() {
+    // Unblock user 3.
+    $this->users[3]->activate();
+    $this->users[3]->save();
+
+    // Setup a node owned by user 2, but *edited* by user 3.
+    $this->nodes[0]->setOwner($this->users[2]);
+    $this->nodes[0]->setRevisionUser($this->users[3]);
+    $this->nodes[0]->save();
+
+    // Ensure owners are not setup to be notified.
+    $this->config('message_subscribe.settings')
+      ->set('notify_own_actions', FALSE)
+      ->save();
+
+    // User 3, also subscribed, should not be notified. User 2 *should* be
+    // notified (they are subscribed in ::setUp) because user 3 edited the node.
+    $message = Message::create(['template' => $this->template->id()]);
+    $subscribers = $this->messageSubscribers->getSubscribers($this->nodes[0], $message);
+    $expected = [
+      $this->users[1]->id() => [
+        'notifiers' => [],
+        'flags' => ['subscribe_node'],
+      ],
+      $this->users[2]->id() => [
+        'notifiers' => [],
+        'flags' => ['subscribe_node'],
+      ],
+    ];
+    $this->assertEquals($expected, $subscribers);
+
+    // Edit the node by user 2, and user 3 should now be notified.
+    $this->nodes[0]->setRevisionUser($this->users[2]);
+    $this->nodes[0]->save();
+    $subscribers = $this->messageSubscribers->getSubscribers($this->nodes[0], $message);
+    $expected = [
+      $this->users[1]->id() => [
+        'notifiers' => [],
+        'flags' => ['subscribe_node'],
+      ],
+      $this->users[3]->id() => [
+        'notifiers' => [],
+        'flags' => ['subscribe_node'],
+      ],
+    ];
+    $this->assertEquals($expected, $subscribers);
+  }
+
 }
