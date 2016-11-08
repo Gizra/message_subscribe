@@ -32,7 +32,7 @@ class UninstallTest extends BrowserTestBase {
     $this->drupalPostForm('admin/modules/uninstall', ['uninstall[message_subscribe]' => TRUE], t('Uninstall'));
     $this->drupalPostForm(NULL, [], t('Uninstall'));
 
-    // Validate Flag was uninstalled.
+    // Validate Message Subscribe was uninstalled.
     $this->assertSession()->pageTextContains(t('The selected modules have been uninstalled.'));
     $this->drupalGet(Url::fromRoute('message_subscribe.admin_settings'));
     $this->assertSession()->statusCodeEquals(404);
