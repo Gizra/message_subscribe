@@ -99,10 +99,10 @@ class FlagEvents implements EventSubscriberInterface {
         if (!$flag) {
           throw new MessageSubscribeException('There is no corresponding email flag (' . $email_flag_name . ') for the ' . $flagging->getFlagId() . ' flag.');
         }
-        if ($action == 'flag') {
+        if ($action === 'flag') {
           $this->flagService->flag($flag, $flagging->getFlaggable(), $flagging->getOwner());
         }
-        elseif ($flag->isFlagged($flagging->getFlaggable(), $flagging->getOwner())) {
+        elseif ($this->flagService->getFlagging($flag, $flagging->getFlaggable(), $flagging->getOwner())) {
           $this->flagService->unflag($flag, $flagging->getFlaggable(), $flagging->getOwner());
         }
       }
