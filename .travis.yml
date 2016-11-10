@@ -14,10 +14,27 @@ env:
     MODULE_NAME='message_subscribe'
     CODER_VERSION='8.2.*'
 
+# Cache Composer directory so that we don't have to download drush all the time.
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/travis_phantomjs
+
 mysql:
   database: drupal
   username: root
   encoding: utf8
+
+before_install:
+  # Upgrade PhantomJS to 2.x.
+  # @see https://github.com/travis-ci/travis-ci/issues/3225
+  # @see https://github.com/testdouble/present/commit/461ac72cdcfc4e87d84711550a638fbc12154567
+  # @see https://github.com/jibran/dynamic_entity_reference/blob/8.x-1.x/.travis.yml
+  - phantomjs --version;
+  - export PATH=$HOME/travis_phantomjs/phantomjs-2.1.1-linux-x86_64/bin:$PATH;
+  - phantomjs --version;
+  - if [[ $(phantomjs --version) != '2.1.1' ]]; then rm -rf $HOME/travis_phantomjs; mkdir -p $HOME/travis_phantomjs; wget https://assets.membergetmember.co/software/phantomjs-2.1.1-linux-x86_64.tar.bz2 -O $HOME/travis_phantomjs/phantomjs-2.1.1-linux-x86_64.tar.bz2; tar -xvf $HOME/travis_phantomjs/phantomjs-2.1.1-linux-x86_64.tar.bz2 -C $HOME/travis_phantomjs; fi;
+  - phantomjs --version
 
 before_script:
   # Remove Xdebug as we don't need it and it causes "PHP Fatal error: Maximum
@@ -70,10 +87,16 @@ before_script:
   # Export web server URL for browser tests.
   - export SIMPLETEST_BASE_URL=http://localhost:8888
 
+  # Browser output.
+  - export BROWSERTEST_OUTPUT_DIRECTORY="/tmp"
+
+  # Start PhantomJS
+  - phantomjs --debug=true --ssl-protocol=any --ignore-ssl-errors=true ./vendor/jcalderonzumba/gastonjs/src/Client/main.js 8510 1024 768 &
+
 script:
   # Coding standards.
   - $HOME/.composer/vendor/bin/phpcs --report=full --standard=Drupal $TESTDIR
   # Run the PHPUnit tests which also include the kernel tests.
-  - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/$MODULE_NAME
+  - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/$MODULE_NAME -vvv
   # Run legacy simpletests.
   - php core/scripts/run-tests.sh --color --verbose --php `which php` --directory modules/$MODULE_NAME/src/Tests --dburl $SIMPLETEST_DB --url $SIMPLETEST_BASE_URL --sqlite ./.db.sqlite
