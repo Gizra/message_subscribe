@@ -319,7 +319,7 @@ class Subscribers implements SubscribersInterface {
    * {@inheritdoc}
    */
   public function getFlags($entity_type = NULL, $bundle = NULL, AccountInterface $account = NULL) {
-    $flags = $this->flagService->getFlags($entity_type, $bundle, $account);
+    $flags = $this->flagService->getAllFlags($entity_type, $bundle, $account);
     $ms_flags = [];
     $prefix = $this->config->get('flag_prefix') . '_';
     foreach ($flags as $flag_name => $flag) {
