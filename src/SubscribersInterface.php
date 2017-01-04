@@ -141,7 +141,7 @@ interface SubscribersInterface {
    * @return \Drupal\flag\FlagInterface[]
    *   An array of the structure [fid] = flag_object.
    *
-   * @see \Drupal\flag\FlagServiceInterface::getFlags()
+   * @see \Drupal\flag\FlagServiceInterface::getAllFlags()
    */
   public function getFlags($entity_type = NULL, $bundle = NULL, AccountInterface $account = NULL);
 

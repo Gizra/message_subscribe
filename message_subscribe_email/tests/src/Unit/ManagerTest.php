@@ -32,7 +32,7 @@ class ManagerTest extends UnitTestCase {
    */
   public function testGetFlags(array $expected, array $flags) {
     $flag_service = $this->prophesize(FlagServiceInterface::class);
-    $flag_service->getFlags()->willReturn($flags);
+    $flag_service->getAllFlags()->willReturn($flags);
 
     $config = $this->prophesize(ImmutableConfig::class);
     $config->get('flag_prefix')->willReturn('non_standard_prefix');

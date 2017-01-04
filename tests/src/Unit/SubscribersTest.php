@@ -122,7 +122,7 @@ namespace Drupal\Tests\message_subscribe\Unit {
 
       // No flags.
       $flag_service = $this->prophesize(FlagServiceInterface::class);
-      $flag_service->getFlags(NULL, NULL, NULL)->willReturn([]);
+      $flag_service->getAllFlags(NULL, NULL, NULL)->willReturn([]);
       $this->flagService = $flag_service->reveal();
       $subscribers = $this->getSubscriberService();
       $this->assertEquals([], $subscribers->getFlags());
@@ -130,7 +130,7 @@ namespace Drupal\Tests\message_subscribe\Unit {
       // No flags matching prefix.
       $flag = $this->prophesize(FlagInterface::class)->reveal();
       $flag_service = $this->prophesize(FlagServiceInterface::class);
-      $flag_service->getFlags(NULL, NULL, NULL)->willReturn([
+      $flag_service->getAllFlags(NULL, NULL, NULL)->willReturn([
         'foo' => $flag,
         'bar' => $flag,
       ]);
@@ -140,7 +140,7 @@ namespace Drupal\Tests\message_subscribe\Unit {
 
       // Matching prefix.
       $flag_service = $this->prophesize(FlagServiceInterface::class);
-      $flag_service->getFlags(NULL, NULL, NULL)->willReturn(
+      $flag_service->getAllFlags(NULL, NULL, NULL)->willReturn(
         ['foo' => $flag, 'bar' => $flag, 'blah_foo' => $flag]
       );
       $this->flagService = $flag_service->reveal();

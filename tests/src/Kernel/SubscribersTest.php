@@ -64,7 +64,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
     // Create node-type.
     $node_type = 'article';
 
-    $flags = $this->flagService->getFlags();
+    $flags = $this->flagService->getAllFlags();
 
     $flag = $flags['subscribe_node'];
     $flag->set('bundles', [$node_type]);
@@ -194,7 +194,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
       'unflag subscribe_user',
     ]);
 
-    $flags = $this->flagService->getFlags();
+    $flags = $this->flagService->getAllFlags();
     $this->flagService->flag($flags['subscribe_node'], $node, $user3);
     $this->flagService->flag($flags['subscribe_node'], $node, $user4);
 
@@ -335,7 +335,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
       ->save();
 
     // Add a few more users.
-    $flags = $this->flagService->getFlags();
+    $flags = $this->flagService->getAllFlags();
     foreach (range(4, 10) as $i) {
       $this->users[$i] = $this->createUser([
         'access content',
