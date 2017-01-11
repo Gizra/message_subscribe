@@ -57,7 +57,7 @@ abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {
     $node_type = $this->createContentType();
 
     // Enable flags.
-    $flags = $this->flagService->getFlags();
+    $flags = $this->flagService->getAllFlags();
 
     $flag = $flags['subscribe_node'];
     $flag->set('bundles', [$node_type->id()]);

@@ -51,7 +51,7 @@ class Manager {
    */
   public function getFlags() {
     $email_flags = [];
-    foreach ($this->flagService->getFlags() as $flag_name => $flag) {
+    foreach ($this->flagService->getAllFlags() as $flag_name => $flag) {
       // Check that the flag is using name convention.
       if (strpos($flag_name, $this->config->get('flag_prefix')) === 0) {
         $email_flags[$flag_name] = $flag;
