@@ -26,5 +26,5 @@ flagTypeConfig:
   show_on_form: false
   show_contextual_link: false
   i18n: null
-  access_author: ''
+  extra_permissions: { }
 linkTypeConfig: {  }
