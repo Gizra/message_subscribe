@@ -25,5 +25,5 @@ flagTypeConfig:
   show_as_field: true
   show_on_form: false
   show_contextual_link: false
-  access_uid: false
+  extra_permissions: { }
 linkTypeConfig: {  }
