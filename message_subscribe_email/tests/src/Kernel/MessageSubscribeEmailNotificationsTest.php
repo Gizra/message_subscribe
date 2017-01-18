@@ -67,6 +67,14 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
     ];
 
     $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
+
+    // Test with advanced contexts, passing node 2 directly, but node 1 in the
+    // context.
+    $context = [
+      'node' => [$this->nodes[1]->id()],
+    ];
+    $uids = $this->messageSubscribers->getSubscribers($this->nodes[2], $message, [], $context);
+    $this->assertEquals($expected_uids, $uids);
   }
 
   /**
