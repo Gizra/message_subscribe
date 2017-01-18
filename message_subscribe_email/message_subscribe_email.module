@@ -57,19 +57,28 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
     $flag_ids[] = $flag->id();
   }
 
-  $query = db_select('flagging', 'f');
-  $result = $query->fields('f', array('uid'))
-    ->condition('flag_id', $flag_ids, 'IN')
-    ->condition('uid', array_keys($uids), 'IN')
-    // Ensure to grab the correct flagging.
-    ->condition('entity_type', $values['entity_type'])
-    ->condition('entity_id', $values['entity']->id())
-    ->groupBy('uid')
-    ->execute()
-    ->fetchAllAssoc('uid');
+  $all_email_subscribers = [];
+  foreach ($values['context'] as $entity_type => $entity_ids) {
+    if (empty($entity_ids)) {
+      continue;
+    }
+
+    $query = db_select('flagging', 'f');
+    $result = $query->fields('f', array('uid'))
+      ->condition('flag_id', $flag_ids, 'IN')
+      ->condition('uid', array_keys($uids), 'IN')
+      // Ensure to grab the correct flagging.
+      ->condition('entity_type', $entity_type)
+      ->condition('entity_id', $entity_ids, 'IN')
+      ->groupBy('uid')
+      ->execute()
+      ->fetchAllAssoc('uid');
+
+    $all_email_subscribers += array_keys($result);
+  }
 
   foreach ($uids as $uid => $data) {
-    if (!in_array($uid, array_keys($result))) {
+    if (!in_array($uid, $all_email_subscribers)) {
       unset($uids[$uid]['notifiers']['email']);
     }
     else {
