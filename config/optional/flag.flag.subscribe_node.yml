@@ -1,7 +1,13 @@
 id: subscribe_node
-entity_type: node
 label: Content
+dependencies:
+  module:
+    - node
 bundles: {  }
+entity_type: node
+global: false
+weight: 0
+status: false
 flag_short: Subscribe
 flag_long: ''
 flag_message: 'You are now subscribed to this item.'
@@ -9,14 +15,7 @@ unflag_short: Unsubscribe
 unflag_long: ''
 unflag_message: 'You are no longer subscribed to this item.'
 unflag_denied_text: ''
-weight: 0
-enabled: false
-langcode: en
-dependencies:
-  module:
-    - node
-roles: null
-flag_type: entity:node
+flag_type: 'entity:node'
 link_type: ajax_link
 flagTypeConfig:
   show_in_links:
@@ -26,5 +25,6 @@ flagTypeConfig:
   show_on_form: false
   show_contextual_link: false
   i18n: null
-  extra_permissions: { }
+  extra_permissions:
+    owner: '0'
 linkTypeConfig: {  }
