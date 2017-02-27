@@ -62,6 +62,13 @@ class MessageSubscribeEmailTest extends JavascriptTestBase {
     $this->users[3] = $this->createUser($permissions);
 
     $this->flagService = $this->container->get('flag');
+
+    // Enable node flags.
+    $flags = $this->flagService->getAllFlags('node');
+    $flags['subscribe_node']->enable();
+    $flags['subscribe_node']->save();
+    $flags['email_node']->enable();
+    $flags['email_node']->save();
   }
 
   /**
