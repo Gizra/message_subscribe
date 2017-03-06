@@ -8,8 +8,8 @@ php:
 
 env:
   matrix:
-  - DRUPAL_CORE=8.2.x
   - DRUPAL_CORE=8.3.x
+  - DRUPAL_CORE=8.4.x
   global:
     MODULE_NAME='message_subscribe'
     CODER_VERSION='8.2.*'
