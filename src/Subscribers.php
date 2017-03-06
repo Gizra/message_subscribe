@@ -197,6 +197,7 @@ class Subscribers implements SubscribersInterface {
         $options += [
           'save on fail' => FALSE,
           'save on success' => FALSE,
+          'context' => $context,
         ];
 
         $this->messageNotifier->send($cloned_message, $options, $notifier_name);
