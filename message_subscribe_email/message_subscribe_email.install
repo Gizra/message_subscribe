@@ -48,23 +48,3 @@ function message_subscribe_email_install() {
     }
   }
 }
-
-/**
- * Implements hook_uninstall().
- */
-function message_subscribe_email_uninstall() {
-  // Revert message to default values if they haven't been changed.
-  $variables = [
-    'message_subscribe_node' => 'subscribe_node_email:default',
-    'message_subscribe_term' => 'subscribe_taxonomy_term_email:default',
-    'message_subscribe_user' => 'subscribe_user_email:default',
-    // Revert OG in case it exists.
-    'message_subscribe_og' => 'subscribe_node_email:default',
-  ];
-
-  foreach ($variables as $name => $value) {
- //   if (variable_get($name) == $value) {
-  //    variable_del($name);
-   // }
-  }
-}
