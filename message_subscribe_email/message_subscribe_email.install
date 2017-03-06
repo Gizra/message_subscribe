@@ -2,10 +2,8 @@
 
 /**
  * @file
- * Install, update, and uninstall functions for the message_subscribe_email module.
+ * Install hooks for the message_subscribe_email module.
  */
-
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
 
 /**
  * Implements hook_install().
