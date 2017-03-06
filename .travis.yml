@@ -8,8 +8,8 @@ php:
 
 env:
   matrix:
-  - DRUPAL_CORE=8.2.x
   - DRUPAL_CORE=8.3.x
+  - DRUPAL_CORE=8.4.x
   global:
     MODULE_NAME='message_subscribe'
     CODER_VERSION='8.2.*'
@@ -72,7 +72,7 @@ before_script:
 
 script:
   # Coding standards.
-  - $HOME/.composer/vendor/bin/phpcs --report=full --standard=Drupal $TESTDIR
+  - $HOME/.composer/vendor/bin/phpcs --report=full --standard=Drupal --severity=error $TESTDIR
   # Run the PHPUnit tests which also include the kernel tests.
   - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/$MODULE_NAME
   # Run legacy simpletests.

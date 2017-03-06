@@ -6,7 +6,6 @@ use Drupal\message\Entity\MessageTemplate;
 use Drupal\Tests\message_subscribe\Kernel\MessageSubscribeTestBase;
 
 /**
- * @file
  * Test base for message subscribe email tests.
  */
 abstract class MessageSubscribeEmailTestBase extends MessageSubscribeTestBase {

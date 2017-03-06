@@ -21,4 +21,3 @@ settings:
   on_label: Email
   off_label: 'Don''t email'
 field_type: boolean
-
