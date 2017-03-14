@@ -191,6 +191,9 @@ class Subscribers implements SubscribersInterface {
 
       $values += ['notifiers' => []];
 
+      // Allow modules to alter the message for the specific user.
+      $this->moduleHandler->alter('message_subscribe_message', $cloned_message, $values);
+
       // Send the message using the required notifiers.
       foreach (array_unique($values['notifiers']) as $notifier_name) {
         $options = !empty($notify_options[$notifier_name]) ? $notify_options[$notifier_name] : [];

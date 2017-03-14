@@ -165,6 +165,8 @@ namespace Drupal\Tests\message_subscribe\Unit {
       $module_handler->getImplementations(Argument::any())->willReturn(['foo']);
       $module_handler->alter('message_subscribe_get_subscribers', Argument::any(), Argument::any())
         ->shouldBeCalled();
+      $module_handler->alter('message_subscribe_message', Argument::any(), Argument::any())
+        ->shouldBeCalled();
       $this->moduleHandler = $module_handler->reveal();
 
       // Mock query.

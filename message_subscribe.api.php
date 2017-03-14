@@ -61,5 +61,19 @@ function hook_message_subscribe_get_subscribers_alter(array &$uids, array $value
 }
 
 /**
+ * Alter the message entity immediately before it is sent.
+ *
+ * @param \Drupal\message\MessageInterface $message
+ *   The message entity to be sent. This already has the recipient set as the
+ *   message owner.
+ * @param $subscriber_data
+ *   An array of values as returned by `hook_message_subscribe_get_subscribers`
+ *   for an individual user.
+ */
+function hook_message_subscribe_message_alter(MessageInterface $message, $subscriber_data) {
+
+}
+
+/**
  * @} End of "addtogroup hooks".
  */

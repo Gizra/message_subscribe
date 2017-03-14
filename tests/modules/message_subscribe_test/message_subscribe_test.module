@@ -18,7 +18,7 @@ function message_subscribe_test_message_subscribe_get_subscribers(MessageInterfa
   return [
     4 => [
       'flags' => ['foo_flag'],
-      'notifiers' => ['sms'],
+      'notifiers' => ['email'],
     ],
   ];
 }
@@ -30,12 +30,22 @@ function message_subscribe_test_message_subscribe_get_subscribers_alter(array &$
   // Set state variable.
   \Drupal::state('message_subscribe_test')->set('alter_hook_called', TRUE);
 
-  // Add non-existent user 10001.
-  $uids[10001] = [
-    'flags' => ['bar_flag'],
-    'notifiers' => ['email'],
-  ];
+  if (!\Drupal::state('message_subscribe_test')->get('disable_subscribers_alter', FALSE)) {
+    // Add non-existent user 10001.
+    $uids[10001] = [
+      'flags' => ['bar_flag'],
+      'notifiers' => ['email'],
+    ];
 
-  // Remove user 2.
-  unset($uids[2]);
+    // Remove user 2.
+    unset($uids[2]);
+  }
+}
+
+/**
+ * Implements hook_message_subscribe_message_alter().
+ */
+function message_subscribe_test_message_subscribe_message_alter(MessageInterface $message, $subscriber_data) {
+  $calls = \Drupal::state('message_subscribe_test')->get('message_alter_hook_called', 0);
+  \Drupal::state('message_subscribe_test')->set('message_alter_hook_called', $calls + 1);
 }

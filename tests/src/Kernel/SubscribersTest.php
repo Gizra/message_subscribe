@@ -313,13 +313,21 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $this->assertEquals([
       4 => [
         'flags' => ['foo_flag'],
-        'notifiers' => ['sms'],
+        'notifiers' => ['email'],
       ],
       10001 => [
         'flags' => ['bar_flag'],
         'notifiers' => ['email'],
       ],
     ], $uids);
+
+    // Disable the test module from adding a fake user.
+    \Drupal::state('message_subscribe_test')->set('disable_subscribers_alter', TRUE);
+
+    // Send a message and verify the message alter hook is called (should be
+    // called once for each subscriber, so 2 times).
+    $this->messageSubscribers->sendMessage($node, $message, [], ['entity access' => FALSE]);
+    $this->assertEquals(2, \Drupal::state('message_subscribe_test')->get('message_alter_hook_called', FALSE));
   }
 
   /**
