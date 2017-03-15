@@ -77,7 +77,7 @@ class QueueTest extends MessageSubscribeTestBase {
     }
 
     // Assert message was saved and added to queue.
-    $uids = array_fill(1, 10, []);
+    $uids = array_fill(1, 10, ['flags' => [], 'notifiers' => []]);
     $subscribe_options = [
       'uids' => $uids,
       'skip context' => TRUE,

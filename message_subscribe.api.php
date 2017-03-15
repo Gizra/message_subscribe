@@ -11,6 +11,8 @@
  */
 
 use Drupal\message\MessageInterface;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface;
 
 /**
  * Allow modules to add user IDs that need to be notified.
@@ -25,30 +27,28 @@ use Drupal\message\MessageInterface;
  *   value. According to this context this function will retrieve the
  *   related subscribers.
  *
- * @return array
- *   Array keyed with the user ID and the value:
+ * @return \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface[]|array
+ *   Array of delivery candidate objects keyed with the user ID, or an array of
+ *   arrays with the value (array usage is deprecated and will be removed in
+ *   2.0):
  *   - "flags": Array with the flag names that resulted with including
  *   the user.
  *   - "notifiers": Array with the Message notifier name plugins.
  */
 function hook_message_subscribe_get_subscribers(MessageInterface $message, array $subscribe_options = [], array $context = []) {
   return [
-    2 => [
-      'flags' => ['subscribe_node'],
-      'notifiers' => ['sms'],
-    ],
-    7 => [
-      'flags' => ['subscribe_og', 'subscribe_user'],
-      'notifiers' => ['sms', 'email'],
-    ],
+    2 => new DeliveryCandidate(['subscribe_node'], ['sms'], 2),
+    7 => new DeliveryCandidate(['subscribe_og', 'subscribe_user'], ['sms', 'email'], 7),
   ];
 }
 
 /**
  * Alter the subscribers list.
  *
- * @param array &$uids
- *   The array of UIDs as defined by `hook_message_subscribe_get_subscribers()`.
+ * @param \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface[]|array &$uids
+ *   The array of delivery candidates as defined by
+ *   `hook_message_subscribe_get_subscribers()`. This can also be an array of
+ *   arrays, but is deprecated.
  * @param array $values
  *   A keyed array of values containing:
  *   - 'context' - The context array.
@@ -66,11 +66,10 @@ function hook_message_subscribe_get_subscribers_alter(array &$uids, array $value
  * @param \Drupal\message\MessageInterface $message
  *   The message entity to be sent. This already has the recipient set as the
  *   message owner.
- * @param $subscriber_data
- *   An array of values as returned by `hook_message_subscribe_get_subscribers`
- *   for an individual user.
+ * @param \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface $delivery_candidate
+ *   A delivery candidate object.
  */
-function hook_message_subscribe_message_alter(MessageInterface $message, $subscriber_data) {
+function hook_message_subscribe_message_alter(MessageInterface $message, DeliveryCandidateInterface $delivery_candidate) {
 
 }
 
