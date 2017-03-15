@@ -6,6 +6,7 @@
  */
 
 use Drupal\message\MessageInterface;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 
 /**
  * Implements hook_message_subscribe_get_subscribers().
@@ -57,9 +58,11 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
 
     foreach ($result as $row) {
 
-      $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : ['notifiers' => []];
+      $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : new DeliveryCandidate([], [], $row->uid);
       // Register the flag name.
-      $uids[$row->uid]['flags'][] = $row->flag_id;
+      $flags = $uids[$row->uid]->getFlags();
+      $flags[] = $row->flag_id;
+      $uids[$row->uid]->setFlags(array_unique($flags));
 
       if ($range) {
         --$range;

@@ -313,10 +313,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $this->assertTrue(\Drupal::state('message_subscribe_test')->get('alter_hook_called'));
     $this->assertEquals([
       4 => new DeliveryCandidate(['foo_flag'], ['email'], 4),
-      10001 => [
-        'flags' => ['bar_flag'],
-        'notifiers' => ['email'],
-      ],
+      10001 => new DeliveryCandidate(['bar_flag'], ['email'], 10001),
     ], $uids);
 
     // Disable the test module from adding a fake user.
@@ -326,6 +323,12 @@ class SubscribersTest extends MessageSubscribeTestBase {
     // called once for each subscriber, so 2 times).
     $this->messageSubscribers->sendMessage($node, $message, [], ['entity access' => FALSE]);
     $this->assertEquals(2, \Drupal::state('message_subscribe_test')->get('message_alter_hook_called', FALSE));
+
+    // Verify legacy array support. Will trigger a notice.
+    $this->setExpectedException(\PHPUnit_Framework_Error_Deprecated::class);
+    \Drupal::state('message_subscribe_test')->set('disable_subscribers_alter', FALSE);
+    \Drupal::state('message_subscribe_test')->set('use_array', TRUE);
+    $this->messageSubscribers->sendMessage($node, $message, [], ['entity access' => FALSE]);
   }
 
   /**

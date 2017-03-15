@@ -184,6 +184,7 @@ class Subscribers implements SubscribersInterface {
     foreach ($uids as $uid => $delivery_candidate) {
       // Array usage is deprecated, but supported until 2.0.
       if (!$delivery_candidate instanceof DeliveryCandidateInterface) {
+        trigger_error('Usage of arrays in subscriber information is deprecated and will be removed in Message Subscribe 2.0. Use a DeliveryCandidate object instead.', E_USER_DEPRECATED);
         $delivery_candidate += ['notifiers' => []];
         $delivery_candidate = new DeliveryCandidate($delivery_candidate['flags'], $delivery_candidate['notifiers'], $uid);
       }
