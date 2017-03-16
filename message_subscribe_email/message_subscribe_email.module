@@ -78,13 +78,14 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
     $all_email_subscribers += array_keys($result);
   }
 
-  foreach ($uids as $uid => $data) {
+  /** @var \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface $delivery_candidate */
+  foreach ($uids as $uid => $delivery_candidate) {
     if (!in_array($uid, $all_email_subscribers)) {
-      unset($uids[$uid]['notifiers']['email']);
+      $delivery_candidate->removeNotifier('email');
     }
     else {
       // Ensure the email notifier is set for email subscribers.
-      $uids[$uid]['notifiers']['email'] = 'email';
+      $delivery_candidate->addNotifier('email');
     }
   }
 }

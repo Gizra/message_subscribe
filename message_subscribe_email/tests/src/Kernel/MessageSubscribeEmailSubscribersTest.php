@@ -4,6 +4,7 @@ namespace Drupal\Tests\message_subscribe_email\Kernel;
 
 use Drupal\Core\Test\AssertMailTrait;
 use Drupal\message\Entity\Message;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 
 /**
  * Test getting email subscribes from context.
@@ -46,20 +47,8 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
 
     // Assert subscribers data.
     $expected_uids = [
-      $user1->id() => [
-        'notifiers' => [
-          'email' => 'email',
-        ],
-        'flags' => [
-          'subscribe_node',
-        ],
-      ],
-      $user2->id() => [
-        'notifiers' => [],
-        'flags' => [
-          'subscribe_node',
-        ],
-      ],
+      $user1->id() => new DeliveryCandidate(['subscribe_node'], ['email'], $user1->id()),
+      $user2->id() => new DeliveryCandidate(['subscribe_node'], [], $user2->id()),
     ];
 
     $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
@@ -94,20 +83,8 @@ class MessageSubscribeEmailSubscribersTest extends MessageSubscribeEmailTestBase
 
     // Assert subscribers data.
     $expected_uids = [
-      $user1->id() => [
-        'notifiers' => [
-          'email' => 'email',
-        ],
-        'flags' => [
-          'subscribe_node',
-        ],
-      ],
-      $user2->id() => [
-        'notifiers' => [],
-        'flags' => [
-          'subscribe_node',
-        ],
-      ],
+      $user1->id() => new DeliveryCandidate(['subscribe_node'], ['email'], $user1->id()),
+      $user2->id() => new DeliveryCandidate(['subscribe_node'], [], $user2->id()),
     ];
 
     $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
