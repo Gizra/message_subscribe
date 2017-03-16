@@ -27,6 +27,28 @@ interface DeliveryCandidateInterface {
   public function setFlags(array $flag_ids);
 
   /**
+   * Adds a flag.
+   *
+   * @param string $flag_id
+   *   The flag ID to add.
+   *
+   * @return static
+   *   Return the object.
+   */
+  public function addFlag($flag_id);
+
+  /**
+   * Remove a flag.
+   *
+   * @param string $flag_id
+   *   The flag ID to remove.
+   *
+   * @return static
+   *   Return the object.
+   */
+  public function removeFlag($flag_id);
+
+  /**
    * Get the notifier IDs.
    *
    * @return string[]
@@ -44,6 +66,28 @@ interface DeliveryCandidateInterface {
    *   Return the object.
    */
   public function setNotifiers(array $notifier_ids);
+
+  /**
+   * Adds a notifier.
+   *
+   * @param string $notifier_id
+   *   The notifier ID to add.
+   *
+   * @return static
+   *   Return the object.
+   */
+  public function addNotifier($notifier_id);
+
+  /**
+   * Remove a notifier.
+   *
+   * @param string $notifier_id
+   *   The notifier ID to remove.
+   *
+   * @return static
+   *   Return the object.
+   */
+  public function removeNotifier($notifier_id);
 
   /**
    * Gets the account ID of the recipient.

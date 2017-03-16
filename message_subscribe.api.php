@@ -27,13 +27,8 @@ use Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface;
  *   value. According to this context this function will retrieve the
  *   related subscribers.
  *
- * @return \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface[]|array
- *   Array of delivery candidate objects keyed with the user ID, or an array of
- *   arrays with the value (array usage is deprecated and will be removed in
- *   2.0):
- *   - "flags": Array with the flag names that resulted with including
- *   the user.
- *   - "notifiers": Array with the Message notifier name plugins.
+ * @return \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface[]
+ *   An array, keyed by recipeint user ID, of delivery candidate objects.
  */
 function hook_message_subscribe_get_subscribers(MessageInterface $message, array $subscribe_options = [], array $context = []) {
   return [
@@ -45,10 +40,9 @@ function hook_message_subscribe_get_subscribers(MessageInterface $message, array
 /**
  * Alter the subscribers list.
  *
- * @param \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface[]|array &$uids
+ * @param \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface[] &$uids
  *   The array of delivery candidates as defined by
- *   `hook_message_subscribe_get_subscribers()`. This can also be an array of
- *   arrays, but is deprecated.
+ *   `hook_message_subscribe_get_subscribers()`.
  * @param array $values
  *   A keyed array of values containing:
  *   - 'context' - The context array.

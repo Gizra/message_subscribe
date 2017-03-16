@@ -14,8 +14,6 @@ use Drupal\flag\FlagServiceInterface;
 use Drupal\message\MessageInterface;
 use Drupal\message_notify\MessageNotifier;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
-use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
-use Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\user\EntityOwnerInterface;
 
@@ -182,12 +180,6 @@ class Subscribers implements SubscribersInterface {
     }
 
     foreach ($uids as $uid => $delivery_candidate) {
-      // Array usage is deprecated, but supported until 2.0.
-      if (!$delivery_candidate instanceof DeliveryCandidateInterface) {
-        $delivery_candidate += ['notifiers' => []];
-        $delivery_candidate = new DeliveryCandidate($delivery_candidate['flags'], $delivery_candidate['notifiers'], $uid);
-      }
-
       $last_uid = $uid;
       // Clone the message in case it will need to be saved, it won't
       // overwrite the existing one.
@@ -418,7 +410,7 @@ class Subscribers implements SubscribersInterface {
   /**
    * Get the default notifiers for a given set of users.
    *
-   * @param array &$uids
+   * @param \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface[] &$uids
    *   An array detailing notification info for users.
    */
   protected function addDefaultNotifiers(array &$uids) {
@@ -428,9 +420,10 @@ class Subscribers implements SubscribersInterface {
     }
     // Use notifier names as keys to avoid potential duplication of notifiers
     // by other modules' hooks.
-    $notifiers = array_combine($notifiers, $notifiers);
     foreach (array_keys($uids) as $uid) {
-      $uids[$uid]['notifiers'] += $notifiers;
+      foreach ($notifiers as $notifier) {
+        $uids[$uid]->addNotifier($notifier);
+      }
     }
   }
 

@@ -3,6 +3,7 @@
 namespace Drupal\Tests\message_subscribe_email\Kernel;
 
 use Drupal\message\Entity\Message;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 
 /**
  * Test automatic email notification flagging.
@@ -31,14 +32,7 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
 
     // Assert subscribers data.
     $expected_uids = [
-      $this->users[1]->id() => [
-        'notifiers' => [
-          'email' => 'email',
-        ],
-        'flags' => [
-          'subscribe_node',
-        ],
-      ],
+      $this->users[1]->id() => new DeliveryCandidate(['subscribe_node'], ['email'], $this->users[1]->id()),
     ];
 
     $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
@@ -58,12 +52,7 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestBa
 
     // Assert subscribers data.
     $expected_uids = [
-      $this->users[1]->id() => [
-        'notifiers' => [],
-        'flags' => [
-          'subscribe_node',
-        ],
-      ],
+      $this->users[1]->id() => new DeliveryCandidate(['subscribe_node'], [], $this->users[1]->id()),
     ];
 
     $this->assertEquals($expected_uids, $uids, 'All expected subscribers were fetched.');
