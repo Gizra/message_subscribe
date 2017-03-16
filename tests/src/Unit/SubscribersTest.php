@@ -165,6 +165,8 @@ namespace Drupal\Tests\message_subscribe\Unit {
       $module_handler->getImplementations(Argument::any())->willReturn(['foo']);
       $module_handler->alter('message_subscribe_get_subscribers', Argument::any(), Argument::any())
         ->shouldBeCalled();
+      $module_handler->alter('message_subscribe_message', Argument::any(), Argument::any())
+        ->shouldBeCalled();
       $this->moduleHandler = $module_handler->reveal();
 
       // Mock query.
@@ -216,10 +218,11 @@ namespace {
      */
     function foo_message_subscribe_get_subscribers() {
       return [
-        1 => [],
-        2 => [],
-        4 => [],
-        7 => [],
+        // Verify arrays are still supported until 2.0.
+        1 => ['flags' => [], 'notifiers' => []],
+        2 => ['flags' => [], 'notifiers' => []],
+        4 => ['flags' => [], 'notifiers' => []],
+        7 => ['flags' => [], 'notifiers' => []],
       ];
     }
 

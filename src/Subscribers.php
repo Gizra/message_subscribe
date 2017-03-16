@@ -14,6 +14,8 @@ use Drupal\flag\FlagServiceInterface;
 use Drupal\message\MessageInterface;
 use Drupal\message_notify\MessageNotifier;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\user\EntityOwnerInterface;
 
@@ -179,7 +181,13 @@ class Subscribers implements SubscribersInterface {
       return;
     }
 
-    foreach ($uids as $uid => $values) {
+    foreach ($uids as $uid => $delivery_candidate) {
+      // Array usage is deprecated, but supported until 2.0.
+      if (!$delivery_candidate instanceof DeliveryCandidateInterface) {
+        $delivery_candidate += ['notifiers' => []];
+        $delivery_candidate = new DeliveryCandidate($delivery_candidate['flags'], $delivery_candidate['notifiers'], $uid);
+      }
+
       $last_uid = $uid;
       // Clone the message in case it will need to be saved, it won't
       // overwrite the existing one.
@@ -187,12 +195,13 @@ class Subscribers implements SubscribersInterface {
       // Push a copy of the original message into the new one.
       $cloned_message->original = $message;
       // Set the owner to this user.
-      $cloned_message->setOwnerId($uid);
+      $cloned_message->setOwnerId($delivery_candidate->getAccountId());
 
-      $values += ['notifiers' => []];
+      // Allow modules to alter the message for the specific user.
+      $this->moduleHandler->alter('message_subscribe_message', $cloned_message, $delivery_candidate);
 
       // Send the message using the required notifiers.
-      foreach (array_unique($values['notifiers']) as $notifier_name) {
+      foreach ($delivery_candidate->getNotifiers() as $notifier_name) {
         $options = !empty($notify_options[$notifier_name]) ? $notify_options[$notifier_name] : [];
         $options += [
           'save on fail' => FALSE,

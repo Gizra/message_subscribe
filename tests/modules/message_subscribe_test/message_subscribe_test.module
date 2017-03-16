@@ -6,6 +6,8 @@
  */
 
 use Drupal\message\MessageInterface;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface;
 
 /**
  * Implements hook_message_subscribe_get_subscribers().
@@ -16,10 +18,7 @@ function message_subscribe_test_message_subscribe_get_subscribers(MessageInterfa
 
   // Add user 4.
   return [
-    4 => [
-      'flags' => ['foo_flag'],
-      'notifiers' => ['sms'],
-    ],
+    4 => new DeliveryCandidate(['foo_flag'], ['email'], 4),
   ];
 }
 
@@ -30,12 +29,23 @@ function message_subscribe_test_message_subscribe_get_subscribers_alter(array &$
   // Set state variable.
   \Drupal::state('message_subscribe_test')->set('alter_hook_called', TRUE);
 
-  // Add non-existent user 10001.
-  $uids[10001] = [
-    'flags' => ['bar_flag'],
-    'notifiers' => ['email'],
-  ];
+  if (!\Drupal::state('message_subscribe_test')->get('disable_subscribers_alter', FALSE)) {
+    // Add non-existent user 10001. Using an array here until array support
+    // is removed in 2.0.
+    $uids[10001] = [
+      'flags' => ['bar_flag'],
+      'notifiers' => ['email'],
+    ];
 
-  // Remove user 2.
-  unset($uids[2]);
+    // Remove user 2.
+    unset($uids[2]);
+  }
+}
+
+/**
+ * Implements hook_message_subscribe_message_alter().
+ */
+function message_subscribe_test_message_subscribe_message_alter(MessageInterface $message, DeliveryCandidateInterface $delivery_candidate) {
+  $calls = \Drupal::state('message_subscribe_test')->get('message_alter_hook_called', 0);
+  \Drupal::state('message_subscribe_test')->set('message_alter_hook_called', $calls + 1);
 }
