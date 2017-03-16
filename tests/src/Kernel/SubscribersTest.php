@@ -135,13 +135,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
 
     // Assert subscribers data.
     $expected_uids = [
-      $user2->id() => [
-        'notifiers' => [],
-        'flags' => [
-          'subscribe_node',
-          'subscribe_user',
-        ],
-      ],
+      $user2->id() => new DeliveryCandidate(['subscribe_node', 'subscribe_user'], [], $user2->id()),
     ];
 
     $this->assertEquals($uids, $expected_uids, 'All expected subscribers were fetched.');
@@ -166,19 +160,8 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $uids = $this->messageSubscribers->getSubscribers($node, $message, $subscribe_options);
 
     $expected_uids = [
-      $user2->id() => [
-        'notifiers' => [],
-        'flags' => [
-          'subscribe_node',
-          'subscribe_user',
-        ],
-      ],
-      $user_blocked->id() => [
-        'notifiers' => [],
-        'flags' => [
-          'subscribe_node',
-        ],
-      ],
+      $user2->id() => new DeliveryCandidate(['subscribe_node', 'subscribe_user'], [], $user2->id()),
+      $user_blocked->id() => new DeliveryCandidate(['subscribe_node'], [], $user_blocked->id()),
     ];
     $this->assertEquals($uids, $expected_uids, 'All expected subscribers were fetched, including blocked users.');
 
@@ -229,13 +212,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
 
     // Assert subscribers data.
     $expected_uids = [
-      $this->users[2]->id() => [
-        'notifiers' => [],
-        'flags' => [
-          'subscribe_node',
-          'subscribe_user',
-        ],
-      ],
+      $this->users[2]->id() => new DeliveryCandidate(['subscribe_node', 'subscribe_user'], [], $this->users[2]->id()),
     ];
     $this->assertEquals($uids, $expected_uids, 'All subscribers except for the triggering user were fetched.');
 
@@ -246,19 +223,8 @@ class SubscribersTest extends MessageSubscribeTestBase {
 
     // Assert subscribers data.
     $expected_uids = [
-      $user1->id() => [
-        'notifiers' => [],
-        'flags' => [
-          'subscribe_node',
-        ],
-      ],
-      $user2->id() => [
-        'notifiers' => [],
-        'flags' => [
-          'subscribe_node',
-          'subscribe_user',
-        ],
-      ],
+      $this->users[1]->id() => new DeliveryCandidate(['subscribe_node'], [], $this->users[1]->id()),
+      $this->users[2]->id() => new DeliveryCandidate(['subscribe_node', 'subscribe_user'], [], $this->users[2]->id()),
     ];
     $this->assertEquals($uids, $expected_uids, 'All subscribers including the triggering user were fetched.');
   }
@@ -323,12 +289,6 @@ class SubscribersTest extends MessageSubscribeTestBase {
     // called once for each subscriber, so 2 times).
     $this->messageSubscribers->sendMessage($node, $message, [], ['entity access' => FALSE]);
     $this->assertEquals(2, \Drupal::state('message_subscribe_test')->get('message_alter_hook_called', FALSE));
-
-    // Verify legacy array support. Will trigger a notice.
-    $this->setExpectedException(\PHPUnit_Framework_Error_Deprecated::class);
-    \Drupal::state('message_subscribe_test')->set('disable_subscribers_alter', FALSE);
-    \Drupal::state('message_subscribe_test')->set('use_array', TRUE);
-    $this->messageSubscribers->sendMessage($node, $message, [], ['entity access' => FALSE]);
   }
 
   /**
@@ -420,14 +380,8 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $message = Message::create(['template' => $this->template->id()]);
     $subscribers = $this->messageSubscribers->getSubscribers($this->nodes[0], $message);
     $expected = [
-      $this->users[1]->id() => [
-        'notifiers' => [],
-        'flags' => ['subscribe_node'],
-      ],
-      $this->users[2]->id() => [
-        'notifiers' => [],
-        'flags' => ['subscribe_node'],
-      ],
+      $this->users[1]->id() => new DeliveryCandidate(['subscribe_node'], [], $this->users[1]->id()),
+      $this->users[2]->id() => new DeliveryCandidate(['subscribe_node'], [], $this->users[2]->id()),
     ];
     $this->assertEquals($expected, $subscribers);
 
@@ -436,14 +390,8 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $this->nodes[0]->save();
     $subscribers = $this->messageSubscribers->getSubscribers($this->nodes[0], $message);
     $expected = [
-      $this->users[1]->id() => [
-        'notifiers' => [],
-        'flags' => ['subscribe_node'],
-      ],
-      $this->users[3]->id() => [
-        'notifiers' => [],
-        'flags' => ['subscribe_node'],
-      ],
+      $this->users[1]->id() => new DeliveryCandidate(['subscribe_node'], [], $this->users[1]->id()),
+      $this->users[3]->id() => new DeliveryCandidate(['subscribe_node'], [], $this->users[3]->id()),
     ];
     $this->assertEquals($expected, $subscribers);
   }

@@ -60,9 +60,7 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
 
       $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : new DeliveryCandidate([], [], $row->uid);
       // Register the flag name.
-      $flags = $uids[$row->uid]->getFlags();
-      $flags[] = $row->flag_id;
-      $uids[$row->uid]->setFlags(array_unique($flags));
+      $uids[$row->uid]->addFlag($row->flag_id);
 
       if ($range) {
         --$range;

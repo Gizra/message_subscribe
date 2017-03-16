@@ -30,18 +30,7 @@ function message_subscribe_test_message_subscribe_get_subscribers_alter(array &$
   \Drupal::state('message_subscribe_test')->set('alter_hook_called', TRUE);
 
   if (!\Drupal::state('message_subscribe_test')->get('disable_subscribers_alter', FALSE)) {
-    // Add non-existent user 10001.
-    if (\Drupal::state('message_subscribe_test')->get('use_array', FALSE)) {
-      // Test to ensure array usage still works (it will throw a deprecated
-      // notice).
-      $uids[10001] = [
-        'flags' => ['bar_flag'],
-        'notifiers' => ['email'],
-      ];
-    }
-    else {
-      $uids[10001] = new DeliveryCandidate(['bar_flag'], ['email'], 10001);
-    }
+    $uids[10001] = new DeliveryCandidate(['bar_flag'], ['email'], 10001);
 
     // Remove user 2.
     unset($uids[2]);

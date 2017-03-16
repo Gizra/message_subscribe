@@ -89,18 +89,9 @@ interface SubscribersInterface {
    *   (optional) The context array, passed by reference. This has the same
    *   elements as the `$context` paramater for `self::sendMessage()`.
    *
-   * @return array
-   *   Array keyed with the user IDs to send notifications to, and an array with
-   *   the flags used for the subscription, and the notifier names to use.
-   *
-   * @code
-   *   array(
-   *     1 => array(
-   *       'flags' => array('subscribe_node', 'subscribe_og'),
-   *       'notifiers' => array('email', 'sms'),
-   *     ),
-   *   );
-   * @endcode
+   * @return \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface[]
+   *   Array of delivery candidate objects keyed with the user IDs to send
+   *   notifications to.
    */
   public function getSubscribers(EntityInterface $entity, MessageInterface $message, array $options = [], array &$context = []);
 

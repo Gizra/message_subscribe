@@ -12,14 +12,14 @@ class DeliveryCandidate implements DeliveryCandidateInterface {
    *
    * @var string[]
    */
-  protected $flags;
+  protected $flags = [];
 
   /**
    * An array of notifier IDs for delivery.
    *
    * @var string[]
    */
-  protected $notifiers;
+  protected $notifiers = [];
 
   /**
    * The delivery candidate account ID.
@@ -39,9 +39,41 @@ class DeliveryCandidate implements DeliveryCandidateInterface {
    *   The delivery candidate account ID.
    */
   public function __construct(array $flags, array $notifiers, $uid) {
-    $this->flags = $flags;
-    $this->notifiers = $notifiers;
+    $this->flags = array_combine($flags, $flags);
+    $this->notifiers = array_combine($notifiers, $notifiers);
     $this->uid = $uid;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addFlag($flag_id) {
+    $this->flags[$flag_id] = $flag_id;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeFlag($flag_id) {
+    unset($this->flags[$flag_id]);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addNotifier($notifier_id) {
+    $this->notifiers[$notifier_id] = $notifier_id;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeNotifier($notifier_id) {
+    unset($this->notifiers[$notifier_id]);
+    return $this;
   }
 
   /**
@@ -55,7 +87,7 @@ class DeliveryCandidate implements DeliveryCandidateInterface {
    * {@inheritdoc}
    */
   public function setFlags(array $flag_ids) {
-    $this->flags = $flag_ids;
+    $this->flags = array_combine($flag_ids, $flag_ids);
     return $this;
   }
 
@@ -70,7 +102,7 @@ class DeliveryCandidate implements DeliveryCandidateInterface {
    * {@inheritdoc}
    */
   public function setNotifiers(array $notifier_ids) {
-    $this->notifiers = $notifier_ids;
+    $this->notifiers = array_combine($notifier_ids, $notifier_ids);
     return $this;
   }
 

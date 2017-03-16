@@ -5,6 +5,7 @@ namespace Drupal\Tests\message_subscribe\Kernel;
 use Drupal\message\Entity\Message;
 use Drupal\message\Entity\MessageTemplate;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
+use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 
 /**
  * Test queue integration.
@@ -77,7 +78,10 @@ class QueueTest extends MessageSubscribeTestBase {
     }
 
     // Assert message was saved and added to queue.
-    $uids = array_fill(1, 10, ['flags' => [], 'notifiers' => []]);
+    $uids = array_fill(1, 10, new DeliveryCandidate([], [], 1));
+    foreach ($uids as $uid => $candidate) {
+      $candidate->setAccountId($uid);
+    }
     $subscribe_options = [
       'uids' => $uids,
       'skip context' => TRUE,
