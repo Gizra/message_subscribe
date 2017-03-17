@@ -76,7 +76,7 @@ class SubscribersTest extends UnitTestCase {
   public function setUp() {
     parent::setUp();
 
-    require __DIR__ . '/fixture_foo.module.php';
+    require __DIR__ . '/../fixture_foo.module.php';
 
     // Setup default mock services. Individual tests can override as needed.
     $this->flagService = $this->prophesize(FlagServiceInterface::class)
