@@ -184,8 +184,11 @@ class Subscribers implements SubscribersInterface {
       // Clone the message in case it will need to be saved, it won't
       // overwrite the existing one.
       $cloned_message = $message->createDuplicate();
-      // Push a copy of the original message into the new one.
-      $cloned_message->original = $message;
+      // Push a copy of the original message into the new one. The key
+      // `original` is not used here as that has special meaning and can prevent
+      // field values from being saved.
+      // @see SqlContentEntityStorage::saveToDedicatedTables().
+      $cloned_message->original_message = $message;
       // Set the owner to this user.
       $cloned_message->setOwnerId($delivery_candidate->getAccountId());
 
