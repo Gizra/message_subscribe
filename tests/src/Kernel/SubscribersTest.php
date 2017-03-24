@@ -2,8 +2,11 @@
 
 namespace Drupal\Tests\message_subscribe\Kernel;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Test\AssertMailTrait;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\message\Entity\Message;
 use Drupal\message_subscribe\Subscribers\DeliveryCandidate;
 
@@ -394,6 +397,45 @@ class SubscribersTest extends MessageSubscribeTestBase {
       $this->users[3]->id() => new DeliveryCandidate(['subscribe_node'], [], $this->users[3]->id()),
     ];
     $this->assertEquals($expected, $subscribers);
+  }
+
+  /**
+   * Tests message bundles with fields are properly cloned.
+   *
+   * @covers ::sendMessage
+   */
+  public function testFieldedMessageBundles() {
+    $field_name = Unicode::strtolower($this->randomMachineName());
+    $field_storage = FieldStorageConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => 'message',
+      'type' => 'text',
+    ]);
+    $field_storage->save();
+    $field_config = FieldConfig::create([
+      'field_storage' => $field_storage,
+      'bundle' => $this->template->id(),
+    ]);
+    $field_config->save();
+
+    // Enable the email notifier.
+    \Drupal::configFactory()->getEditable('message_subscribe.settings')->set('default_notifiers', ['email'])->save();
+
+    $message = Message::create([
+      'template' => $this->template->id(),
+      'uid' => $this->users[1],
+      $field_name => $this->randomString(),
+    ]);
+
+    // Save and reload to mimic queue behavior.
+    $message->save();
+    $message = $message->load($message->id());
+
+    // Send message set to save the cloned message.
+    $node = $this->nodes[0];
+    $this->messageSubscribers->sendMessage($node, $message, ['email' => ['save on success' => TRUE]], ['entity access' => FALSE]);
+    $cloned_message = \Drupal::entityTypeManager()->getStorage('message')->load($message->id() + 1);
+    $this->assertEquals($message->{$field_name}->value, $cloned_message->{$field_name}->value);
   }
 
 }
