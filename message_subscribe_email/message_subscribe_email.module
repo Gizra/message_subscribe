@@ -53,7 +53,7 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
     return;
   }
 
-  $flag_ids = array();
+  $flag_ids = [];
   foreach ($flags as $flag) {
     $flag_ids[] = $flag->id();
   }
@@ -65,7 +65,7 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
     }
 
     $query = db_select('flagging', 'f');
-    $result = $query->fields('f', array('uid'))
+    $result = $query->fields('f', ['uid'])
       ->condition('flag_id', $flag_ids, 'IN')
       ->condition('uid', array_keys($uids), 'IN')
       // Ensure to grab the correct flagging.
