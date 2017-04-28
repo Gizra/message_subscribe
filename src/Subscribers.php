@@ -291,6 +291,7 @@ class Subscribers implements SubscribersInterface {
     $this->addDefaultNotifiers($uids);
 
     $this->moduleHandler->alter('message_subscribe_get_subscribers', $uids, $values);
+    ksort($uids);
 
     return $uids;
 
