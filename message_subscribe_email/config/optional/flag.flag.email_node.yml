@@ -25,7 +25,6 @@ flagTypeConfig:
   show_as_field: true
   show_on_form: false
   show_contextual_link: false
-  i18n: null
   extra_permissions:
     owner: '0'
 linkTypeConfig: {  }
