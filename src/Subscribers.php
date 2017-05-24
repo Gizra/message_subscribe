@@ -325,11 +325,16 @@ class Subscribers implements SubscribersInterface {
    * {@inheritdoc}
    */
   public function getFlags($entity_type = NULL, $bundle = NULL, AccountInterface $account = NULL) {
+    $flags = $this->flagService->getAllFlags($entity_type, $bundle);
     if ($account) {
-      $flags = $this->flagService->getUsersFlags($account, $entity_type, $bundle);
-    }
-    else {
-      $flags = $this->flagService->getAllFlags($entity_type, $bundle);
+      // Filter flags down to ones the account has action access for.
+      // @see https://www.drupal.org/node/2870375
+      foreach ($flags as $flag_id => $flag) {
+        if (!$flag->actionAccess('flag', $account)->isAllowed()
+        && !$flag->actionAccess('unflag', $account)->isAllowed()) {
+          unset($flags[$flag_id]);
+        }
+      }
     }
     $ms_flags = [];
     $prefix = $this->config->get('flag_prefix') . '_';
