@@ -162,10 +162,6 @@ class Subscribers implements SubscribersInterface {
       $message->save();
     }
 
-    if ($use_queue) {
-      $id = $entity->id();
-    }
-
     if ($use_queue && empty($subscribe_options['queue'])) {
       if (empty($message->id())) {
         throw new MessageSubscribeException('Cannot add a non-saved message to the queue.');
