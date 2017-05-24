@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\flag\FlagServiceInterface;
@@ -74,6 +75,20 @@ class Subscribers implements SubscribersInterface {
   protected $queue;
 
   /**
+   * Logger channel.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $logger;
+
+  /**
+   * Debugging enabled.
+   *
+   * @var bool
+   */
+  protected $debug = FALSE;
+
+  /**
    * Construct the service.
    *
    * @param \Drupal\flag\FlagServiceInterface $flag_service
@@ -96,6 +111,7 @@ class Subscribers implements SubscribersInterface {
     $this->messageNotifier = $message_notifier;
     $this->moduleHandler = $module_handler;
     $this->queue = $queue->get('message_subscribe');
+    $this->debug = $this->config->get('debug_mode');
   }
 
   /**
@@ -106,6 +122,18 @@ class Subscribers implements SubscribersInterface {
    */
   public function setMembershipManager(MembershipManagerInterface $membership_manager) {
     $this->membershipManager = $membership_manager;
+  }
+
+  /**
+   * Sets the logger channel.
+   *
+   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
+   *   The message_subscribe logger channel.
+   *
+   * @todo Inject this service in the 2.x version
+   */
+  public function setLoggerChannel(LoggerChannelInterface $logger) {
+    $this->logger = $logger;
   }
 
   /**
@@ -178,6 +206,7 @@ class Subscribers implements SubscribersInterface {
       // If we use a queue, it will be deleted.
       return;
     }
+    $this->debug('Preparing to process subscriptions for users: @uids', ['@uids' => implode(', ', array_keys($uids))]);
 
     foreach ($uids as $uid => $delivery_candidate) {
       $last_uid = $uid;
@@ -196,6 +225,13 @@ class Subscribers implements SubscribersInterface {
       $this->moduleHandler->alter('message_subscribe_message', $cloned_message, $delivery_candidate);
 
       // Send the message using the required notifiers.
+      $this->debug(
+        'Preparing delivery for uid @user with notifiers @notifiers',
+        [
+          '@user' => $uid,
+          '@notifiers' => implode(', ', $delivery_candidate->getNotifiers()),
+        ]
+      );
       foreach ($delivery_candidate->getNotifiers() as $notifier_name) {
         $options = !empty($notify_options[$notifier_name]) ? $notify_options[$notifier_name] : [];
         $options += [
@@ -204,7 +240,8 @@ class Subscribers implements SubscribersInterface {
           'context' => $context,
         ];
 
-        $this->messageNotifier->send($cloned_message, $options, $notifier_name);
+        $result = $this->messageNotifier->send($cloned_message, $options, $notifier_name);
+        $this->debug($result ? 'Successfully sent message via notifier @notifier to user @uid' : 'Failed to send message via notifier @notifier to user @uid', ['@notifier' => $notifier_name, '@uid' => $uid]);
 
         // Check we didn't timeout.
         if ($use_queue && $subscribe_options['queue']['end time'] && time() < $subscribe_options['queue']['end time']) {
@@ -224,6 +261,7 @@ class Subscribers implements SubscribersInterface {
       ];
 
       $task['subscribe_options']['last uid'] = $last_uid;
+      $this->debug('Queuing new batch with last uid of @uid', ['@uid' => $last_uid]);
 
       // Create a new queue item, with the last user ID.
       $this->queue->createItem($task);
@@ -244,6 +282,13 @@ class Subscribers implements SubscribersInterface {
     foreach ($this->moduleHandler->getImplementations('message_subscribe_get_subscribers') as $module) {
       $function = $module . '_message_subscribe_get_subscribers';
       $result = $function($message, $options, $context);
+      $this->debug(
+        'Found @uids from @function',
+        [
+          '@uids' => implode(', ', array_keys($result)),
+          '@function' => $function,
+        ]
+      );
       $uids += $result;
     }
 
@@ -268,6 +313,7 @@ class Subscribers implements SubscribersInterface {
     foreach ($uids as $uid => $values) {
       // See if the author of the entity gets notified.
       if (!$notify_message_owner && $this->isEntityOwner($entity, $uid)) {
+        $this->debug('Removing @uid from recipient list since they are the entity owner.', ['@uid' => $uid]);
         unset($uids[$uid]);
       }
 
@@ -275,10 +321,13 @@ class Subscribers implements SubscribersInterface {
         $account = $this->entityTypeManager->getStorage('user')->load($uid);
         if (!$entity->access('view', $account)) {
           // User doesn't have access to view the entity.
+          $this->debug('Removing @uid from recipient list since they do not have view access.', ['@uid' => $uid]);
           unset($uids[$uid]);
         }
       }
     }
+
+    $this->debug('Recipients after access filter and entity owner filter: @uids', ['@uids' => implode(', ', array_keys($uids))]);
 
     $values = [
       'context' => $context,
@@ -289,9 +338,11 @@ class Subscribers implements SubscribersInterface {
     ];
 
     $this->addDefaultNotifiers($uids);
+    $this->debug('Recipient list after default notifiers: @uids', ['@uids' => implode(', ', array_keys($uids))]);
 
     $this->moduleHandler->alter('message_subscribe_get_subscribers', $uids, $values);
     ksort($uids);
+    $this->debug('Recipient list after ksort and alter hook: @uids', ['@uids' => implode(', ', array_keys($uids))]);
 
     return $uids;
 
@@ -434,6 +485,21 @@ class Subscribers implements SubscribersInterface {
         $uids[$uid]->addNotifier($notifier);
       }
     }
+  }
+
+  /**
+   * Wrapper to the logger channel to only log if debugging is enabled.
+   *
+   * @param string $message
+   *   The message to log.
+   * @param array $context
+   *   The replacement patterns.
+   */
+  protected function debug($message, array $context = []) {
+    if (!$this->debug) {
+      return;
+    }
+    $this->logger->debug($message, $context);
   }
 
 }

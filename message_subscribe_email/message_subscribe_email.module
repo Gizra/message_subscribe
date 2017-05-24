@@ -53,10 +53,20 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
     return;
   }
 
+  $debug = \Drupal::config('message_subscribe.settings')->get('debug_mode');
+
   $flag_ids = [];
   foreach ($flags as $flag) {
     $flag_ids[] = $flag->id();
   }
+  $debug && \Drupal::logger('message_subscribe_email')->debug(
+    'Gathering email subscriptions for context: @context',
+    ['@context' => "\n\n" . print_r($values['context'], TRUE)]
+  );
+  $debug && \Drupal::logger('message_subscribe_email')->debug(
+    'Gathering email subscriptions using flags: @flags for users: @uids',
+    ['@flags' => implode(', ', $flag_ids), '@uids' => array_keys($uids)]
+  );
 
   $all_email_subscribers = [];
   foreach ($values['context'] as $entity_type => $entity_ids) {
@@ -78,13 +88,17 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
     $all_email_subscribers += array_keys($result);
   }
 
+  $debug && \Drupal::logger('message_subscribe_email')->debug('Found email subscribers @subscribers', ['@subscribers' => implode(', ', $all_email_subscribers)]);
+
   /** @var \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface $delivery_candidate */
   foreach ($uids as $uid => $delivery_candidate) {
     if (!in_array($uid, $all_email_subscribers)) {
+      $debug && \Drupal::logger('message_subscribe_email')->debug('Removing EMAIL notifier for user @uid', ['@uid' => $uid]);
       $delivery_candidate->removeNotifier('email');
     }
     else {
       // Ensure the email notifier is set for email subscribers.
+      $debug && \Drupal::logger('message_subscribe_email')->debug('Adding EMAIL notifier for user @uid', ['@uid' => $uid]);
       $delivery_candidate->addNotifier('email');
     }
   }

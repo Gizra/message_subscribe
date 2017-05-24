@@ -11,6 +11,9 @@ message_subscribe.settings:
     flag_prefix:
       type: string
       label: 'The prefix that will be used to identify subscription flags'
+    debug_mode:
+      type: boolean
+      label: 'Enable debugging mode for verbose logging'
     default_notifiers:
       type: sequence
       label: 'Message notifiers that will be added to every subscription'
