@@ -22,6 +22,12 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
   // Determine if a range is needed for the query.
   $range = $subscribe_options['range'];
 
+  $debug = \Drupal::config('message_subscribe.settings')->get('debug_mode');
+  $debug && \Drupal::logger('message_subscribe')->debug(
+    'Gathering ALL subscriptions for @context',
+    ['@context' => "\n\n" . print_r($context, TRUE)]
+  );
+
   // Find the users that subscribed to each context.
   foreach ($context as $entity_type => $entity_ids) {
     if (!$entity_ids) {
@@ -32,6 +38,16 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
     if (!$flags = \Drupal::service('message_subscribe.subscribers')->getFlags($entity_type)) {
       continue;
     }
+
+    $debug && \Drupal::logger('message_subscribe')->debug(
+      'Using flags @flags for @entity_type @entity_ids for users greater than id @uid',
+      [
+        '@flags' => implode(', ', array_keys($flags)),
+        '@entity_type' => $entity_type,
+        '@entity_ids' => implode(', ', $entity_ids),
+        '@uid' => $subscribe_options['last uid'],
+      ]
+    );
 
     // Query all the entity IDs inside the given flags. We don't use
     // flag_get_content_flags() as we want to get all the flaggings of an
@@ -58,6 +74,10 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
 
     foreach ($result as $row) {
 
+      $debug && \Drupal::logger('message_subscribe')->debug(
+        'Subscriber row flag_id: @flag_id user: @uid',
+        ['@flag_id' => $row->flag_id, '@uid' => $row->uid]
+      );
       $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : new DeliveryCandidate([], [], $row->uid);
       // Register the flag name.
       $uids[$row->uid]->addFlag($row->flag_id);
@@ -66,11 +86,16 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
         --$range;
         if ($range == 0) {
           // We've reach the requested item.
+          \Drupal::logger('message_subscribe')->debug('Exiting hook early as range was reached. Last uid to process @uid', ['@uid' => $row->uid]);
           return $uids;
         }
       }
     }
   }
+  $debug && \Drupal::logger('message_subscribe')->debug(
+    'Found @count recipients.',
+    ['@count' => count($uids)]
+  );
 
   return $uids;
 }

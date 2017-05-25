@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\flag\FlagInterface;
 use Drupal\flag\FlagServiceInterface;
@@ -118,6 +119,7 @@ class SubscribersTest extends UnitTestCase {
     // Override config mock to allow access to the prefix variable.
     $config = $this->prophesize(ImmutableConfig::class);
     $config->get('flag_prefix')->willReturn('blah');
+    $config->get('debug_mode')->willReturn(FALSE);
     $config_factory = $this->prophesize(ConfigFactoryInterface::class);
     $config_factory->get('message_subscribe.settings')->willReturn($config);
     $this->configFactory = $config_factory->reveal();
@@ -158,9 +160,17 @@ class SubscribersTest extends UnitTestCase {
   public function testSendMessage() {
     // Mock config.
     $config = $this->prophesize(ImmutableConfig::class);
+    $config->get('use_queue')->willReturn(FALSE);
+    $config->get('notify_own_actions')->willReturn(FALSE);
+    $config->get('default_notifiers')->willReturn(FALSE);
+    $config->get('debug_mode')->willReturn(TRUE);
     $config_factory = $this->prophesize(ConfigFactoryInterface::class);
     $config_factory->get('message_subscribe.settings')->willReturn($config);
     $this->configFactory = $config_factory->reveal();
+
+    // Mock logger.
+    $logger = $this->prophesize(LoggerChannelInterface::class);
+    $logger->debug(Argument::any(), Argument::any())->shouldBeCalled();
 
     // Mock module handler.
     $module_handler = $this->prophesize(ModuleHandlerInterface::class);
@@ -189,6 +199,7 @@ class SubscribersTest extends UnitTestCase {
     $this->entityTypeManager = $entity_type_manager->reveal();
 
     $subscribers = $this->getSubscriberService();
+    $subscribers->setLoggerChannel($logger->reveal());
 
     $entity = $this->prophesize(EntityInterface::class);
     $entity->access('view', $account)->willReturn(TRUE);

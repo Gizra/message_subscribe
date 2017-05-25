@@ -44,6 +44,11 @@ class MessageSubscribeAdminSettingsTest extends SystemConfigFormTestBase {
         '#config_name' => 'message_subscribe.settings',
         '#config_key' => 'flag_prefix',
       ],
+      'debug_mode' => [
+        '#value' => TRUE,
+        '#config_name' => 'message_subscribe.settings',
+        '#config_key' => 'debug_mode',
+      ],
       'default_notifiers' => [
         '#value' => ['email', 'test'],
         '#config_name' => 'message_subscribe.settings',

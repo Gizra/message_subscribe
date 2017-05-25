@@ -1,5 +1,6 @@
 use_queue: false
 notify_own_actions: false
 flag_prefix: subscribe
+debug_mode: false
 default_notifiers:
   - email

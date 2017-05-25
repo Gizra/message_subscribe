@@ -24,7 +24,7 @@ class MessageSubscribeAdminSettings extends ConfigFormBase {
     parent::submitForm($form, $form_state);
     $config = $this->config('message_subscribe.settings');
 
-    foreach (['use_queue', 'notify_own_actions', 'flag_prefix'] as $variable) {
+    foreach (['use_queue', 'notify_own_actions', 'flag_prefix', 'debug_mode'] as $variable) {
       $config->set($variable, $form_state->getValue($variable));
     }
     $config->set('default_notifiers', array_values($form_state->getValue('default_notifiers')));
@@ -82,6 +82,12 @@ class MessageSubscribeAdminSettings extends ConfigFormBase {
       '#title' => t('Use queue'),
       '#description' => t('Use the queue to process the Messages.'),
       '#default_value' => $config->get('use_queue'),
+    ];
+
+    $form['debug_mode'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable debugging mode'),
+      '#description' => $this->t('Enables verbose logging of subscription activities for debugging purposes. <strong>This should not be enabled in a production environment.</strong>'),
     ];
 
     return parent::buildForm($form, $form_state);
