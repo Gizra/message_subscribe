@@ -73,7 +73,6 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
     $result = $query->execute();
 
     foreach ($result as $row) {
-
       $debug && \Drupal::logger('message_subscribe')->debug(
         'Subscriber row flag_id: @flag_id user: @uid',
         ['@flag_id' => $row->flag_id, '@uid' => $row->uid]
@@ -81,15 +80,6 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
       $uids[$row->uid] = !empty($uids[$row->uid]) ? $uids[$row->uid] : new DeliveryCandidate([], [], $row->uid);
       // Register the flag name.
       $uids[$row->uid]->addFlag($row->flag_id);
-
-      if ($range) {
-        --$range;
-        if ($range == 0) {
-          // We've reach the requested item.
-          \Drupal::logger('message_subscribe')->debug('Exiting hook early as range was reached. Last uid to process @uid', ['@uid' => $row->uid]);
-          return $uids;
-        }
-      }
     }
   }
   $debug && \Drupal::logger('message_subscribe')->debug(
