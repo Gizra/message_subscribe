@@ -85,7 +85,7 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
       ->execute()
       ->fetchAllAssoc('uid');
 
-    $all_email_subscribers += array_keys($result);
+    $all_email_subscribers = array_merge($all_email_subscribers, array_keys($result));
   }
 
   $debug && \Drupal::logger('message_subscribe_email')->debug('Found email subscribers @subscribers', ['@subscribers' => implode(', ', $all_email_subscribers)]);
