@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\message_subscribe_email\Functional;
 
-use Drupal\simpletest\AssertContentTrait;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
 use Drupal\Tests\BrowserTestBase;
@@ -14,7 +13,6 @@ use Drupal\Tests\BrowserTestBase;
  */
 class ViewsTest extends BrowserTestBase {
 
-  use AssertContentTrait;
   use ContentTypeCreationTrait;
   use NodeCreationTrait;
 
