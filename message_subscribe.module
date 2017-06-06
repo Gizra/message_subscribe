@@ -90,7 +90,9 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
     $users = $user_query->execute()->fetchCol();
 
     // Limit the flagging results to only this subset of users.
-    $query->condition('fc.uid', $users, 'IN');
+    if (!empty($users)) {
+      $query->condition('fc.uid', $users, 'IN');
+    }
   }
 
   $result = $query->execute();
