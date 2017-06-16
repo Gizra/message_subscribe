@@ -79,6 +79,7 @@ function message_subscribe_message_subscribe_get_subscribers(MessageInterface $m
       ->fields('fc', ['uid']);
     $user_query->condition($flagging_condition);
     $user_query->condition('fc.uid', $subscribe_options['last uid'], '>');
+    $user_query->orderBy('fc.uid');
     $user_query->range(0, $range);
 
     // If we're not notifying blocked users, we need to take this into account
