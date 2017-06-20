@@ -88,6 +88,7 @@ class MessageSubscribeAdminSettings extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Enable debugging mode'),
       '#description' => $this->t('Enables verbose logging of subscription activities for debugging purposes. <strong>This should not be enabled in a production environment.</strong>'),
+      '#default_value' => $config->get('debug_mode'),
     ];
 
     return parent::buildForm($form, $form_state);
