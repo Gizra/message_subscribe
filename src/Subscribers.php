@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\flag\FlagServiceInterface;
@@ -17,6 +16,7 @@ use Drupal\message_notify\MessageNotifier;
 use Drupal\message_subscribe\Exception\MessageSubscribeException;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\user\EntityOwnerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * A message subscribers service.
@@ -77,7 +77,7 @@ class Subscribers implements SubscribersInterface {
   /**
    * Logger channel.
    *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
 
@@ -127,12 +127,12 @@ class Subscribers implements SubscribersInterface {
   /**
    * Sets the logger channel.
    *
-   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
+   * @param \Psr\Log\LoggerInterface $logger
    *   The message_subscribe logger channel.
    *
    * @todo Inject this service in the 2.x version
    */
-  public function setLoggerChannel(LoggerChannelInterface $logger) {
+  public function setLoggerChannel(LoggerInterface $logger) {
     $this->logger = $logger;
   }
 
