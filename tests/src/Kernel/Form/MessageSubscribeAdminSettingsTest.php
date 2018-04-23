@@ -1,24 +1,26 @@
 <?php
 
-namespace Drupal\message_subscribe\Tests\Form;
+namespace Drupal\Tests\message_subscribe\Kernel\Form;
 
 use Drupal\message_subscribe\Form\MessageSubscribeAdminSettings;
-use Drupal\system\Tests\System\SystemConfigFormTestBase;
+use Drupal\KernelTests\ConfigFormTestBase;
 
 /**
  * Test the admin settings form.
  *
  * @group message_subscribe
  */
-class MessageSubscribeAdminSettingsTest extends SystemConfigFormTestBase {
+class MessageSubscribeAdminSettingsTest extends ConfigFormTestBase {
 
   /**
    * {@inheritdoc}
    */
   public static $modules = [
-    'message_subscribe',
     'field',
+    'flag',
+    'message_notify',
     'message_notify_test',
+    'message_subscribe',
   ];
 
   /**
