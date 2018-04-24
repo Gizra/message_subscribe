@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\message_subscribe_email\Tests\Form;
+namespace Drupal\Tests\message_subscribe_email\Kernel\Form;
 
-use Drupal\message_subscribe\Tests\Form\MessageSubscribeAdminSettingsTest;
+use Drupal\Tests\message_subscribe\Kernel\Form\MessageSubscribeAdminSettingsTest;
 
 /**
  * Test the admin settings form.

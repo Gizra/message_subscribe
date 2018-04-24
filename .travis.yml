@@ -8,8 +8,7 @@ php:
 
 env:
   matrix:
-  - DRUPAL_CORE=8.4.x
-  - DRUPAL_CORE=8.5.x
+  - DRUPAL_CORE=8.6.x
   global:
     MODULE_NAME='message_subscribe'
     CODER_VERSION='8.2.*'
@@ -44,15 +43,15 @@ before_script:
 
   # Download dependencies.
   # @todo Specify in `require` and `require-dev` in `composer.json`
-  - cd modules
-  - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/Gizra/og.git
-  - travis_retry git clone --branch 8.x-4.x --depth 1 https://git.drupal.org/project/flag.git
-  - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/Gizra/message.git
-  - travis_retry git clone --branch 8.x-1.x --depth 1 https://github.com/Gizra/message_notify.git
-  - cd ..
+  - composer require drupal/flag drupal/message drupal/message_notify
 
-  # Install Composer dependencies on 8.1.x and above.
-  - test ${DRUPAL_CORE} == "8.0.x" || composer self-update && composer install
+  # @todo Revert back to main repo once deprecation issue is committed.
+  # @see https://github.com/Gizra/og/pull/365
+  - cd modules && git clone --branch 364-deprecated https://github.com/jhedstrom/og.git && cd -
+
+  # Install Composer dependencies.
+  - composer self-update && composer install
+  - composer update phpunit/phpunit --with-dependencies
 
   # Coder.
   - composer global require drupal/coder:$CODER_VERSION
@@ -75,5 +74,3 @@ script:
   - $HOME/.composer/vendor/bin/phpcs --report=full --standard=Drupal --severity=error $TESTDIR
   # Run the PHPUnit tests which also include the kernel tests.
   - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/$MODULE_NAME
-  # Run legacy simpletests.
-  - php core/scripts/run-tests.sh --color --verbose --php `which php` --directory modules/$MODULE_NAME/src/Tests --dburl $SIMPLETEST_DB --url $SIMPLETEST_BASE_URL --sqlite ./.db.sqlite
