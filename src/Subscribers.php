@@ -177,7 +177,9 @@ class Subscribers implements SubscribersInterface {
       // Add item to the queue.
       $task = [
         'message' => $message,
-        'entity' => $entity,
+        // Clone the entity first to avoid any oddness with serialization.
+        // @see https://www.drupal.org/project/drupal/issues/2971157
+        'entity' => clone $entity,
         'notify_options' => $notify_options,
         'subscribe_options' => $subscribe_options,
         'context' => $context,
