@@ -242,7 +242,7 @@ class SubscribersTest extends MessageSubscribeTestBase {
     $message = Message::create(['template' => $this->template->id()]);
 
     $node = $this->nodes[0];
-    $node->setPublished(FALSE);
+    $node->setUnpublished();
     $node->save();
 
     // Add permission to view own unpublished content.
