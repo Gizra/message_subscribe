@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.flagging.subscribe_flagging
+    - flag.flag.email_node
+id: flagging.email_node.subscribe_flagging
+field_name: subscribe_flagging
+entity_type: flagging
+bundle: email_node
+label: 'Subscription flagging'
+description: 'The subscribe flagging that this is tied to.'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:flagging'
+  handler_settings: {  }
+field_type: entity_reference
