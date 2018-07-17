@@ -7,12 +7,9 @@
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\flag\FlaggingInterface;
 use Drupal\flag\FlagInterface;
 
 /**
@@ -136,7 +133,7 @@ function message_subscribe_email_message_subscribe_admin_settings_form_submit(ar
 /**
  * Implements hook_ENTITY_TYPE_presave().
  */
-function message_subscribe_email_flagging_presave(EntityInterface $entity) {
+function message_subscribe_email_flagging_presave(FlaggingInterface $entity) {
   $subscribePrefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
   $emailPrefix = \Drupal::config('message_subscribe_email.settings')->get('flag_prefix') . '_';
 
@@ -146,9 +143,9 @@ function message_subscribe_email_flagging_presave(EntityInterface $entity) {
     $bundle = str_replace($emailPrefix, $subscribePrefix, $entity->bundle());
     $result = $storage->getQuery()
       ->condition('flag_id', $bundle)
-      ->condition('flagged_entity__target_id', $entity->flagged_entity->entity->id())
-      ->condition('flagged_entity__target_type', $entity->flagged_entity->entity->getEntityTypeId())
-      ->condition('uid', $entity->uid->target_id)
+      ->condition('flagged_entity__target_id', $entity->getFlaggableId())
+      ->condition('flagged_entity__target_type', $entity->getFlaggableType())
+      ->condition('uid', $entity->getOwnerId())
       ->execute();
     if (!empty($result)) {
       $entity->subscribe_flagging->target_id = reset($result);
