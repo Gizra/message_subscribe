@@ -284,6 +284,8 @@ function message_subscribe_get_subscribers($entity_type, $entity, Message $messa
 
   _message_subscribe_add_default_notifiers($uids);
 
+  ksort($uids);
+
   drupal_alter('message_subscribe_get_subscribers', $uids, $values);
 
   return $uids;
