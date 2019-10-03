@@ -7,7 +7,7 @@ Message-notify; providing a scalable solution for sending mass messages
 MAIN CONCEPTS
 =============
 1. Every flag that is prefixed with "subscribe_" is considered a valid
-   subscring-flag by this module. You can add as many flags as you wish.
+   subscribing-flag by this module. You can add as many flags as you wish.
 1. It is up to the the implementing module to create the Message entity,
    and pass it along to message_subscribe_send_message(). From there
    message-subscribe takes care of saving it, and sending it to the
