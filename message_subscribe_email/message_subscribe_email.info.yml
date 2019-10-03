@@ -2,8 +2,8 @@ name: 'Message subscribe email'
 core: 8.x
 package: Message
 dependencies:
-  - message_subscribe_ui
-  - flag
-  - user
-  - views
+  - message_subscribe:message_subscribe_ui
+  - flag:flag
+  - drupal:user
+  - drupal:views
 type: module

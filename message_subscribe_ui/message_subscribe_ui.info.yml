@@ -3,6 +3,6 @@ description: 'Message subscribe UI'
 core: 8.x
 package: Message
 dependencies:
-  - message_subscribe
-  - views
+  - message_subscribe:message_subscribe
+  - drupal:views
 type: module
