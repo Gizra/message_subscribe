@@ -3,9 +3,9 @@
 namespace Drupal\Tests\message_subscribe_ui\Functional;
 
 use Drupal\entity_test\FieldStorageDefinition;
-use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\taxonomy\Functional\TaxonomyTestTrait;
+use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 
 /**
  * Tests for the advanced subscriptions block.

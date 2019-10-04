@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\message_subscribe_email\Functional;
 
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\BrowserTestBase;
 
 /**

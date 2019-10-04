@@ -2,14 +2,14 @@
 
 namespace Drupal\Tests\message_subscribe_email\FunctionalJavascript;
 
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
 /**
  * Javascript tests for message subscribe email.
  *
  * @group message_subscribe_email
  */
-class MessageSubscribeEmailTest extends JavascriptTestBase {
+class MessageSubscribeEmailTest extends WebDriverTestBase {
 
   /**
    * {@inheritdoc}

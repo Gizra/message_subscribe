@@ -74,7 +74,7 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
       continue;
     }
 
-    $query = db_select('flagging', 'f');
+    $query = \Drupal::database()->select('flagging', 'f');
     $result = $query->fields('f', ['uid'])
       ->condition('flag_id', $flag_ids, 'IN')
       ->condition('uid', array_keys($uids), 'IN')

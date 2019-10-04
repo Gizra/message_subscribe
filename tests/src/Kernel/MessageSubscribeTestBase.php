@@ -2,11 +2,10 @@
 
 namespace Drupal\Tests\message_subscribe\Kernel;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
-use Drupal\simpletest\UserCreationTrait;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\Tests\message\Kernel\MessageTemplateCreateTrait;
 
 /**
@@ -64,7 +63,7 @@ abstract class MessageSubscribeTestBase extends KernelTestBase {
     $this->installConfig(['field', 'filter', 'node', 'message_subscribe']);
 
     // Add a message template.
-    $this->template = $this->createMessageTemplate(Unicode::strtolower($this->randomMachineName()), $this->randomString(), $this->randomString(), [$this->randomString()]);
+    $this->template = $this->createMessageTemplate(mb_strtolower($this->randomMachineName()), $this->randomString(), $this->randomString(), [$this->randomString()]);
   }
 
 }
