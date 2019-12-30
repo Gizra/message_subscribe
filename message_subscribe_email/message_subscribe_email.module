@@ -92,14 +92,17 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
 
   /** @var \Drupal\message_subscribe\Subscribers\DeliveryCandidateInterface $delivery_candidate */
   foreach ($uids as $uid => $delivery_candidate) {
-    if (!in_array($uid, $all_email_subscribers)) {
-      $debug && \Drupal::logger('message_subscribe_email')->debug('Removing EMAIL notifier for user @uid', ['@uid' => $uid]);
-      $delivery_candidate->removeNotifier('email');
-    }
-    else {
-      // Ensure the email notifier is set for email subscribers.
-      $debug && \Drupal::logger('message_subscribe_email')->debug('Adding EMAIL notifier for user @uid', ['@uid' => $uid]);
-      $delivery_candidate->addNotifier('email');
+    // If email flags aren't already set, get them from database.
+    if (!array_intersect($delivery_candidate->getFlags(), $flag_ids)) {
+      if (!in_array($uid, $all_email_subscribers)) {
+        $debug && \Drupal::logger('message_subscribe_email')->debug('Removing EMAIL notifier for user @uid', ['@uid' => $uid]);
+        $delivery_candidate->removeNotifier('email');
+      }
+      else {
+        // Ensure the email notifier is set for email subscribers.
+        $debug && \Drupal::logger('message_subscribe_email')->debug('Adding EMAIL notifier for user @uid', ['@uid' => $uid]);
+        $delivery_candidate->addNotifier('email');
+      }
     }
   }
 }
