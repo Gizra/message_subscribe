@@ -47,11 +47,20 @@ function hook_message_subscribe_get_subscribers(MessageInterface $message, array
  *   A keyed array of values containing:
  *   - 'context' - The context array.
  *   - 'entity_type' - The entity type ID.
- *   - 'entity' - The entity object
+ *   - 'entity' - The entity object.
+ *   - 'message' - The Message entity.
  *   - 'subscribe_options' - The subscribe options array.
  */
 function hook_message_subscribe_get_subscribers_alter(array &$uids, array $values) {
+  // Don't send message to original comment author.
+  if ($values['entity_type'] != 'comment') {
+    // Entity is not a comment.
+    return;
+  }
 
+  /** @var \Drupal\comment\CommentInterface $comment */
+  $comment = $values['entity'];
+  unset($uids[$comment->getOwnerId()]);
 }
 
 /**
