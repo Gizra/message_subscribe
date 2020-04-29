@@ -2,6 +2,7 @@
 
 namespace Drupal\message_subscribe\Plugin\QueueWorker;
 
+use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
 use Drupal\message_subscribe\SubscribersInterface;
@@ -60,7 +61,13 @@ class MessageSubscribe extends QueueWorkerBase implements ContainerFactoryPlugin
     // Reload message and entity.
     $message = $message->load($message->id());
     $entity = $entity->load($entity->id());
+
     if (!$entity || !$message) {
+      return;
+    }
+
+    if ($entity instanceof EntityPublishedInterface && !$entity->isPublished()) {
+      // Entity is no longer published.
       return;
     }
 
