@@ -8,4 +8,6 @@ dependencies[] = flag
 dependencies[] = list
 dependencies[] = views
 
+test_dependencies[] = og
+
 files[] = message_subscribe_email.test

@@ -10,9 +10,32 @@
  * Test integration for the message_subscribe_email module.
  */
 
-class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
+abstract class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
+
+  /**
+   * @var
+   *
+   * User1 object.
+   */
+  protected $user1;
+
+  /**
+   * @var
+   *
+   * User2 object.
+   */
+  protected $user2;
+
+  /**
+   * @var
+   *
+   * The node object for the tests.
+   */
+  protected $node;
+
+
   function setUp() {
-    parent::setUp('message_subscribe', 'flag', 'message_subscribe_email');
+    parent::setUp('message_subscribe', 'flag', 'message_subscribe_email', 'og');
 
     // Create node-type.
     $node_type = $this->drupalCreateContentType();
@@ -20,6 +43,8 @@ class MessageSubscribeEmailTestHelper extends DrupalWebTestCase {
 
     // Enable flags.
     $flags = flag_get_default_flags(TRUE);
+
+    drupal_static_reset();
 
     $flag = $flags['subscribe_node'];
     $flag->types[] = $node_type;
@@ -212,4 +237,84 @@ class MessageSubscribeEmailNotificationsTest extends MessageSubscribeEmailTestHe
 
     $this->assertEqual($uids, $expected_uids, 'All expected subscribers were fetched.');
   }
+}
+
+/**
+ * Check the toggle button for sending email for subscribe groups.
+ */
+class MessageSubscribeSendMailButtonTest extends MessageSubscribeEmailTestHelper {
+
+  /**
+   * @var
+   *
+   * The group object.
+   */
+  protected $group;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Check email notifications send toggle',
+      'description' => 'Check email notifications when the user disable the notification.',
+      'group' => 'Message subscribe',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp();
+
+    // Set up group.
+    $group_type = $this->drupalCreateContentType(array('type' => 'group'));
+    og_create_field(OG_GROUP_FIELD, 'node', 'group');
+    $this->group = $this->drupalCreateNode(array('type' => $group_type->type));
+
+    // Set up groups content type.
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $this->node->type);
+
+    og_group('node', $this->group, array('entity_type' => 'user', 'entity' => $this->user1));
+    og_group('node', $this->group, array('entity_type' => 'user', 'entity' => $this->user2));
+
+    // Grant groups permission to users.
+    $rid = og_get_user_roles('node', $this->group->nid, $this->user1->uid);
+
+    og_role_grant_permissions(key($rid), array(
+      "create {$this->node->type} content"
+    ));
+
+    $flags = flag_get_default_flags(TRUE);
+    $flag = $flags['subscribe_og'];
+    $flag->types[] = $this->group->type;
+    $flag->save();
+    $flag->enable();
+    drupal_static_reset('flag_get_flags');
+  }
+
+  /**
+   * Testing the email sending workflow when flagging and un flagging OG flag.
+   */
+  public function testDontSendMailButton() {
+    // Flag a group for both users.
+    $flag = flag_get_flag('subscribe_og');
+    $flag->flag('flag', $this->group->nid, $this->user1, TRUE);
+    $flag->flag('flag', $this->group->nid, $this->user2, TRUE);
+
+    // Post a group content by user1 and verify user2 received the mail.
+    $node = $this->drupalCreateNode(array(
+      'type' => $this->node->type,
+    ));
+
+    // Post a group content by user2 and verify user1 received the mail.
+    og_group('node', $this->group, array('entity_type' => 'node', 'entity' => $node));
+
+    $message = message_create('foo');
+    $uids = message_subscribe_get_subscribers('node', $this->group, $message);
+    $this->assertEqual(array_keys($uids), array($this->user1->uid, $this->user2->uid), 'User 1 and user 2 receiving the messages.');
+
+    // user2 disable mails from group1.
+    $flag->flag('unflag', $this->group->nid, $this->user2, TRUE);
+
+    // Post a group content by user1 and verify user2 did not received the mail.
+    $uids = message_subscribe_get_subscribers('node', $this->group, $message);
+    $this->assertEqual(array_keys($uids), array($this->user1->uid), 'Only user 1 will receive mails about relate to the group.');
+  }
+
 }
