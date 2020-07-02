@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - flag
+id: flagging.subscribe_flagging
+field_name: subscribe_flagging
+entity_type: flagging
+type: entity_reference
+settings:
+  target_type: flagging
+module: core
+locked: true
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -9,6 +9,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\flag\FlaggingInterface;
 use Drupal\flag\FlagInterface;
 
 /**
@@ -79,8 +80,8 @@ function message_subscribe_email_message_subscribe_get_subscribers_alter(array &
       ->condition('flag_id', $flag_ids, 'IN')
       ->condition('uid', array_keys($uids), 'IN')
       // Ensure to grab the correct flagging.
-      ->condition('entity_type', $entity_type)
-      ->condition('entity_id', $entity_ids, 'IN')
+      ->condition('flagged_entity__target_type', $entity_type)
+      ->condition('flagged_entity__target_id', $entity_ids, 'IN')
       ->groupBy('uid')
       ->execute()
       ->fetchAllAssoc('uid');
@@ -130,4 +131,27 @@ function message_subscribe_email_message_subscribe_admin_settings_form_submit(ar
     ->getEditable('message_subscribe_email.settings')
     ->set('flag_prefix', $form_state->getValue('message_subscribe_email_flag_prefix'))
     ->save();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function message_subscribe_email_flagging_presave(FlaggingInterface $entity) {
+  $subscribePrefix = \Drupal::config('message_subscribe.settings')->get('flag_prefix') . '_';
+  $emailPrefix = \Drupal::config('message_subscribe_email.settings')->get('flag_prefix') . '_';
+
+  // Automatically set the reference to the subscribe flagging on creation.
+  if ($entity->isNew() && strpos($entity->bundle(), $emailPrefix) === 0) {
+    $storage = \Drupal::entityTypeManager()->getStorage('flagging');
+    $bundle = str_replace($emailPrefix, $subscribePrefix, $entity->bundle());
+    $result = $storage->getQuery()
+      ->condition('flag_id', $bundle)
+      ->condition('flagged_entity__target_id', $entity->getFlaggableId())
+      ->condition('flagged_entity__target_type', $entity->getFlaggableType())
+      ->condition('uid', $entity->getOwnerId())
+      ->execute();
+    if (!empty($result)) {
+      $entity->subscribe_flagging->target_id = reset($result);
+    }
+  }
 }

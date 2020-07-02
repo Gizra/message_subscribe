@@ -5,6 +5,9 @@
  * Install hooks for the message_subscribe_email module.
  */
 
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+
 /**
  * Implements hook_install().
  *
@@ -50,6 +53,42 @@ function message_subscribe_email_install() {
         $flag->setThirdPartySetting('message_subscribe_ui', 'view_name', $view_name);
         $flag->save();
       }
+    }
+  }
+}
+
+/**
+ * Add an entity reference to the original subscribe flagging.
+ */
+function message_subscribe_email_update_8100() {
+  FieldStorageConfig::create([
+    'entity_type' => 'flagging',
+    'field_name' => 'subscribe_flagging',
+    'type' => 'entity_reference',
+    'settings' => [
+      'target_type' => 'flagging',
+    ],
+    'locked' => TRUE,
+  ])->setCardinality(1)->save();
+
+  $emailPrefix = \Drupal::config('message_subscribe_email.settings')->get('flag_prefix') . '_';
+  $flags = \Drupal::entityTypeManager()->getStorage('flag')->loadMultiple();
+  foreach ($flags as $flag) {
+    if (strpos($flag->id(), $emailPrefix) === 0) {
+      FieldConfig::create([
+        'entity_type' => 'flagging',
+        'bundle' => $flag->id(),
+        'field_name' => 'subscribe_flagging',
+        'type' => 'entity_reference',
+        'cardinality' => 1,
+      ])
+        ->setLabel('Subscription flagging')
+        ->setDescription('The subscribe flagging that this is tied to.')
+        ->setRequired(TRUE)
+        ->setSetting('target_type', 'flagging')
+        ->setSetting('handler', 'default')
+        ->setSetting('handler_settings', [])
+        ->save();
     }
   }
 }
