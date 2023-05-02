@@ -92,9 +92,15 @@ class SubscriptionController extends ControllerBase {
    */
   public function tabAccess(AccountInterface $user, FlagInterface $flag = NULL) {
     if (!$flag) {
-      // We are inside /message-subscribe so get the first flag.
+      // We are inside /message-subscribe so get the first enabled flag.
       $flags = $this->subscribers->getFlags();
-      $flag = reset($flags);
+      foreach ($flags as $_flag) {
+        if ($_flag->status()) {
+          // Fetch the first enabled flag.
+          $flag = $_flag;
+          break;
+        }
+      }
     }
 
     if (!$flag) {
@@ -144,13 +150,25 @@ class SubscriptionController extends ControllerBase {
    */
   public function tab(UserInterface $user, FlagInterface $flag = NULL) {
     if (!$flag) {
-      // We are inside /message-subscribe so get the first flag.
+      // We are inside /message-subscribe so get the first enabled flag.
       $flags = $this->subscribers->getFlags();
-      $flag = reset($flags);
+      foreach ($flags as $_flag) {
+        if ($_flag->status()) {
+          // Fetch the first enabled flag.
+          $flag = $_flag;
+          break;
+        }
+      }
     }
 
     $view = $this->getView($user, $flag);
     $result = $view->preview();
+
+    // Add contextual links to the view for developer purposes.
+    $result['#view']->element['#view_id'] = $view->id();
+    $result['#view']->element['#view_display_show_admin_links'] = $view->getShowAdminLinks();
+    $result['#view']->element['#view_display_plugin_id'] = $view->display_handler->getPluginId();
+    views_add_contextual_links($result['#view']->element, 'view', $view->current_display);
 
     // Add cache tags for this flag and view.
     $result['#cache']['tags'] = $flag->getCacheTags() + $view->getCacheTags();
