@@ -46,6 +46,10 @@ class MessageSubscribeUiLocalTask extends DeriverBase implements ContainerDerive
 
     $first = TRUE;
     foreach ($this->subscribers->getFlags() as $flag) {
+      if (!$flag->status()) {
+        // Ignore disabled flags.
+        continue;
+      }
       $this->derivatives[$flag->id()] = [
         'title' => $flag->label(),
         // First route gets the same route name as the parent (in order to
